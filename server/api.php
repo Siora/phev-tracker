@@ -29,28 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  if (!is_array($body)) fail(400, 'Ungültiges JSON');
 }
 function email(string $value): string { return mb_strtolower(trim($value)); }
-if ($action === 'register' || $action === 'login') {
+if ($action === 'login') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405, 'POST erforderlich');
  $mail = email((string)($body['email'] ?? ''));
  $password = (string)($body['password'] ?? '');
  if (!filter_var($mail, FILTER_VALIDATE_EMAIL) || strlen($password) < 12 || strlen($password) > 1024) fail(400, 'E-Mail oder Passwort ungültig (mindestens 12 Zeichen)');
- if ($action === 'register') {
-  if (empty($config['registration_enabled'])) fail(403, 'Registrierung deaktiviert');
-  try {
-   $stmt=$db->prepare('INSERT INTO users(email,password_hash) VALUES (?,?)');
-   $stmt->execute([$mail,password_hash($password,PASSWORD_DEFAULT)]);
-   $uid=(int)$db->lastInsertId();
-  } catch (PDOException $e) { fail(409, 'Konto kann nicht erstellt werden'); }
- } else {
-  $stmt=$db->prepare('SELECT id,password_hash FROM users WHERE email=?');
-  $stmt->execute([$mail]); $user=$stmt->fetch();
-  if (!$user || !password_verify($password,$user['password_hash'])) { usleep(250000); fail(401, 'Anmeldung fehlgeschlagen'); }
-  $uid=(int)$user['id'];
- }
+ $stmt=$db->prepare('SELECT id,password_hash,role FROM users WHERE email=?');
+ $stmt->execute([$mail]); $user=$stmt->fetch();
+ if (!$user || !password_verify($password,$user['password_hash'])) { usleep(250000); fail(401, 'Anmeldung fehlgeschlagen'); }
+ $uid=(int)$user['id'];
  $token=bin2hex(random_bytes(32));
  $stmt=$db->prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 7 DAY))');
  $stmt->execute([hash('sha256',$token),$uid]);
- respond(200,['token'=>$token,'email'=>$mail]);
+ respond(200,['token'=>$token,'email'=>$mail,'role'=>$user['role']]);
 }
 $auth=$_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
 if (!preg_match('/^Bearer ([a-f0-9]{64})$/D',$auth,$match)) fail(401,'Anmeldung erforderlich');
@@ -59,6 +50,26 @@ $stmt=$db->prepare('SELECT user_id FROM sessions WHERE token_hash=? AND expires_
 $stmt->execute([$hash]); $uid=$stmt->fetchColumn();
 if (!$uid) fail(401,'Sitzung abgelaufen');
 $uid=(int)$uid;
+if ($action === 'admin-create-user') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
+ if ($stmt->fetchColumn() !== 'admin') fail(403,'Nur Administratoren');
+ $mail=email((string)($body['email']??''));
+ $password=(string)($body['password']??'');
+ if (!filter_var($mail,FILTER_VALIDATE_EMAIL) || strlen($password)<12 || strlen($password)>1024) fail(400,'Ungültige E-Mail oder Passwort');
+ try {
+  $stmt=$db->prepare("INSERT INTO users(email,password_hash,role) VALUES (?,?,'user')");
+  $stmt->execute([$mail,password_hash($password,PASSWORD_DEFAULT)]);
+ } catch (PDOException $e) { fail(409,'Konto konnte nicht erstellt werden'); }
+ respond(201,['ok'=>true]);
+}
+if ($action === 'admin-users') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'GET') fail(405,'GET erforderlich');
+ $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
+ if ($stmt->fetchColumn() !== 'admin') fail(403,'Nur Administratoren');
+ $stmt=$db->query('SELECT id,email,role,created_at FROM users ORDER BY id');
+ respond(200,['users'=>$stmt->fetchAll()]);
+}
 if ($action === 'logout') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);respond(200,['ok'=>true]);
