@@ -185,7 +185,6 @@ $('file').onchange=async e=>{
   $('import').classList.toggle('hide',!pending.length)
 };
 $('import').onclick=()=>{
-  if(cloudView)return alert('Cloud-Ansicht ist derzeit schreibgeschützt.');
   let updated=0,added=0;
   pending.forEach(x=>{
     let i=records.findIndex(r=>r.type==='charge'&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){
