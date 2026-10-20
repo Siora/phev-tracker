@@ -48,6 +48,7 @@
 <button onclick="tab('home')">Übersicht</button>
 <button onclick="tab('add')">Eintragen</button>
 <button onclick="tab('csv')">CSV</button>
+<button onclick="tab('vehicles')">Fahrzeuge</button>
 <button onclick="tab('options')">Optionen</button>
 <button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
 </nav>
@@ -120,6 +121,7 @@
 </select>
 </div>
 </div>
+<label>Fahrzeug</label><select id="vehicleFilter" onchange="render()"><option value="">Alle Fahrzeuge</option></select>
 <label>Ladeort / Tankstelle</label>
 <select id="provider" onchange="render()">
 <option value="">Alle Orte / Tankstellen</option>
@@ -157,6 +159,7 @@
 <option value="charge">Stromladung</option>
 <option value="fuel">Benzintankung</option>
 </select>
+<label>Fahrzeug</label><select name="vehicle_id" id="entryVehicle"><option value="">Ohne Fahrzeugzuordnung</option></select>
 <label>Datum</label>
 <input name="date" type="date" required>
 <label>Menge (kWh / Liter)</label>
@@ -173,6 +176,24 @@
 <label>Ladeort / Tankstelle</label>
 <input name="place">
 <button>Speichern</button>
+</form>
+</section>
+<section id="vehicles" class="hide">
+<h2>Meine Fahrzeuge</h2>
+<p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
+<div id="vehicle-list"></div>
+<h3>Fahrzeug hinzufügen / bearbeiten</h3>
+<form id="vehicle-form">
+<label>Marke<input name="brand" maxlength="100" required></label>
+<label>Modell<input name="model" maxlength="100" required></label>
+<label>Baujahr<input name="model_year" type="number" min="1900" max="2200"></label>
+<label>Kennzeichen<input name="plate" maxlength="40"></label>
+<label>Antriebsart<input name="drivetrain" maxlength="60" placeholder="z. B. Plug-in-Hybrid"></label>
+<label>Batteriekapazität (kWh)<input name="battery_kwh" type="number" step="any" min="0"></label>
+<label>Tankvolumen (Liter)<input name="tank_liters" type="number" step="any" min="0"></label>
+<label>Notizen<textarea name="notes" maxlength="5000"></textarea></label>
+<button type="submit">Fahrzeug speichern</button>
+<button type="button" id="vehicle-cancel">Abbrechen</button>
 </form>
 </section>
 <section id="csv" class="hide">
@@ -229,8 +250,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=19" defer></script>
-<script src="app.js?v=19" defer>
+<script src="cloud.js?v=20" defer></script>
+<script src="app.js?v=20" defer>
 </script>
 </main>
 </div>
