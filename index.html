@@ -126,6 +126,7 @@
 <select id="provider" onchange="render()">
 <option value="">Alle Orte / Tankstellen</option>
 </select>
+<div id="vehicle-summary" aria-live="polite"></div>
 <div class="grid" id="stats">
 </div>
 <div class="analytics-grid">
@@ -182,6 +183,12 @@
 <h2>Meine Fahrzeuge</h2>
 <p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
 <div id="vehicle-list"></div>
+<h3>Bestehende Einträge zuordnen</h3>
+<p>Wähle ein Fahrzeug und übertrage alle bisher nicht zugeordneten Einträge. Bestehende Zuordnungen bleiben unverändert.</p>
+<label>Ziel-Fahrzeug<select id="bulkVehicle"><option value="">Fahrzeug auswählen</option></select></label>
+<p id="bulk-count"></p>
+<button type="button" id="bulk-assign">Nicht zugeordnete Einträge übernehmen</button>
+<p id="bulk-status" role="status"></p>
 <h3>Fahrzeug hinzufügen / bearbeiten</h3>
 <form id="vehicle-form">
 <label>Marke<input name="brand" maxlength="100" required></label>
@@ -250,8 +257,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=20" defer></script>
-<script src="app.js?v=20" defer>
+<script src="cloud.js?v=21" defer></script>
+<script src="app.js?v=21" defer>
 </script>
 </main>
 </div>
