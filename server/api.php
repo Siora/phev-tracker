@@ -56,10 +56,12 @@ if ($action === 'admin-create-user') {
  if ($stmt->fetchColumn() !== 'admin') fail(403,'Nur Administratoren');
  $mail=email((string)($body['email']??''));
  $password=(string)($body['password']??'');
+ $role=(string)($body['role']??'user');
+ if (!in_array($role,['admin','user'],true)) fail(400,'Ungültige Rolle');
  if (!filter_var($mail,FILTER_VALIDATE_EMAIL) || strlen($password)<12 || strlen($password)>1024) fail(400,'Ungültige E-Mail oder Passwort');
  try {
-  $stmt=$db->prepare("INSERT INTO users(email,password_hash,role) VALUES (?,?,'user')");
-  $stmt->execute([$mail,password_hash($password,PASSWORD_DEFAULT)]);
+  $stmt=$db->prepare("INSERT INTO users(email,password_hash,role) VALUES (?,?,?)");
+  $stmt->execute([$mail,password_hash($password,PASSWORD_DEFAULT),$role]);
  } catch (PDOException $e) { fail(409,'Konto konnte nicht erstellt werden'); }
  respond(201,['ok'=>true]);
 }
