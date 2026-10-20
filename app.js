@@ -10,8 +10,8 @@ const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.p
 const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
 function tab(t){
-  ['home','add','csv','options'].forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','options'][i]===t));
+  ['home','add','csv','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','options','cloud'][i]===t));
   render();
   window.scrollTo(0,0)
 }
