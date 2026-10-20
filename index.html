@@ -200,8 +200,33 @@
 <small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
 </p>
 </section>
-<section id="cloud" class="hide"><h2>Mein Konto</h2><p>Cloud-Anmeldung wird eingerichtet.</p></section>
+<section id="cloud" class="hide">
+<h2>Mein Konto</h2>
+<p id="cloud-status" role="status">Nicht angemeldet.</p>
+<form id="cloud-login">
+<label>E-Mail<input name="email" type="email" autocomplete="username" required></label>
+<label>Passwort<input name="password" type="password" autocomplete="current-password" required></label>
+<button>Anmelden</button>
+</form>
+<div id="cloud-account" class="hide">
+<p id="cloud-identity"></p>
+<button id="cloud-check" type="button">Cloud-Einträge zählen</button>
+<button id="cloud-logout" type="button">Abmelden</button>
+<p id="cloud-count"></p>
+<div id="cloud-admin" class="hide">
+<h2>Benutzer erstellen</h2>
+<form id="cloud-create">
+<label>E-Mail<input name="email" type="email" required></label>
+<label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
+<button>Benutzer erstellen</button>
+</form>
+<h2>Benutzer</h2><div id="cloud-users"></div>
+</div>
+</div>
+<p><small>Deine lokalen Daten bleiben unverändert. Es erfolgt keine automatische Synchronisierung.</small></p>
+</section>
 <script src="charts.js" defer></script>
+<script src="cloud.js" defer></script>
 <script src="app.js" defer>
 </script>
 </main>
