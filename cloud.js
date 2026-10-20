@@ -41,7 +41,16 @@ async function loadVehicles(){
     if(!confirm('Fahrzeug löschen? Fahrzeuge mit Einträgen können nicht gelöscht werden.'))return;
     try{await cloudCall('vehicle-delete',{id:v.id});await loadVehicles();}catch(e){ce('vehicle-status').textContent=e.message;}
    };
-   p.append(edit,del);list.append(p);
+   const photo=document.createElement('button');
+   photo.type='button';photo.textContent='Foto festlegen';
+   photo.onclick=()=>{
+    const previous=localStorage.getItem('phev-photo-'+v.id)||'';
+    const url=prompt('HTTPS-Adresse eines Fahrzeugfotos eingeben. Leer lassen, um wieder das automatische Bild zu verwenden:',previous);
+    if(url===null)return;
+    try{window.setVehiclePhoto(v.id,url);ce('vehicle-status').textContent=url.trim()?'Eigenes Fahrzeugfoto gespeichert (nur auf diesem Gerät).':'Automatische Bildauswahl wieder aktiviert.';}
+    catch(error){ce('vehicle-status').textContent=error.message;}
+   };
+   p.append(edit,photo,del);list.append(p);
   }
  }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
 }
