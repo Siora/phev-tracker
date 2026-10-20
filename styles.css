@@ -657,3 +657,44 @@ button:hover{filter:brightness(1.06)}
  .main{padding:12px}
  .topbar h1{font-size:25px}
 }
+
+
+/* V24 – Layout der Referenz mit echten Live-Daten */
+#home{display:flex;flex-direction:column;gap:14px}
+#home>.hero{order:0}
+#home>.dashboard-label{order:1;margin:0}
+#home>label,#home>#period,#home>#vehicleFilter,#home>#provider,#home>#customdates{order:2}
+#home>#vehicle-summary{order:3}
+#home>#stats{order:4}
+#home>.analytics-grid{order:5}
+#home>.dashboard-actions{order:6}
+#home>.dashboard-bottom{order:7}
+#home>small{order:8}
+#home>h2:last-of-type,#home>#entries{order:9}
+.dashboard-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.dashboard-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quick-card{min-width:0;background:#fff;border:1px solid #e1eaf3;border-radius:20px;padding:18px;box-shadow:0 6px 20px #1b46700d}
+.quick-card h2{margin:0 0 16px;font-size:17px}
+.quick-charge{background:linear-gradient(145deg,#f0fff6,#fff 75%)}
+.quick-fuel{background:linear-gradient(145deg,#eef7ff,#fff 75%)}
+.quick-form label{font-size:12px;margin-top:10px}
+.quick-form input,.quick-form select{min-height:40px;padding:9px;margin:5px 0}
+.quick-form button{width:100%;margin-top:10px;background:linear-gradient(90deg,#26b65b,#35ca72)}
+.quick-fuel button{background:linear-gradient(90deg,#1d75e8,#388ff8)}
+.recent-row{padding:12px 0;border-bottom:1px solid #e4edf5;font-size:13px;color:#38516c}
+.fleet-row{display:block;width:100%;text-align:left;background:#f0f7ff;color:#163d66;border:1px solid #dceaf8;margin:8px 0;box-shadow:none}
+.secondary-action{width:100%;background:#eff6ff;color:#1767c6;border:1px solid #d8e8f9;margin-top:15px;box-shadow:none}
+.action-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.action-buttons button{background:#f0f7ff;color:#195d9c;border:1px solid #dce9f5;box-shadow:none}
+.compare-row{display:grid;grid-template-columns:75px 1fr 100px;align-items:center;gap:8px;margin:14px 0;font-size:12px}
+.compare-row strong{text-align:right;font-size:12px}
+.compare-track{height:13px;border-radius:6px;background:#eaf0f7;overflow:hidden}
+.compare-fill{height:100%;border-radius:6px;background:#80b8fa}
+#home>.analytics-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin:0}
+#home>.analytics-grid>.analytics-card{grid-column:auto}
+#home>.analytics-grid>.analytics-card:first-child{grid-column:span 2}
+#home>.analytics-grid>.analytics-card:last-child{grid-column:span 2}
+#home>#stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1300px){.dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:span 2}}
+@media(max-width:780px){.dashboard-bottom{grid-template-columns:1fr}#home>.analytics-grid{grid-template-columns:1fr}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:auto}}
+@media(max-width:560px){.dashboard-actions{grid-template-columns:1fr}#home>#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-card{padding:16px}}
