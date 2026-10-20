@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=24">
 </head>
 <body>
 <div class="app-shell">
@@ -46,23 +46,23 @@
 </div>
 <nav>
 <button onclick="tab('home')">Übersicht</button>
-<button onclick="tab('add')">Eintragen</button>
-<button onclick="tab('csv')">CSV</button>
-<button onclick="tab('vehicles')">Fahrzeuge</button>
-<button onclick="tab('options')">Optionen</button>
+<button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
+<button onclick="tab('csv')">↥ Import / Export</button>
+<button onclick="tab('vehicles')">🚘 Fahrzeuge</button>
+<button onclick="tab('options')">⚙ Optionen & Backup</button>
 <button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
 </nav>
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 23</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 24</small>
 </div>
 </aside>
 <main class="main">
 <header class="topbar">
 <div>
 <small>FAHRZEUG-DASHBOARD</small>
-<h1>Dein PHEV im Überblick</h1>
+<h1>Übersicht</h1>
 </div>
 <div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
 </header>
@@ -100,7 +100,7 @@
 </svg>
 </div>
 </div>
-<h2>Dashboard</h2>
+<h2 class="dashboard-label">Dashboard</h2>
 <label>Zeitraum</label>
 <select id="period" onchange="render()">
 <option value="month">Letzter Monat</option>
@@ -148,7 +148,14 @@
   </article>
 </div>
 <small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
-<h2>Einträge</h2>
+<div class="dashboard-actions">
+<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
+<article class="quick-card quick-fuel"><h2>⛽ Neue Tankung</h2><form class="quick-form" data-type="fuel"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Getankte Menge (Liter)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Tankstelle / Notizen<input name="place" placeholder="z. B. Autobahn"></label><button type="submit">⛽ Tankung speichern</button></form></article>
+<article class="quick-card recent-card"><h2>Letzte Einträge</h2><div id="recent-entries"></div><button type="button" class="secondary-action" onclick="document.getElementById('entries').scrollIntoView({behavior:'smooth'})">Alle Einträge anzeigen ↓</button></article>
+<article class="quick-card fleet-card"><h2>🚘 Fahrzeugübersicht</h2><div id="fleet-overview"></div><button type="button" class="secondary-action" onclick="tab('vehicles')">+ Neues Fahrzeug anlegen</button></article>
+</div>
+<div class="dashboard-bottom"><article class="quick-card"><h2>↥ Schnellaktionen</h2><div class="action-buttons"><button onclick="tab('csv')">CSV Import</button><button onclick="exportCSV()">CSV Export</button><button onclick="backup()">Backup erstellen</button><button onclick="tab('options')">Einstellungen</button></div></article><article class="quick-card"><h2>Monatsvergleich</h2><div id="month-compare"></div></article></div>
+<h2>Alle Einträge</h2>
 <div id="entries">
 </div>
 </section>
@@ -257,8 +264,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=23" defer></script>
-<script src="app.js?v=23" defer>
+<script src="cloud.js?v=24" defer></script>
+<script src="app.js?v=24" defer>
 </script>
 </main>
 </div>
