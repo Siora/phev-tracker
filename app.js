@@ -17,7 +17,7 @@ function tab(t){
   window.scrollTo(0,0)
 }
 function save(){
-  if(cloudView){alert('Cloud-Ansicht: Bearbeiten folgt mit der Synchronisierung.');return;}
+  if(cloudView){window.queueCloudChanges(records);render();return;}
   localStorage.setItem(key,JSON.stringify(records));
   render()
 }
@@ -53,7 +53,7 @@ function render(){
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'');edit.textContent='Bearbeiten';edit.onclick=()=>{
       let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-    };edit.disabled=cloudView;div.append(edit);btn.textContent='Löschen';btn.disabled=cloudView;btn.onclick=()=>{
+    };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
       }
@@ -74,7 +74,6 @@ for(let i=new Date().getFullYear();i>=2020;i--)$('chosenYear').add(new Option(i,
 $('form').elements.date.value=new Date().toISOString().slice(0,10);
 $('form').onsubmit=e=>{
   e.preventDefault();
-  if(cloudView)return alert('Cloud-Ansicht ist derzeit schreibgeschützt.');
   let f=new FormData(e.target),x={
     id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||''
   };
