@@ -393,3 +393,75 @@ button{
     font-size:19px
   }
 }
+
+
+/* Clean Dark — ruhige Flächen, klare Typografie, dezente Akzente */
+:root {
+  --bg: #0d1118;
+  --panel: #171d26;
+  --panel2: #1e2631;
+  --stroke: #303b49;
+  --blue: #7aaef8;
+  --muted: #a3afbe;
+}
+body {
+  background: #0d1118;
+  color: #edf1f6;
+  line-height: 1.5;
+}
+.sidebar {
+  background: #121821;
+  border-right-color: #27313d;
+}
+.brand-mark { background: #202c3b; }
+.sidebar nav button { color: #cbd5e1; }
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: #26364a;
+  color: #e7f0ff;
+}
+.sidebar-foot {
+  border-color: #303b49;
+  background: #19212c;
+}
+.sidebar-foot hr { border-top-color: #303b49; }
+.topbar h1 { font-weight: 700; letter-spacing: -.8px; }
+.topbar-badge {
+  background: #1d2836;
+  border-color: #354355;
+  color: #cbdcf2;
+}
+#add, #csv, #options {
+  background: var(--panel);
+  border-color: var(--stroke);
+  box-shadow: 0 10px 28px #00000014;
+}
+h2 { font-weight: 650; }
+label { color: #c4cfdb; }
+input, select {
+  background: #202936;
+  border: 1px solid #3a4858;
+  color: #f2f5f9;
+  border-radius: 12px;
+}
+input:focus, select:focus {
+  outline: 2px solid #7aaef8;
+  outline-offset: 1px;
+}
+button {
+  background: #739fe0;
+  color: #0d1826;
+  border-radius: 12px;
+}
+button:hover { filter: brightness(1.08); }
+.hero {
+  background: linear-gradient(130deg, #202b38, #161e28);
+  border-color: #364455;
+  border-radius: 22px;
+}
+.tile {
+  background: #19212c;
+  border: 1px solid #303c4a;
+  border-radius: 17px;
+  box-shadow: 0 6px 20px #00000014;
+}
