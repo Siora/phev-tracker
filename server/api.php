@@ -1,4 +1,11 @@
 <?php
+/*
+ * PHEV Tracker – serverseitige JSON-API
+ *
+ * Verantwortlich für Authentifizierung, Benutzerverwaltung, Fahrzeuge
+ * und fahrzeuggebundene Datensätze. Besitzprüfungen schützen Nutzerdaten.
+ * Datenbankschema und API-Verhalten bleiben durch diese Kommentare unverändert.
+ */
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
