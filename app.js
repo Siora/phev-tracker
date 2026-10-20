@@ -55,7 +55,7 @@ async function updateVehiclePhoto(vehicle){
 // Aktualisiert sämtliche Fahrzeug-Auswahllisten nach Anmeldung oder Änderungen.
 function refreshVehicles(){
  const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
- filter.replaceChildren(new Option('Alle Fahrzeuge',''),new Option('Ohne Fahrzeugzuordnung','none'),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ filter.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
  entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
