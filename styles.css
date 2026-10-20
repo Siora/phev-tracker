@@ -574,6 +574,10 @@ button:hover { filter: brightness(1.08); }
 }
 
 
+/* ================================================================
+ * DESIGN V23: Helles Dashboard, Navigation und responsive Karten
+ * Frühere Styles bleiben als Basis erhalten; spätere Blöcke überschreiben sie.
+ * ================================================================ */
 /* V23 – helles, mobiles Dashboard nach Designvorlage */
 :root{color-scheme:light;--bg:#f1f6fc;--panel:#fff;--panel2:#f5f9ff;--stroke:#dce7f2;--blue:#2379ed;--muted:#637790}
 body{background:linear-gradient(135deg,#f8fbff,#eaf3fb 65%,#f8fbff);color:#142443;line-height:1.55}
@@ -659,6 +663,9 @@ button:hover{filter:brightness(1.06)}
 }
 
 
+/* ================================================================
+ * DESIGN V24: Dashboard-Schnellformulare, Fahrzeug- und Monatskarten
+ * ================================================================ */
 /* V24 – Layout der Referenz mit echten Live-Daten */
 #home{display:flex;flex-direction:column;gap:14px}
 #home>.hero{order:0}
@@ -699,6 +706,9 @@ button:hover{filter:brightness(1.06)}
 @media(max-width:780px){.dashboard-bottom{grid-template-columns:1fr}#home>.analytics-grid{grid-template-columns:1fr}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:auto}}
 @media(max-width:560px){.dashboard-actions{grid-template-columns:1fr}#home>#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-card{padding:16px}}
 
+/* ================================================================
+ * DESIGN V25: Modellbezogene Fahrzeugfotos und responsive Platzhalter
+ * ================================================================ */
 /* Version 25: realistische, modellbezogene Fahrzeugbilder */
 .car-art,.sidebar-car{position:relative}
 .car-art{min-width:220px;max-width:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}
