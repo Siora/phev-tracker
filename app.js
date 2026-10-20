@@ -42,21 +42,11 @@ function render(){
   }),filtered=all.filter(x=>!provider.value||(x.type==='charge'&&(x.place||'Unbekannt')===provider.value)),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
-  let group={
-  };
-  filtered.forEach(x=>{
-    let k=x.date.slice(0,7);group[k]??={
-      charge:0,fuel:0
-    };group[k][x.type]+=conv(x)
-  });
-  let max=Math.max(1,...Object.values(group).map(x=>x.charge+x.fuel));
-  $('monthchart').innerHTML=Object.keys(group).sort().map(k=>'<div class="barrow"><span>'+k+'</span><div class="track"><div class="fill" style="width:'+((group[k].charge+group[k].fuel)/max*100)+'%"></div></div><span>'+fmt(group[k].charge+group[k].fuel,settings.base)+'</span></div>').join('')||'<small>Keine Daten für diesen Zeitraum.</small>';
-  $('costchart').innerHTML='<div class="barrow"><span>Strom</span><div class="track"><div class="fill" style="width:'+(cost?electric/cost*100:0)+'%"></div></div><span>'+fmt(electric,settings.base)+'</span></div><div class="barrow"><span>Benzin</span><div class="track"><div class="fill fuel" style="width:'+(cost?petrol/cost*100:0)+'%"></div></div><span>'+fmt(petrol,settings.base)+'</span></div>';
-  let byProvider={
-  };
-  charges.forEach(x=>byProvider[x.place||'Unbekannt']=(byProvider[x.place||'Unbekannt']||0)+x.amount);
-  let pmax=Math.max(1,...Object.values(byProvider));
-  $('providerchart').innerHTML=Object.entries(byProvider).sort((a,b)=>b[1]-a[1]).map(([name,value])=>'<div class="barrow"><span>'+escapeHTML(name)+'</span><div class="track"><div class="fill" style="width:'+(value/pmax*100)+'%"></div></div><span>'+value.toFixed(1)+' kWh</span></div>').join('')||'<small>Keine Ladevorgänge.</small>';
+  const metric = $('trendMetric').value;
+  AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
+  AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
+  AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
+  AnalyticsCharts.providers($('providerchart'), charges);
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'');edit.textContent='Bearbeiten';edit.onclick=()=>{
@@ -209,4 +199,5 @@ $('import').onclick=()=>{
 };
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{
 });
+$('trendMetric').addEventListener('change', render);
 tab('home');
