@@ -125,14 +125,23 @@
 </select>
 <div class="grid" id="stats">
 </div>
-<h2>Monatliche Entwicklung</h2>
-<div id="monthchart" class="chart">
-</div>
-<h2>Kostenverteilung</h2>
-<div id="costchart" class="chart">
-</div>
-<h2>Ladevorgänge nach Anbieter</h2>
-<div id="providerchart" class="chart">
+<div class="analytics-grid">
+  <article class="analytics-card analytics-wide">
+    <div class="chart-heading"><div><small>ENERGIE & KOSTEN</small><h2>Monatlicher Verlauf</h2></div><select id="trendMetric" aria-label="Diagrammkennzahl"><option value="energy">Geladene kWh</option><option value="cost">Kosten</option><option value="fuel">Benzinliter</option></select></div>
+    <div id="trendchart" class="interactive-chart" aria-label="Monatliches Balkendiagramm"></div>
+  </article>
+  <article class="analytics-card">
+    <div class="chart-heading"><div><small>KOSTENAUFTEILUNG</small><h2>Strom & Benzin</h2></div></div>
+    <div id="donutchart" class="interactive-chart"></div>
+  </article>
+  <article class="analytics-card">
+    <div class="chart-heading"><div><small>PREISENTWICKLUNG</small><h2>Ø Strompreis / kWh</h2></div></div>
+    <div id="pricechart" class="interactive-chart"></div>
+  </article>
+  <article class="analytics-card analytics-wide">
+    <div class="chart-heading"><div><small>LADEANBIETER</small><h2>Geladene Energie nach Anbieter</h2></div></div>
+    <div id="providerchart" class="interactive-chart"></div>
+  </article>
 </div>
 <small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
 <h2>Einträge</h2>
@@ -190,6 +199,7 @@
 <small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
 </p>
 </section>
+<script src="charts.js" defer></script>
 <script src="app.js" defer>
 </script>
 </main>
