@@ -85,7 +85,7 @@ ce('vehicle-form').onsubmit=async e=>{
  finally{button.disabled=false;}
 };
 
-function showAccount(email,role){ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');}
+function showAccount(email,role){document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');}
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
  ce('cloud-users').replaceChildren();
@@ -130,6 +130,7 @@ ce('cloud-check').onclick=async()=>{
 ce('cloud-logout').onclick=async()=>{
  try{await cloudCall('logout',{});}catch(error){}
  cloudToken=null;
+ document.body.classList.add('login-locked');
  localStorage.removeItem(sessionKey);
  window.showLocalRecords();
  ce('vehicle-status').textContent='Bitte anmelden, um Fahrzeuge zu verwalten.';
