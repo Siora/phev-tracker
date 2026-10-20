@@ -10,6 +10,8 @@ const $=x=>document.getElementById(x),key='phev-records-1';
 const costComparisonKey='phev-cost-comparison-v1';
 const fuelEnergyKey='phev-fuel-energy-factor-v1';
 let cloudView=false;
+function toggleMobileMenu(){const nav=$('primary-nav'),button=$('mobile-menu-toggle');if(!nav||!button)return;const open=nav.classList.toggle('menu-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?'✕ Menü schliessen':'☰ Menü öffnen';}
+document.addEventListener('click',event=>{if(event.target.closest('#primary-nav button')){const nav=$('primary-nav'),button=$('mobile-menu-toggle');nav?.classList.remove('menu-open');if(button){button.setAttribute('aria-expanded','false');button.textContent='☰ Menü öffnen';}}});
 function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
 window.updateLoginNotice=updateLoginNotice;
 let vehicles=[];
