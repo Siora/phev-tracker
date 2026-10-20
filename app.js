@@ -166,6 +166,7 @@ function render(){
       ? 'Basis: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand. Lade- und Tankmengen sind nur Näherungswerte.'
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
+  renderCostComparison(charges,fuel);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
@@ -358,3 +359,41 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch
 });
 $('trendMetric').addEventListener('change', render);
 tab('home');
+
+/* Modellvergleich: keine Änderung der gespeicherten Lade- oder Tankdatensätze. */
+const costComparisonKey='phev-cost-comparison-v1';
+function getCostComparison(){
+ try{
+  const values=JSON.parse(localStorage.getItem(costComparisonKey)||'{}');
+  return {electric:Number(values.electric)>0?Number(values.electric):20,fuel:Number(values.fuel)>0?Number(values.fuel):7};
+ }catch{return {electric:20,fuel:7};}
+}
+function saveCostComparison(){
+ const electric=Number($('comparison-electric').value),fuel=Number($('comparison-fuel').value);
+ if(!Number.isFinite(electric)||!Number.isFinite(fuel)||electric<=0||fuel<=0||electric>200||fuel>100){
+  alert('Bitte gültige Verbrauchswerte eingeben.');return;
+ }
+ localStorage.setItem(costComparisonKey,JSON.stringify({electric,fuel}));
+ render();
+ alert('Vergleichswerte gespeichert.');
+}
+function renderCostComparison(charges,fuel){
+ const target=$('cost-comparison-result');
+ if(!target)return;
+ const chargeKwh=charges.reduce((total,r)=>total+Number(r.amount||0),0);
+ const fuelLiters=fuel.reduce((total,r)=>total+Number(r.amount||0),0);
+ if(!chargeKwh||!fuelLiters){
+  target.textContent='Für den Vergleich werden mindestens eine Stromladung und eine Tankung im gewählten Zeitraum benötigt.';
+  return;
+ }
+ const assumptions=getCostComparison();
+ const electricity=charges.reduce((total,r)=>total+conv(r),0)/chargeKwh*assumptions.electric;
+ const petrol=fuel.reduce((total,r)=>total+conv(r),0)/fuelLiters*assumptions.fuel;
+ const difference=petrol-electricity;
+ target.textContent='Strom: '+fmt(electricity,settings.base)+'/100 km · Benzin: '+fmt(petrol,settings.base)+'/100 km · '+(difference>=0?'Strom günstiger um ':'Benzin günstiger um ')+fmt(Math.abs(difference),settings.base)+'/100 km.';
+}
+try{
+ const comparison=getCostComparison();
+ $('comparison-electric').value=comparison.electric;
+ $('comparison-fuel').value=comparison.fuel;
+}catch(error){console.warn('Vergleichseinstellungen nicht geladen',error);}
