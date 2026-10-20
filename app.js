@@ -242,8 +242,10 @@ $('file').onchange=async e=>{
   $('import').classList.toggle('hide',!pending.length)
 };
 $('import').onclick=()=>{
+  const target=$('entryVehicle').value;
+  if(!target||!vehicles.some(v=>String(v.id)===String(target))){alert('Bitte vor dem CSV-Import unter Eintragen ein Fahrzeug auswählen.');return;}
   let updated=0,added=0;
-  pending.forEach(x=>{x.vehicle_id=$('entryVehicle').value?Number($('entryVehicle').value):null;
+  pending.forEach(x=>{x.vehicle_id=Number(target);
     let i=records.findIndex(r=>r.type==='charge'&&String(r.vehicle_id||'')===String(x.vehicle_id||'')&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){
       records[i]={
         ...records[i],amount:x.amount
