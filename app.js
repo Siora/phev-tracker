@@ -176,6 +176,7 @@ function render(){
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
   renderEnergyBalance(filtered);
+  renderConsumptionTrend();
   renderCostComparison(charges,fuel);
   renderChargingTypes(charges);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
@@ -390,6 +391,41 @@ function energyBalance(items){
  const fuelKwh=liters*fuelEnergyFactor();
  return {distance,electric,liters,fuelKwh,total:electric+fuelKwh};
 }
+
+/* 12-Monats-Trend: nur Monate mit mindestens zwei Kilometerständen vergleichen. */
+function consumptionTrendRows(vehicleId,year,month){
+ const result=[];
+ for(let offset=11;offset>=0;offset--){
+  const d=new Date(year,month-offset,1),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  const items=records.filter(r=>String(r.date||'').startsWith(key)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
+  const b=energyBalance(items);
+  result.push({key,label:String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getFullYear()).slice(2),valid:b.distance>0&&items.length>0,electric:b.distance?b.electric*100/b.distance:0,fuel:b.distance?b.fuelKwh*100/b.distance:0,total:b.distance?b.total*100/b.distance:0,cost:b.distance?items.reduce((n,r)=>n+conv(r),0)*100/b.distance:0});
+ }
+ return result;
+}
+function renderConsumptionTrend(){
+ const target=$('consumption-trend');if(!target)return;
+ const now=new Date(),period=$('period').value;
+ const year=period==='custom'?Number($('chosenYear').value||now.getFullYear()):now.getFullYear();
+ const month=period==='custom'?Number($('chosenMonth').value||now.getMonth()):now.getMonth();
+ const rows=consumptionTrendRows($('vehicleFilter').value,year,month);
+ target.replaceChildren();
+ const valid=rows.filter(r=>r.valid);
+ if(!valid.length){target.textContent='Noch keine Monate mit ausreichenden Kilometerständen für eine Verbrauchskurve vorhanden.';return;}
+ const legend=document.createElement('p');legend.textContent='🔵 Strom · 🟠 Benzin (umgerechnet) · Gesamtenergie in kWh/100 km';target.append(legend);
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+ svg.setAttribute('viewBox','0 0 600 240');svg.setAttribute('role','img');svg.setAttribute('aria-label','Kombinierte Energieverbrauchsentwicklung der letzten zwölf Monate');svg.style.cssText='width:100%;height:auto;max-height:290px';
+ const max=Math.max(1,...valid.map(r=>r.total))*1.12;
+ const make=(tag,attrs)=>{const el=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));svg.append(el);return el;};
+ for(let i=0;i<=4;i++){const y=195-i*43;make('line',{x1:42,y1:y,x2:585,y2:y,stroke:'#dce5ef'});const t=make('text',{x:2,y:y+4,'font-size':11,fill:'#52657d'});t.textContent=(max*i/4).toFixed(0);}
+ rows.forEach((r,i)=>{const x=48+i*48;const t=make('text',{x,y:218,'font-size':10,'text-anchor':'middle',fill:'#52657d'});t.textContent=r.label;});
+ const draw=(key,color)=>{let segment=[];const flush=()=>{if(segment.length>1)make('polyline',{points:segment.join(' '),fill:'none',stroke:color,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});segment=[];};rows.forEach((r,i)=>{if(!r.valid){flush();return;}const x=48+i*48,y=195-r[key]/max*172;segment.push(x+','+y.toFixed(1));make('circle',{cx:x,cy:y,r:3.5,fill:color});});flush();};
+ draw('electric','#168fbe');draw('fuel','#e39b38');draw('total','#283e63');
+ target.append(svg);
+ const table=document.createElement('div');table.style.cssText='overflow-x:auto';const inner=document.createElement('table');inner.style.cssText='width:100%;font-size:12px;border-collapse:collapse';const head=document.createElement('tr');for(const h of ['Monat','Strom','Benzin','Gesamt','Kosten']){const th=document.createElement('th');th.textContent=h;th.style.padding='6px';head.append(th);}inner.append(head);
+ for(const r of rows){const tr=document.createElement('tr');for(const value of [r.label,r.valid?r.electric.toFixed(1):'–',r.valid?r.fuel.toFixed(1):'–',r.valid?r.total.toFixed(1):'–',r.valid?r.cost.toFixed(2)+' '+settings.base:'–']){const td=document.createElement('td');td.textContent=value;td.style.cssText='padding:6px;border-top:1px solid #e2eaf3;text-align:center';tr.append(td);}inner.append(tr);}table.append(inner);target.append(table);
+}
+
 function renderEnergyBalance(items){
  const target=$('energy-balance');if(!target)return;
  const b=energyBalance(items);
