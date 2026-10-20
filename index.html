@@ -221,7 +221,7 @@
 <form id="cloud-create">
 <label>E-Mail<input name="email" type="email" required></label>
 <label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
-<button>Benutzer erstellen</button>
+<label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button>Benutzer erstellen</button>
 </form>
 <h2>Benutzer</h2><div id="cloud-users"></div>
 </div>
@@ -229,8 +229,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=18" defer></script>
-<script src="app.js?v=18" defer>
+<script src="cloud.js?v=19" defer></script>
+<script src="app.js?v=19" defer>
 </script>
 </main>
 </div>
