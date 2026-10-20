@@ -1,4 +1,9 @@
-/* PHEV Tracker – interaktive, barrierearme Diagramme ohne externe Bibliotheken. */
+/*
+ * PHEV Tracker – Diagramme ohne externe Bibliotheken
+ *
+ * Rendert Zeitverläufe, Kostenverteilung, Preisentwicklung und Anbieterwerte.
+ * Die Diagramme arbeiten ausschließlich mit den gefilterten Einträgen.
+ */
 const AnalyticsCharts = (() => {
   const money = (value, currency) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: 2}).format(value) + ' ' + currency;
   const num = (value, digits = 1) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: digits}).format(value);
@@ -20,6 +25,7 @@ const AnalyticsCharts = (() => {
     node.setAttribute('aria-label', text);
     node.tabIndex = 0;
   };
+  // Gruppiert Messwerte monatsweise und erzeugt ein interaktives Balkendiagramm.
   function trend(node, entries, metric, currency, convert) {
     clean(node);
     const groups = new Map();
@@ -50,6 +56,7 @@ const AnalyticsCharts = (() => {
     });
     node.append(bars, element('p', 'chart-hint', 'Balken berühren, um Monatswerte anzuzeigen.'));
   }
+  // Vergleicht Strom- und Kraftstoffkosten in der gewählten Währung.
   function donut(node, entries, currency, convert) {
     clean(node);
     const charge = entries.filter(e => e.type === 'charge').reduce((s, e) => s + convert(e), 0);
@@ -75,6 +82,7 @@ const AnalyticsCharts = (() => {
     layout.append(ring, legend);
     node.append(layout);
   }
+  // Gewichteter durchschnittlicher Strompreis je Monat.
   function price(node, entries, currency, convert) {
     clean(node);
     const groups = new Map();
