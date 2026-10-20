@@ -1,5 +1,6 @@
 const cloudApi='https://tracker.web-produktion.com/api/api.php';
 let cloudToken=null;
+const sessionKey='phev-session-v1';
 const ce=id=>document.getElementById(id);
 const cs=message=>ce('cloud-status').textContent=message;
 async function cloudCall(action,data){
@@ -13,6 +14,8 @@ async function cloudCall(action,data){
  if(!response.ok)throw Error(json.error||'Serverfehler');
  return json;
 }
+async function loadCloudOverview(){const d=await cloudCall('data');window.showCloudRecords(d.records);ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+' (schreibgeschützt).';}
+function showAccount(email,role){ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');}
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
  ce('cloud-users').replaceChildren();
@@ -29,10 +32,9 @@ ce('cloud-login').onsubmit=async event=>{
  try{
   const result=await cloudCall('login',{email:form.elements.email.value,password:form.elements.password.value});
   cloudToken=result.token;
-  ce('cloud-identity').textContent=result.email+' · '+result.role;
-  ce('cloud-login').classList.add('hide');
-  ce('cloud-account').classList.remove('hide');
-  ce('cloud-admin').classList.toggle('hide',result.role!=='admin');
+  localStorage.setItem(sessionKey,JSON.stringify({token:result.token,email:result.email,role:result.role}));
+  showAccount(result.email,result.role);
+  await loadCloudOverview();
   form.elements.password.value='';
   cs('Angemeldet. Lokale Einträge bleiben unverändert.');
   if(result.role==='admin')await cloudUsers();
@@ -58,6 +60,8 @@ ce('cloud-check').onclick=async()=>{
 ce('cloud-logout').onclick=async()=>{
  try{await cloudCall('logout',{});}catch(error){}
  cloudToken=null;
+ localStorage.removeItem(sessionKey);
+ window.showLocalRecords();
  ce('cloud-account').classList.add('hide');
  ce('cloud-login').classList.remove('hide');
  ce('cloud-count').textContent='';
@@ -82,3 +86,5 @@ ce('cloud-upload').onclick=async()=>{
  }catch(e){cs('Import unterbrochen: '+e.message);}
  finally{btn.disabled=false;}
 };
+
+(async()=>{try{const saved=JSON.parse(localStorage.getItem(sessionKey)||'null');if(!saved?.token)return;cloudToken=saved.token;await loadCloudOverview();showAccount(saved.email,saved.role);cs('Sitzung wiederhergestellt.');if(saved.role==='admin')await cloudUsers();}catch(e){if(e.message==='Sitzung abgelaufen'||e.message==='Anmeldung erforderlich'){cloudToken=null;localStorage.removeItem(sessionKey);window.showLocalRecords();cs('Bitte erneut anmelden.');}else cs('Cloud momentan nicht erreichbar.');}})();
