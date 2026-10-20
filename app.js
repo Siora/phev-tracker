@@ -1,5 +1,16 @@
 const $=x=>document.getElementById(x),key='phev-records-1';
 let cloudView=false;
+let vehicles=[];
+window.setVehicles=function(items){vehicles=items;refreshVehicles();render();};
+function vehicleName(v){return v.brand+' '+v.model+(v.plate?' · '+v.plate:'');}
+function refreshVehicles(){
+ const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
+ filter.replaceChildren(new Option('Alle Fahrzeuge',''),new Option('Ohne Fahrzeugzuordnung','none'),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
+ entry.replaceChildren(new Option('Ohne Fahrzeugzuordnung',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:'';
+}
+
 let records=JSON.parse(localStorage.getItem(key)||'[]'),settings=JSON.parse(localStorage.getItem('phev-settings-1')||'{"base":"CHF","rate":0.94}'),pending=[];
 const n=x=>{
   let s=String(x??'').replace(/[^0-9,.-]/g,'');
@@ -11,8 +22,8 @@ const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.p
 const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
 function tab(t){
-  ['home','add','csv','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','options','cloud'][i]===t));
+  ['home','add','csv','vehicles','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','vehicles','options','cloud'][i]===t));
   render();
   window.scrollTo(0,0)
 }
@@ -39,8 +50,9 @@ function render(){
     from=new Date(y,m-months+1,1);
     to=new Date(y,m+1,1)
   }
+  let selectedVehicle=$('vehicleFilter').value;
   let all=records.filter(x=>{
-    let d=new Date(x.date+'T12:00:00');return d>=from&&d<to
+    let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
@@ -51,8 +63,8 @@ function render(){
   AnalyticsCharts.providers($('providerchart'), charges);
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
-    let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+    let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -75,7 +87,7 @@ $('form').elements.date.value=new Date().toISOString().slice(0,10);
 $('form').onsubmit=e=>{
   e.preventDefault();
   let f=new FormData(e.target),x={
-    id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||''
+    id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||'',vehicle_id:f.get('vehicle_id')?Number(f.get('vehicle_id')):null
   };
   if(!x.amount)return;
   if(e.target.dataset.editId){
@@ -91,6 +103,7 @@ $('form').onsubmit=e=>{
   save();
   e.target.reset();
   $('provider').value='';
+  $('vehicleFilter').value='';
   $('period').value='12';
   tab('home')
 };
@@ -107,9 +120,9 @@ function settingsSave(){
   alert('Gespeichert')
 }
 window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));tab('home');};
-window.showLocalRecords=function(){cloudView=false;records=JSON.parse(localStorage.getItem(key)||'[]');tab('home');};
+window.showLocalRecords=function(){cloudView=false;vehicles=[];refreshVehicles();records=JSON.parse(localStorage.getItem(key)||'[]');tab('home');};
 function exportCSV(){
- const columns=['id','type','date','amount','cost','currency','km','place'];
+ const columns=['id','type','date','amount','cost','currency','km','place','vehicle_id'];
  const cell=value=>{
   let s=String(value??'');
   if(/^[=+@\-\t\r]/.test(s))s="'"+s;
@@ -123,7 +136,7 @@ function exportCSV(){
 }
 function backup(){
   let b=new Blob([JSON.stringify({
-    records,settings
+    records,settings,vehicles
   },null,2)],{
     type:'application/json'
   }),a=document.createElement('a');
@@ -201,8 +214,8 @@ $('file').onchange=async e=>{
 };
 $('import').onclick=()=>{
   let updated=0,added=0;
-  pending.forEach(x=>{
-    let i=records.findIndex(r=>r.type==='charge'&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){
+  pending.forEach(x=>{x.vehicle_id=$('entryVehicle').value?Number($('entryVehicle').value):null;
+    let i=records.findIndex(r=>r.type==='charge'&&String(r.vehicle_id||'')===String(x.vehicle_id||'')&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){
       records[i]={
         ...records[i],amount:x.amount
       };updated++
