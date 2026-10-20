@@ -1,0 +1,9 @@
+{
+  "name": "PHEV Tracker BYD",
+  "short_name": "PHEV Tracker",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#10243b",
+  "theme_color": "#10243b",
+  "icons": []
+}
