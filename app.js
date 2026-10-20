@@ -41,7 +41,7 @@ function render(){
   }
   let all=records.filter(x=>{
     let d=new Date(x.date+'T12:00:00');return d>=from&&d<to
-  }),filtered=all.filter(x=>!provider.value||(x.type==='charge'&&(x.place||'Unbekannt')===provider.value)),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
+  }),filtered=all.filter(x=>x.type==='fuel'||!provider.value||(x.type==='charge'&&(x.place||'Unbekannt')===provider.value)),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
@@ -90,6 +90,8 @@ $('form').onsubmit=e=>{
   else records.push(x);
   save();
   e.target.reset();
+  $('provider').value='';
+  $('period').value='12';
   tab('home')
 };
 $('base').value=settings.base;
