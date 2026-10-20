@@ -698,3 +698,14 @@ button:hover{filter:brightness(1.06)}
 @media(max-width:1300px){.dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:span 2}}
 @media(max-width:780px){.dashboard-bottom{grid-template-columns:1fr}#home>.analytics-grid{grid-template-columns:1fr}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:auto}}
 @media(max-width:560px){.dashboard-actions{grid-template-columns:1fr}#home>#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-card{padding:16px}}
+
+/* Version 25: realistische, modellbezogene Fahrzeugbilder */
+.car-art,.sidebar-car{position:relative}
+.car-art{min-width:220px;max-width:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.vehicle-photo{display:block;width:100%;max-height:235px;object-fit:contain;border-radius:12px;filter:drop-shadow(0 9px 12px #1b42602c)}
+.sidebar-car .vehicle-photo{max-height:125px}
+.vehicle-photo[hidden],.vehicle-photo-fallback[hidden],.vehicle-photo-credit[hidden]{display:none!important}
+.vehicle-photo-fallback{display:grid;place-items:center;font-size:80px;min-height:125px;opacity:.7}
+.sidebar-car .vehicle-photo-fallback{font-size:60px}
+.vehicle-photo-credit{font-size:10px;color:#536d87;text-align:center;margin-top:4px;text-decoration:underline}
+@media(max-width:560px){.car-art{min-width:110px;max-width:45%}.vehicle-photo{max-height:145px}.vehicle-photo-fallback{font-size:48px;min-height:85px}.vehicle-photo-credit{font-size:9px}}
