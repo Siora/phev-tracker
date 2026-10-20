@@ -7,8 +7,8 @@ function refreshVehicles(){
  const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
  filter.replaceChildren(new Option('Alle Fahrzeuge',''),new Option('Ohne Fahrzeugzuordnung','none'),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
- entry.replaceChildren(new Option('Ohne Fahrzeugzuordnung',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:'';
+ entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
  const bulk=$('bulkVehicle'),old=bulk.value;
  bulk.replaceChildren(new Option('Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  bulk.value=[...bulk.options].some(o=>o.value===old)?old:'';
@@ -61,6 +61,13 @@ function render(){
     to=new Date(y,m+1,1)
   }
   let selectedVehicle=$('vehicleFilter').value;
+  const active=vehicles.find(v=>String(v.id)===selectedVehicle);
+  const title=active?vehicleName(active):(selectedVehicle==='none'?'Ohne Fahrzeugzuordnung':'Alle Fahrzeuge');
+  $('brandVehicle').textContent=title;
+  $('footerVehicle').textContent=title;
+  $('topVehicle').textContent='⚡ '+title;
+  $('heroVehicle').textContent=title;
+  $('heroVehicleDetails').textContent=active?(active.drivetrain||'Fahrzeug')+' · Energie & Kosten':'Energie & Kosten';
   let all=records.filter(x=>{
     let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
@@ -109,6 +116,7 @@ $('form').onsubmit=e=>{
   let f=new FormData(e.target),x={
     id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||'',vehicle_id:f.get('vehicle_id')?Number(f.get('vehicle_id')):null
   };
+  if(!x.vehicle_id||!vehicles.some(v=>String(v.id)===String(x.vehicle_id))){alert('Bitte zuerst ein Fahrzeug auswählen.');return;}
   if(!x.amount)return;
   if(e.target.dataset.editId){
     let i=records.findIndex(r=>r.id===e.target.dataset.editId);
@@ -122,6 +130,7 @@ $('form').onsubmit=e=>{
   else records.push(x);
   save();
   e.target.reset();
+  $('entryVehicle').value=vehicles.length===1?String(vehicles[0].id):'';
   $('provider').value='';
   $('vehicleFilter').value='';
   $('period').value='12';
