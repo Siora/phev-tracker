@@ -1,25 +1,198 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#11263b"><link rel="manifest" href="manifest.webmanifest"><title>PHEV Tracker</title><style>
-:root{color-scheme:dark;--bg:#081521;--panel:#112337;--panel2:#172d43;--stroke:#263d52;--blue:#278cff;--muted:#9fb5ca}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% 0%,#172d48 0%,#081521 55%);color:#f2f7fc;font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;min-height:100vh}
-.app-shell{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1720px;margin:auto;min-height:100vh}
-.sidebar{background:linear-gradient(160deg,#152b42,#0c1c2c);border-right:1px solid #274057;padding:24px 16px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh}
-.brand{display:flex;align-items:center;gap:10px}.brand-mark{font-size:25px;background:#173d65;border-radius:12px;padding:10px}.brand strong{font-size:21px;letter-spacing:-.7px}.brand small{display:block;margin-top:3px}
-.sidebar-car{margin:15px 0 6px}.sidebar-car svg{width:100%;filter:drop-shadow(0 8px 15px #010811)}
-.sidebar nav{display:flex;flex-direction:column;gap:8px}.sidebar nav button{width:100%;text-align:left;background:transparent;border:0;padding:14px 16px;margin:0;border-radius:10px;color:#d8e6f4;font-size:15px;cursor:pointer}.sidebar nav button:hover,.sidebar nav button.active{background:linear-gradient(90deg,#1474ed,#409bff);color:white}
-.sidebar-foot{margin-top:auto;padding:15px;border:1px solid #30495e;border-radius:13px;font-weight:600}.sidebar-foot small{font-weight:400}.sidebar-foot hr{border:0;border-top:1px solid #30495e;margin:13px 0}
-.main{padding:24px 30px;min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}.topbar h1{font-size:27px;margin:6px 0}.topbar-badge{background:#16334f;padding:12px 16px;border:1px solid #294d71;border-radius:14px;font-weight:600}
-section{background:transparent;margin:0;padding:0}#add,#csv,#options{max-width:750px;background:var(--panel);padding:24px;border:1px solid var(--stroke);border-radius:18px}
-h2{font-size:18px;letter-spacing:-.3px;margin:20px 0 15px}label{display:block;color:#c9d8e7;font-size:13px;font-weight:600;margin-top:10px}
-small{color:var(--muted);font-size:12px}input,select,button{font:inherit}input,select{display:block;width:100%;background:#1b3046;color:#f0f6fd;border:1px solid #3b536b;border-radius:9px;padding:12px;margin:7px 0 12px;min-height:45px}button{background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 16px;cursor:pointer;font-weight:600}#form button,#options button,#import{margin:10px 0;width:100%}
-.hero{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:205px;padding:20px 26px;border-radius:18px;border:1px solid #29445e;background:radial-gradient(ellipse at 77% 65%,#284c6d,#12253b 70%);overflow:hidden}.hero h2{font-size:27px;margin:10px 0}.car-art{width:45%;max-width:420px;min-width:200px}.car-art svg{width:100%;filter:drop-shadow(0 10px 12px #07121e)}
-#home>label,#home>#period,#home>#provider,#customdates{max-width:460px}#home>#period,#home>#provider{margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.tile{background:linear-gradient(155deg,#172e45,#112237);padding:19px 15px;border-radius:15px;border:1px solid #284056;min-height:112px}.tile b{display:block;font-size:23px;margin-top:13px;letter-spacing:-.5px}.tile small{font-size:13px}
-.chart{background:linear-gradient(155deg,#152a40,#0e2032);padding:20px;border-radius:16px;border:1px solid var(--stroke);min-height:100px}
-.barrow{display:grid;grid-template-columns:minmax(100px,155px) minmax(0,1fr) 105px;gap:12px;align-items:center;margin:12px 0;font-size:13px}.barrow span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.barrow span:last-child{text-align:right}.track{height:17px;background:#263f56;border-radius:5px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#1679e9,#5aaeff);border-radius:4px}.fill.fuel{background:linear-gradient(90deg,#e9771c,#ffaf49)}
-#entries{background:var(--panel);border:1px solid var(--stroke);border-radius:15px;padding:4px 17px}.item{padding:12px 0;border-bottom:1px solid #294259;line-height:1.7}.item:last-child{border-bottom:0}.item button{display:inline-block;width:auto;margin:7px 7px 0 0;padding:7px 11px;font-size:12px}.item button:last-child{background:#713b48}
-.hide{display:none!important}
-@media(min-width:1150px){#home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}#home>.hero,#home>h2:first-of-type,#home>label,#home>#period,#home>#provider,#home>#customdates,#home>#stats{grid-column:1/-1}#home>.hero{margin-bottom:4px}#home>h2{margin:8px 0 0}#home>#stats{margin:4px 0 10px}#home>#monthchart,#home>#costchart,#home>#providerchart{grid-column:auto}#home>#entries{grid-column:1/-1}#home>small{grid-column:1/-1}}
-@media(max-width:1050px){.app-shell{grid-template-columns:1fr}.sidebar{position:static;height:auto;padding:14px;gap:12px}.sidebar-car,.sidebar-foot{display:none}.sidebar nav{flex-direction:row;overflow-x:auto}.sidebar nav button{white-space:nowrap;text-align:center;padding:12px 14px}.main{padding:17px}.topbar h1{font-size:23px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.topbar-badge{display:none}.hero{min-height:150px;padding:16px}.hero h2{font-size:20px}.car-art{min-width:135px;width:49%}.tile{padding:13px;min-height:95px}.tile b{font-size:19px}.barrow{grid-template-columns:90px minmax(0,1fr) 85px;gap:6px;font-size:11px}.chart{padding:12px}.main{padding:12px}.sidebar{padding:12px}.sidebar nav button{font-size:13px}.brand strong{font-size:19px}}
-</style></head><body><div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">⚡</div><div><strong>PHEV Tracker</strong><small>BYD Seal U DM-i</small></div></div><div class="sidebar-car"><svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="paint" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e5eef6"/><stop offset=".52" stop-color="#8da7ba"/><stop offset="1" stop-color="#405a70"/></linearGradient><linearGradient id="glass" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#54718c"/><stop offset="1" stop-color="#102539"/></linearGradient></defs><ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/><path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/><path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/><path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/><path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/><path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/><circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/><circle cx="132" cy="188" r="22" fill="#b6c7d3"/><circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/><circle cx="401" cy="188" r="22" fill="#b6c7d3"/><path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/></svg></div><nav><button onclick="tab('home')">Übersicht</button><button onclick="tab('add')">Eintragen</button><button onclick="tab('csv')">CSV</button><button onclick="tab('options')">Optionen</button></nav><div class="sidebar-foot">BYD Seal U DM-i<br><small>Plug-in-Hybrid · CHF / EUR</small><hr><small>Deine Daten bleiben auf diesem Gerät.</small></div></aside><main class="main"><header class="topbar"><div><small>FAHRZEUG-DASHBOARD</small><h1>Dein PHEV im Überblick</h1></div><div class="topbar-badge">⚡ BYD Seal U DM-i</div></header><section id="home"><div class="hero"><div><small>DEIN FAHRZEUG</small><h2>BYD Seal U DM-i</h2><small>Plug-in-Hybrid · Energie & Kosten</small></div><div class="car-art"><svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="paint" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e5eef6"/><stop offset=".52" stop-color="#8da7ba"/><stop offset="1" stop-color="#405a70"/></linearGradient><linearGradient id="glass" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#54718c"/><stop offset="1" stop-color="#102539"/></linearGradient></defs><ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/><path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/><path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/><path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/><path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/><path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/><circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/><circle cx="132" cy="188" r="22" fill="#b6c7d3"/><circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/><circle cx="401" cy="188" r="22" fill="#b6c7d3"/><path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/></svg></div></div><h2>Dashboard</h2><label>Zeitraum</label><select id="period" onchange="render()"><option value="month">Letzter Monat</option><option value="3">Letzte 3 Monate</option><option value="6">Letzte 6 Monate</option><option value="12">Letztes Jahr</option><option value="custom">Monat und Jahr auswählen</option></select><div id="customdates" class="grid hide"><div><label>Monat</label><select id="chosenMonth" onchange="render()"></select></div><div><label>Jahr</label><select id="chosenYear" onchange="render()"></select></div></div><label>Ladeanbieter</label><select id="provider" onchange="render()"><option value="">Alle Anbieter</option></select><div class="grid" id="stats"></div><h2>Monatliche Entwicklung</h2><div id="monthchart" class="chart"></div><h2>Kostenverteilung</h2><div id="costchart" class="chart"></div><h2>Ladevorgänge nach Anbieter</h2><div id="providerchart" class="chart"></div><small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small><h2>Einträge</h2><div id="entries"></div></section><section id="add" class="hide"><h2>Neuer Eintrag</h2><form id="form"><label>Art</label><select name="type"><option value="charge">Stromladung</option><option value="fuel">Benzintankung</option></select><label>Datum</label><input name="date" type="date" required><label>Menge (kWh / Liter)</label><input name="amount" type="number" min=".001" step="any" required><label>Gesamtkosten</label><input name="cost" type="number" min="0" step="any" required><label>Währung</label><select name="currency"><option>CHF</option><option>EUR</option></select><label>Kilometerstand (optional)</label><input name="km" type="number" min="0"><label>Ladeort / Tankstelle</label><input name="place"><button>Speichern</button></form></section><section id="csv" class="hide"><h2>ChargeLog CSV importieren</h2><p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p><input id="file" type="file" accept=".csv,text/csv"><div id="preview"></div><button id="import" class="hide">Einträge importieren</button></section><section id="options" class="hide"><h2>Optionen & Backup</h2><label>Auswertungswährung</label><select id="base"><option>CHF</option><option>EUR</option></select><label>1 EUR = CHF (manuell)</label><input id="rate" type="number" step="any" min=".01"><button onclick="settingsSave()">Speichern</button><button onclick="backup()">JSON-Backup herunterladen</button><label>JSON-Backup wiederherstellen</label><input type="file" id="restore" accept=".json"><p><small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small></p></section><script>
-const $=x=>document.getElementById(x),key='phev-records-1';let records=JSON.parse(localStorage.getItem(key)||'[]'),settings=JSON.parse(localStorage.getItem('phev-settings-1')||'{"base":"CHF","rate":0.94}'),pending=[];const n=x=>{let s=String(x??'').replace(/[^0-9,.-]/g,'');if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else s=s.replace(',','.');return Number(s)||0};const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.place||'').toLowerCase()].join('|');const fmt=(v,c)=>v.toFixed(2)+' '+c;const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;function tab(t){['home','add','csv','options'].forEach(x=>$(x).classList.toggle('hide',x!==t));document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','options'][i]===t));render();window.scrollTo(0,0)}function save(){localStorage.setItem(key,JSON.stringify(records));render()}function render(){const now=new Date(),period=$('period').value;let y=now.getFullYear(),m=now.getMonth();$('customdates').classList.toggle('hide',period!=='custom');let provider=$('provider'),current=provider.value,providers=[...new Set(records.filter(x=>x.type==='charge').map(x=>x.place||'Unbekannt'))].sort();provider.replaceChildren(new Option('Alle Anbieter',''),...providers.map(x=>new Option(x,x)));provider.value=providers.includes(current)?current:'';let months=Number(period)||1;let chosenYear=Number($('chosenYear').value||y),chosenMonth=Number($('chosenMonth').value||m);let from,to;if(period==='custom'){from=new Date(chosenYear,chosenMonth,1);to=new Date(chosenYear,chosenMonth+1,1)}else{from=new Date(y,m-months+1,1);to=new Date(y,m+1,1)}let all=records.filter(x=>{let d=new Date(x.date+'T12:00:00');return d>=from&&d<to}),filtered=all.filter(x=>!provider.value||(x.type==='charge'&&(x.place||'Unbekannt')===provider.value)),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];$('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');let group={};filtered.forEach(x=>{let k=x.date.slice(0,7);group[k]??={charge:0,fuel:0};group[k][x.type]+=conv(x)});let max=Math.max(1,...Object.values(group).map(x=>x.charge+x.fuel));$('monthchart').innerHTML=Object.keys(group).sort().map(k=>'<div class="barrow"><span>'+k+'</span><div class="track"><div class="fill" style="width:'+((group[k].charge+group[k].fuel)/max*100)+'%"></div></div><span>'+fmt(group[k].charge+group[k].fuel,settings.base)+'</span></div>').join('')||'<small>Keine Daten für diesen Zeitraum.</small>';$('costchart').innerHTML='<div class="barrow"><span>Strom</span><div class="track"><div class="fill" style="width:'+(cost?electric/cost*100:0)+'%"></div></div><span>'+fmt(electric,settings.base)+'</span></div><div class="barrow"><span>Benzin</span><div class="track"><div class="fill fuel" style="width:'+(cost?petrol/cost*100:0)+'%"></div></div><span>'+fmt(petrol,settings.base)+'</span></div>';let byProvider={};charges.forEach(x=>byProvider[x.place||'Unbekannt']=(byProvider[x.place||'Unbekannt']||0)+x.amount);let pmax=Math.max(1,...Object.values(byProvider));$('providerchart').innerHTML=Object.entries(byProvider).sort((a,b)=>b[1]-a[1]).map(([name,value])=>'<div class="barrow"><span>'+escapeHTML(name)+'</span><div class="track"><div class="fill" style="width:'+(value/pmax*100)+'%"></div></div><span>'+value.toFixed(1)+' kWh</span></div>').join('')||'<small>Keine Ladevorgänge.</small>';$('entries').replaceChildren();filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'');edit.textContent='Bearbeiten';edit.onclick=()=>{let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')};div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save()}};div.append(btn);$('entries').append(div)})}function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}for(let i=0;i<12;i++)$('chosenMonth').add(new Option(new Date(2026,i,1).toLocaleString('de-CH',{month:'long'}),i));$('chosenMonth').value=new Date().getMonth();for(let i=new Date().getFullYear();i>=2020;i--)$('chosenYear').add(new Option(i,i));$('form').elements.date.value=new Date().toISOString().slice(0,10);$('form').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),x={id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||''};if(!x.amount)return;if(e.target.dataset.editId){let i=records.findIndex(r=>r.id===e.target.dataset.editId);if(i>=0){x.id=records[i].id;records[i]=x}delete e.target.dataset.editId;e.target.querySelector('button').textContent='Speichern'}else records.push(x);save();e.target.reset();tab('home')};$('base').value=settings.base;$('rate').value=settings.rate;function settingsSave(){let r=n($('rate').value);if(r<=0)return alert('Ungültiger Kurs');settings={base:$('base').value,rate:r};localStorage.setItem('phev-settings-1',JSON.stringify(settings));render();alert('Gespeichert')}function backup(){let b=new Blob([JSON.stringify({records,settings},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='phev-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}$('restore').onchange=async e=>{try{let x=JSON.parse(await e.target.files[0].text());if(!Array.isArray(x.records))throw Error();if(confirm('Bestehende Einträge ersetzen?')){records=x.records;settings=x.settings||settings;save();tab('home')}}catch{alert('Ungültige Sicherung')}};function csvRows(s){s=s.replace(/^\uFEFF/,'');let line=s.split(/\r?\n/)[0]||'',sep=(line.match(/;/g)||[]).length>=(line.match(/,/g)||[]).length?';':',',rows=[],row=[],v='',q=false;for(let i=0;i<s.length;i++){let c=s[i];if(c==='"'){if(q&&s[i+1]==='"'){v+='"';i++}else q=!q}else if(c===sep&&!q){row.push(v);v=''}else if((c==='\r'||c==='\n')&&!q){if(c==='\r'&&s[i+1]==='\n')i++;row.push(v);if(row.some(Boolean))rows.push(row);row=[];v=''}else v+=c}row.push(v);if(row.some(Boolean))rows.push(row);return rows}function date(s){let m=String(s||'').match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');m=String(s||'').match(/^(\d{1,2})\s*[./]\s*(\d{1,2})\s*[./]\s*(\d{4})/);return m?m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'):''}$('file').onchange=async e=>{let rows=csvRows(await e.target.files[0].text());let h=(rows.shift()||[]).map(x=>x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'')),find=(...terms)=>h.findIndex(x=>terms.some(t=>x.includes(t))),d=find('datum','date','start'),a=h.indexOf('energiekwh')>=0?h.indexOf('energiekwh'):h.indexOf('energykwh')>=0?h.indexOf('energykwh'):find('charged','energy'),c=find('gesamtbetragingewahlterwahrung','totalcost','totalprice','gesamtkosten','cost','kosten'),p=find('ort','location','station','place','ladeort','provider','anbieter'),w=h.indexOf('wahrung')>=0?h.indexOf('wahrung'):find('currency'),k=find('odometer','kilometerstand');if(d<0||a<0||c<0){$('preview').textContent='Spalten nicht erkannt: '+h.join(', ');return}let seen=new Set();pending=[];rows.forEach(r=>{let x={id:crypto.randomUUID(),type:'charge',date:date(r[d]),amount:n(r[a]),cost:n(r[c]),currency:w>=0&&/EUR/i.test(r[w])?'EUR':'CHF',place:p>=0?r[p]:'ChargeLog',km:k>=0?n(r[k]):null};if(!x.date||x.amount<=0||x.cost<0||seen.has(id(x)))return;seen.add(id(x));pending.push(x)});$('preview').textContent=pending.length+' CSV-Ladevorgänge erkannt (bereits vorhandene werden anhand von Datum, Ort und Kosten aktualisiert; CSV-Zeilen: '+rows.length+', Datum-Spalte: '+d+', Energie-Spalte: '+a+', Kosten-Spalte: '+c+'). Vorschau: '+pending.slice(0,8).map(x=>x.date+' / '+x.amount+' kWh / '+fmt(x.cost,x.currency)).join(' | ')+'. Prüfe insbesondere Kosten und Währung.';$('import').classList.toggle('hide',!pending.length)};$('import').onclick=()=>{let updated=0,added=0;pending.forEach(x=>{let i=records.findIndex(r=>r.type==='charge'&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){records[i]={...records[i],amount:x.amount};updated++}else{records.push(x);added++}});pending=[];save();alert(added+' neu importiert, '+updated+' bestehende Einträge aktualisiert.');tab('home')};if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});tab('home');</script></main></div></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11263b">
+<link rel="manifest" href="manifest.webmanifest">
+<title>PHEV Tracker</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+<div class="brand">
+<div class="brand-mark">⚡</div>
+<div>
+<strong>PHEV Tracker</strong>
+<small>BYD Seal U DM-i</small>
+</div>
+</div>
+<div class="sidebar-car">
+<svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="paint" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#e5eef6"/>
+<stop offset=".52" stop-color="#8da7ba"/>
+<stop offset="1" stop-color="#405a70"/>
+</linearGradient>
+<linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
+<stop stop-color="#54718c"/>
+<stop offset="1" stop-color="#102539"/>
+</linearGradient>
+</defs>
+<ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/>
+<path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/>
+<path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/>
+<path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/>
+<path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/>
+<path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/>
+<circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
+<circle cx="132" cy="188" r="22" fill="#b6c7d3"/>
+<circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
+<circle cx="401" cy="188" r="22" fill="#b6c7d3"/>
+<path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/>
+</svg>
+</div>
+<nav>
+<button onclick="tab('home')">Übersicht</button>
+<button onclick="tab('add')">Eintragen</button>
+<button onclick="tab('csv')">CSV</button>
+<button onclick="tab('options')">Optionen</button>
+</nav>
+<div class="sidebar-foot">BYD Seal U DM-i<br>
+<small>Plug-in-Hybrid · CHF / EUR</small>
+<hr>
+<small>Deine Daten bleiben auf diesem Gerät.</small>
+</div>
+</aside>
+<main class="main">
+<header class="topbar">
+<div>
+<small>FAHRZEUG-DASHBOARD</small>
+<h1>Dein PHEV im Überblick</h1>
+</div>
+<div class="topbar-badge">⚡ BYD Seal U DM-i</div>
+</header>
+<section id="home">
+<div class="hero">
+<div>
+<small>DEIN FAHRZEUG</small>
+<h2>BYD Seal U DM-i</h2>
+<small>Plug-in-Hybrid · Energie & Kosten</small>
+</div>
+<div class="car-art">
+<svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="paint" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#e5eef6"/>
+<stop offset=".52" stop-color="#8da7ba"/>
+<stop offset="1" stop-color="#405a70"/>
+</linearGradient>
+<linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
+<stop stop-color="#54718c"/>
+<stop offset="1" stop-color="#102539"/>
+</linearGradient>
+</defs>
+<ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/>
+<path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/>
+<path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/>
+<path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/>
+<path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/>
+<path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/>
+<circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
+<circle cx="132" cy="188" r="22" fill="#b6c7d3"/>
+<circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
+<circle cx="401" cy="188" r="22" fill="#b6c7d3"/>
+<path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/>
+</svg>
+</div>
+</div>
+<h2>Dashboard</h2>
+<label>Zeitraum</label>
+<select id="period" onchange="render()">
+<option value="month">Letzter Monat</option>
+<option value="3">Letzte 3 Monate</option>
+<option value="6">Letzte 6 Monate</option>
+<option value="12">Letztes Jahr</option>
+<option value="custom">Monat und Jahr auswählen</option>
+</select>
+<div id="customdates" class="grid hide">
+<div>
+<label>Monat</label>
+<select id="chosenMonth" onchange="render()">
+</select>
+</div>
+<div>
+<label>Jahr</label>
+<select id="chosenYear" onchange="render()">
+</select>
+</div>
+</div>
+<label>Ladeanbieter</label>
+<select id="provider" onchange="render()">
+<option value="">Alle Anbieter</option>
+</select>
+<div class="grid" id="stats">
+</div>
+<h2>Monatliche Entwicklung</h2>
+<div id="monthchart" class="chart">
+</div>
+<h2>Kostenverteilung</h2>
+<div id="costchart" class="chart">
+</div>
+<h2>Ladevorgänge nach Anbieter</h2>
+<div id="providerchart" class="chart">
+</div>
+<small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
+<h2>Einträge</h2>
+<div id="entries">
+</div>
+</section>
+<section id="add" class="hide">
+<h2>Neuer Eintrag</h2>
+<form id="form">
+<label>Art</label>
+<select name="type">
+<option value="charge">Stromladung</option>
+<option value="fuel">Benzintankung</option>
+</select>
+<label>Datum</label>
+<input name="date" type="date" required>
+<label>Menge (kWh / Liter)</label>
+<input name="amount" type="number" min=".001" step="any" required>
+<label>Gesamtkosten</label>
+<input name="cost" type="number" min="0" step="any" required>
+<label>Währung</label>
+<select name="currency">
+<option>CHF</option>
+<option>EUR</option>
+</select>
+<label>Kilometerstand (optional)</label>
+<input name="km" type="number" min="0">
+<label>Ladeort / Tankstelle</label>
+<input name="place">
+<button>Speichern</button>
+</form>
+</section>
+<section id="csv" class="hide">
+<h2>ChargeLog CSV importieren</h2>
+<p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
+<input id="file" type="file" accept=".csv,text/csv">
+<div id="preview">
+</div>
+<button id="import" class="hide">Einträge importieren</button>
+</section>
+<section id="options" class="hide">
+<h2>Optionen & Backup</h2>
+<label>Auswertungswährung</label>
+<select id="base">
+<option>CHF</option>
+<option>EUR</option>
+</select>
+<label>1 EUR = CHF (manuell)</label>
+<input id="rate" type="number" step="any" min=".01">
+<button onclick="settingsSave()">Speichern</button>
+<button onclick="backup()">JSON-Backup herunterladen</button>
+<label>JSON-Backup wiederherstellen</label>
+<input type="file" id="restore" accept=".json">
+<p>
+<small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
+</p>
+</section>
+<script src="app.js" defer>
+</script>
+</main>
+</div>
+</body>
+</html>
