@@ -118,8 +118,9 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $stmt=$db->prepare('DELETE FROM vehicles WHERE user_id=? AND id=?');$stmt->execute([$uid,$vid]);
  respond(200,['ok'=>true]);
 }
+$chargeKindColumn=(bool)$db->query("SHOW COLUMNS FROM records LIKE 'charge_kind'")->fetch();
 if ($action === 'data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
- $stmt=$db->prepare('SELECT id,type,date,time,charge_mode,amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
+ $stmt=$db->prepare('SELECT id,type,date,time,charge_mode,'.($chargeKindColumn?'charge_kind':'NULL AS charge_kind').',amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
  $stmt->execute([$uid]);$rows=$stmt->fetchAll();
  $stmt=$db->prepare('SELECT base,rate FROM user_settings WHERE user_id=?');$stmt->execute([$uid]);
  respond(200,['records'=>$rows,'settings'=>$stmt->fetch() ?: ['base'=>'CHF','rate'=>0.94]]);
@@ -131,6 +132,8 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $date=(string)($r['date'] ?? '');
  $time=(string)($r['time'] ?? '');
  $chargeMode=(string)($r['charge_mode'] ?? '');
+ $chargeKind=(string)($r['charge_kind'] ?? '');
+ if (!in_array($chargeKind,['','Zuhause','Öffentlich','Arbeitsplatz','Kostenlos'],true)) fail(400,'Ungültiger Ladeort');
  if ($time!=='' && !preg_match('/^[0-2][0-9]:[0-5][0-9]$/D',$time)) fail(400,'Ungültige Uhrzeit');
  if ($time!=='' && (int)substr($time,0,2)>23) fail(400,'Ungültige Uhrzeit');
  if (!in_array($chargeMode,['','AC','DC'],true)) fail(400,'Ungültiger Ladestrom');
@@ -144,9 +147,15 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   (isset($r['km']) && (!is_numeric($r['km']) || (float)$r['km']<0 || (float)$r['km']>100000000))) fail(400,'Ungültiger Eintrag');
  $vehicleId=($r['vehicle_id']??null)===null||($r['vehicle_id']??'')===''?null:(int)$r['vehicle_id'];
  if ($vehicleId!==null) {if ($vehicleId<=0) fail(400,'Ungültiges Fahrzeug');$check=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');$check->execute([$vehicleId,$uid]);if (!$check->fetchColumn()) fail(403,'Fahrzeug nicht erlaubt');}
- $stmt=$db->prepare('INSERT INTO records(id,user_id,type,date,time,charge_mode,amount,cost,currency,km,place,vehicle_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
- ON DUPLICATE KEY UPDATE type=VALUES(type),date=VALUES(date),time=VALUES(time),charge_mode=VALUES(charge_mode),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place),vehicle_id=VALUES(vehicle_id)');
- $stmt->execute([$id,$uid,$r['type'],$date,$time?:null,$chargeMode?:null,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'',$vehicleId]);
+ $columns='id,user_id,type,date,time,charge_mode,amount,cost,currency,km,place,vehicle_id';
+ $values='?,?,?,?,?,?,?,?,?,?,?,?';
+ $updates='type=VALUES(type),date=VALUES(date),time=VALUES(time),charge_mode=VALUES(charge_mode),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place),vehicle_id=VALUES(vehicle_id)';
+ $params=[$id,$uid,$r['type'],$date,$time?:null,$chargeMode?:null,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'',$vehicleId];
+ if ($chargeKindColumn) {
+  $columns.=',charge_kind';$values.=',?';$updates.=',charge_kind=VALUES(charge_kind)';$params[]=$chargeKind?:null;
+ }
+ $stmt=$db->prepare('INSERT INTO records('.$columns.') VALUES ('.$values.') ON DUPLICATE KEY UPDATE '.$updates);
+ $stmt->execute($params);
  respond(200,['ok'=>true]);
 }
 if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
