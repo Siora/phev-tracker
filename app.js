@@ -10,6 +10,15 @@ const $=x=>document.getElementById(x),key='phev-records-1';
 let cloudView=false;
 let vehicles=[];
 window.setVehicles=function(items){vehicles=items;refreshVehicles();render();};
+// Lokale Bildwahl: Die Cloud-Fahrzeugdaten bleiben unverändert.
+window.setVehiclePhoto=function(vehicleId,url){
+ const clean=String(url||'').trim();
+ if(clean&&!/^https:\/\/[^\s]+$/i.test(clean))throw Error('Bitte eine gültige HTTPS-Bildadresse eingeben.');
+ const key='phev-photo-'+vehicleId;
+ if(clean)localStorage.setItem(key,clean);else localStorage.removeItem(key);
+ window.currentPhotoVehicle=null;
+ render();
+};
 function vehicleName(v){return v.brand+' '+v.model+(v.plate?' · '+v.plate:'');}
 
 // Fahrzeugbilder: Modellnamen streng abgleichen, Ergebnisse zwischenspeichern.
@@ -28,6 +37,8 @@ function displayVehiclePhoto(result){
 async function updateVehiclePhoto(vehicle){
  const request=++photoRequest;
  if(!vehicle){displayVehiclePhoto(null);return;}
+ const custom=localStorage.getItem('phev-photo-'+vehicle.id);
+ if(custom){displayVehiclePhoto({src:custom,page:custom,alt:'Eigenes Fahrzeugfoto: '+vehicleName(vehicle)});return;}
  const key=(vehicle.brand+' '+vehicle.model).trim().toLowerCase();
  if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
  displayVehiclePhoto(null);
