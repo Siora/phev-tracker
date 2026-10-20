@@ -1,9 +1,19 @@
+/*
+ * PHEV Tracker – Anwendungslogik
+ *
+ * Zuständig für lokale Einträge, Fahrzeugauswahl, Filter, Auswertungen,
+ * Import/Export sowie die Darstellung des Dashboards.
+ * Die Cloud-Anbindung ist in cloud.js gekapselt.
+ */
+
 const $=x=>document.getElementById(x),key='phev-records-1';
 let cloudView=false;
 let vehicles=[];
 window.setVehicles=function(items){vehicles=items;refreshVehicles();render();};
 function vehicleName(v){return v.brand+' '+v.model+(v.plate?' · '+v.plate:'');}
 
+// Fahrzeugbilder: Modellnamen streng abgleichen, Ergebnisse zwischenspeichern.
+// Bei fehlendem Treffer bleibt die neutrale Fahrzeuggrafik sichtbar.
 const vehiclePhotoCache=new Map();
 let photoRequest=0;
 function displayVehiclePhoto(result){
@@ -42,6 +52,7 @@ async function updateVehiclePhoto(vehicle){
  }catch(e){if(request===photoRequest)displayVehiclePhoto(null);}
 }
 
+// Aktualisiert sämtliche Fahrzeug-Auswahllisten nach Anmeldung oder Änderungen.
 function refreshVehicles(){
  const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
  filter.replaceChildren(new Option('Alle Fahrzeuge',''),new Option('Ohne Fahrzeugzuordnung','none'),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
@@ -55,6 +66,7 @@ function refreshVehicles(){
  updateBulkCount();
 }
 function updateBulkCount(){const count=records.filter(r=>!r.vehicle_id).length; $('bulk-count').textContent=count+' Einträge ohne Fahrzeugzuordnung.';}
+// Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
  if(!vehicles.some(v=>String(v.id)===String(vehicleId)))throw Error('Fahrzeug nicht gefunden');
  let count=0;records=records.map(r=>{if(r.vehicle_id)return r;count++;return {...r,vehicle_id:Number(vehicleId)};});
@@ -71,6 +83,7 @@ const n=x=>{
 const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.place||'').toLowerCase()].join('|');
 const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
+// Wechsel zwischen den Bereichen der Single-Page-Anwendung.
 function tab(t){
   ['home','add','csv','vehicles','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
   document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','vehicles','options','cloud'][i]===t));
@@ -157,6 +170,7 @@ for(let i=0;i<12;i++)$('chosenMonth').add(new Option(new Date(2026,i,1).toLocale
 $('chosenMonth').value=new Date().getMonth();
 for(let i=new Date().getFullYear();i>=2020;i--)$('chosenYear').add(new Option(i,i));
 $('form').elements.date.value=new Date().toISOString().slice(0,10);
+// Neuer Lade-/Tank-Eintrag oder Aktualisierung eines vorhandenen Eintrags.
 $('form').onsubmit=e=>{
   e.preventDefault();
   let f=new FormData(e.target),x={
@@ -182,6 +196,7 @@ $('form').onsubmit=e=>{
   $('period').value='12';
   tab('home')
 };
+// Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
 document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
@@ -197,6 +212,7 @@ function settingsSave(){
 }
 window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));tab('home');updateBulkCount();};
 window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
+// CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
 function exportCSV(){
  const columns=['id','type','date','amount','cost','currency','km','place','vehicle_id'];
  const cell=value=>{
