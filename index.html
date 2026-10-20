@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 <!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
@@ -32,7 +32,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 30</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 31</small>
 </div>
 </aside>
 <main class="main">
@@ -80,6 +80,7 @@
 <option value="">Alle Orte / Tankstellen</option>
 </select>
 <div id="vehicle-summary" aria-live="polite"></div>
+<h2>Verbrauch pro 100 km</h2><div class="grid" id="consumption-stats"></div><p id="consumption-note"></p>
 <div class="grid" id="stats">
 </div>
 <div class="analytics-grid">
@@ -226,8 +227,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=30" defer></script>
-<script src="app.js?v=30" defer>
+<script src="cloud.js?v=31" defer></script>
+<script src="app.js?v=31" defer>
 </script>
 </main>
 </div>
