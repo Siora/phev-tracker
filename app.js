@@ -22,6 +22,7 @@ function recordTimes(){try{return JSON.parse(localStorage.getItem(recordTimeKey(
 function recordTime(id){const record=records.find(r=>r.id===id);return String(record?.time||'').slice(0,5)||recordTimes()[id]||'';}
 function setRecordTime(id,time){const times=recordTimes();if(/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(time))times[id]=time;else delete times[id];localStorage.setItem(recordTimeKey(),JSON.stringify(times));}
 function recordDateTime(r){return String(r.date||'')+(recordTime(r.id)?' '+recordTime(r.id):'');}
+function compareRecordDateTime(a,b){const av=String(a.date||'')+'T'+(recordTime(a.id)||'00:00');const bv=String(b.date||'')+'T'+(recordTime(b.id)||'00:00');const result=av.localeCompare(bv);return ($('entry-sort')?.value==='asc'?1:-1)*result || String(a.id).localeCompare(String(b.id));}
 function localClock(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
 let cloudView=false;
@@ -129,6 +130,7 @@ function save(){
   scheduleAutomaticBackup();
   render();updateBulkCount()
 }
+$('entry-sort')?.addEventListener('change',render);
 function render(){
   updateLoginNotice();
   const now=new Date(),period=$('period').value;
@@ -202,7 +204,7 @@ function render(){
   AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
   AnalyticsCharts.providers($('providerchart'), charges);
   const recent=$('recent-entries');recent.replaceChildren();
-  filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).forEach(r=>{const p=document.createElement('p');p.className='recent-row';p.textContent=(r.type==='charge'?'⚡ ':'⛽ ')+recordDateTime(r)+(r.type==='charge'&&getChargeMode(r.id)?' · '+getChargeMode(r.id):'')+' · '+r.amount+(r.type==='charge'?' kWh':' l')+' · '+fmt(r.cost,r.currency);recent.append(p);});
+  filtered.slice().sort(compareRecordDateTime).slice(0,5).forEach(r=>{const p=document.createElement('p');p.className='recent-row';p.textContent=(r.type==='charge'?'⚡ ':'⛽ ')+recordDateTime(r)+(r.type==='charge'&&getChargeMode(r.id)?' · '+getChargeMode(r.id):'')+' · '+r.amount+(r.type==='charge'?' kWh':' l')+' · '+fmt(r.cost,r.currency);recent.append(p);});
   if(!recent.children.length)recent.textContent='Noch keine Einträge im Zeitraum.';
   const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
   const compare=$('month-compare');compare.replaceChildren();const monthsMap=new Map();filtered.forEach(r=>{const month=r.date.slice(0,7);monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));});const maxMonth=Math.max(1,...monthsMap.values());[...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{const line=document.createElement('div');line.className='compare-row';const label=document.createElement('span');label.textContent=month;const track=document.createElement('div');track.className='compare-track';const bar=document.createElement('div');bar.className='compare-fill';bar.style.width=(value/maxMonth*100)+'%';track.append(bar);const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);line.append(label,track,amount);compare.append(line);});if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
@@ -253,7 +255,8 @@ $('form').onsubmit=e=>{
   x.charge_mode=x.type==='charge'?String(f.get('charge_mode')||''):'';
   setRecordTime(x.id,x.time);
   setChargeMode(x.id,x.charge_mode);
-  setChargingType(x.id,chargeKind);
+  x.charge_kind=x.type==='charge'?chargeKind:'';
+  setChargingType(x.id,x.charge_kind);
   save();
   e.target.reset();
   $('entryVehicle').value=vehicles.length===1?String(vehicles[0].id):'';
@@ -263,7 +266,7 @@ $('form').onsubmit=e=>{
   tab('home')
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
-document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;record.time=f.elements.time.value;record.charge_mode=record.type==='charge'?f.elements.charge_mode.value:'';records.push(record);setRecordTime(record.id,record.time);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
+document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;record.time=f.elements.time.value;record.charge_mode=record.type==='charge'?f.elements.charge_mode.value:'';record.charge_kind=record.type==='charge'?f.elements.charge_kind.value:'';records.push(record);setRecordTime(record.id,record.time);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
@@ -276,7 +279,7 @@ function settingsSave(){
   render();
   alert('Gespeichert')
 }
-window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
+window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',charge_kind:x.charge_kind||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
 window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
 // CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
 function exportCSV(){
@@ -507,7 +510,7 @@ function chargingTypeStorageKey(){
 function chargingTypes(){
  try{return JSON.parse(localStorage.getItem(chargingTypeStorageKey())||'{}')||{};}catch{return {};}
 }
-function getChargingType(id){return chargingTypes()[id]||'';}
+function getChargingType(id){const record=records.find(r=>r.id===id);return record?.charge_kind||chargingTypes()[id]||'';}
 function setChargingType(id,type){
  const allowed=['Zuhause','Öffentlich','Arbeitsplatz','Kostenlos'];
  const data=chargingTypes();
