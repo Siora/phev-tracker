@@ -445,66 +445,56 @@ function renderChargingTypes(charges){
 }
 
 /* Eigenständiger PDF-Export ohne externe Bibliothek oder Serverübertragung. */
+
+/* Druckfertiger A4-Bericht: Vektordiagramme, Kennzahlen und paginierte Tabellen. */
 function exportPdfReport(mode){
  const year=Number($('report-year').value),month=$('report-month').value,vehicleId=$('report-vehicle').value;
- if(!Number.isInteger(year)||year<2020||year>2100){alert('Bitte ein gültiges Jahr auswählen.');return;}
+ if(!Number.isInteger(year)||year<2020||year>2100){alert('Bitte gültiges Jahr auswählen.');return;}
  const period=String(year)+(mode==='month'?'-'+month:'');
- const data=records.filter(r=>r.date.startsWith(period)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
+ const data=records.filter(r=>String(r.date||'').startsWith(period)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
  const chosen=vehicles.find(v=>String(v.id)===vehicleId);
  const title=mode==='month'?'Monatsbericht '+month+'.'+year:'Jahresbericht '+year;
- const heading=chosen?vehicleName(chosen):'Alle Fahrzeuge';
- const lines=[title,'Fahrzeug: '+heading,'Erstellt: '+new Date().toLocaleDateString('de-CH'),'Waehrung: '+settings.base,''];
- const addStats=(label,items)=>{
-  const charges=items.filter(r=>r.type==='charge'),fuel=items.filter(r=>r.type==='fuel');
-  const amount=arr=>arr.reduce((total,r)=>total+Number(r.amount||0),0);
-  const cost=arr=>arr.reduce((total,r)=>total+conv(r),0);
-  lines.push(label);
-  lines.push('Ladungen: '+charges.length+' | Energie: '+amount(charges).toFixed(2)+' kWh | Kosten: '+fmt(cost(charges),settings.base));
-  lines.push('Tankungen: '+fuel.length+' | Benzin: '+amount(fuel).toFixed(2)+' l | Kosten: '+fmt(cost(fuel),settings.base));
-  lines.push('Gesamtkosten: '+fmt(cost(items),settings.base),'');
- };
- addStats('Zusammenfassung',data);
+ const pdf=new PhevPdfReport(title,chosen?vehicleName(chosen):'Alle Fahrzeuge',settings.base);
+ const charges=data.filter(r=>r.type==='charge'),fuel=data.filter(r=>r.type==='fuel');
+ const sum=(arr,fn)=>arr.reduce((n,r)=>n+fn(r),0);
+ const total=sum(data,conv),energy=sum(charges,r=>Number(r.amount||0)),liters=sum(fuel,r=>Number(r.amount||0));
+ pdf.heading('Übersicht');
+ pdf.metrics([['Gesamtkosten',total.toFixed(2)+' '+settings.base],['Strom',energy.toFixed(1)+' kWh'],['Benzin',liters.toFixed(1)+' l'],['Vorgänge',String(data.length)]]);
+ pdf.heading('Kostenverteilung');
+ pdf.donut([sum(charges,conv),sum(fuel,conv)],['Strom','Benzin']);
+ pdf.heading(mode==='year'?'Kosten nach Monat':'Kosten nach Tag');
+ const buckets=mode==='year'?Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')):[...new Set(data.map(r=>r.date.slice(8,10)))].sort();
+ const points=buckets.map(k=>sum(data.filter(r=>(mode==='year'?r.date.slice(5,7):r.date.slice(8,10))===k),conv));
+ pdf.bars(buckets,points);
  if(mode==='year'){
-  for(let m=1;m<=12;m++){
-   const prefix=year+'-'+String(m).padStart(2,'0');
-   addStats('Monat '+String(m).padStart(2,'0'),data.filter(r=>r.date.startsWith(prefix)));
-  }
- }else{
-  lines.push('Einzelne Vorgaenge (Datum | Art | Menge | Kosten)');
-  for(const r of data.slice().sort((a,b)=>a.date.localeCompare(b.date))){
-   lines.push(r.date+' | '+(r.type==='charge'?'Strom':'Benzin')+' | '+Number(r.amount).toFixed(2)+(r.type==='charge'?' kWh':' l')+' | '+fmt(conv(r),settings.base));
-  }
+  pdf.heading('Monatsübersicht');
+  pdf.table(['Monat','Ladungen','Tankungen','Kosten '+settings.base],buckets.map((k,i)=>{const rows=data.filter(r=>r.date.slice(5,7)===k);return [k,String(rows.filter(r=>r.type==='charge').length),String(rows.filter(r=>r.type==='fuel').length),sum(rows,conv).toFixed(2)];}),[70,125,125,165]);
  }
- if(!data.length)lines.push('Keine Eintraege im ausgewaehlten Zeitraum.');
- lines.push('Hinweis: Umrechnung gemaess den aktuell gespeicherten Waehrungseinstellungen.');
- const pdf=makeSimplePdf(lines);
- const url=URL.createObjectURL(new Blob([pdf],{type:'application/pdf'}));
- const a=document.createElement('a');a.href=url;a.download='phev-'+(mode==='month'?'monat-':'jahr-')+period+'.pdf';
- document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ pdf.heading('Einzelne Einträge');
+ const sorted=data.slice().sort((x,y)=>String(x.date).localeCompare(String(y.date)));
+ pdf.table(['Datum','Art','Menge','Ort','Kosten '+settings.base],sorted.map(r=>[r.date,r.type==='charge'?'Strom':'Benzin',Number(r.amount||0).toFixed(2)+(r.type==='charge'?' kWh':' l'),r.place||'–',conv(r).toFixed(2)]),[75,65,90,175,90]);
+ if(!data.length)pdf.note('Keine Einträge im gewählten Zeitraum.');
+ pdf.note('Beträge gemäß aktuellen Währungseinstellungen umgerechnet. Diagramme zeigen erfasste Vorgänge.');
+ const url=URL.createObjectURL(new Blob([pdf.finish()],{type:'application/pdf'}));
+ const link=document.createElement('a');link.href=url;link.download='phev-'+(mode==='month'?'monat-':'jahr-')+period+'.pdf';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
-function makeSimplePdf(lines){
- // PDF-Standardfont Helvetica mit WinAnsi-kompatibler ASCII-Umschrift.
- const plain=text=>String(text).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^\x20-\x7e]/g,'?');
- const esc=text=>plain(text).replace(/[\\()]/g,'\\$&');
- const pages=[];
- for(let i=0;i<lines.length;i+=49)pages.push(lines.slice(i,i+49));
- if(!pages.length)pages.push([]);
- const objects=['','<< /Type /Catalog /Pages 2 0 R >>','','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
- const kids=[];
- for(const page of pages){
-  const pageId=objects.length,contentId=pageId+1;kids.push(pageId+' 0 R');
-  objects.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents '+contentId+' 0 R >>');
-  const content='BT /F1 11 Tf 45 790 Td 15 TL '+page.map((line,i)=>(i?'T* ':'')+'('+esc(line.slice(0,95))+') Tj').join('\n')+' ET';
-  objects.push('<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream');
- }
- objects[2]='<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+kids.length+' >>';
- let out='%PDF-1.4\n',offsets=[0];
- for(let i=1;i<objects.length;i++){offsets[i]=out.length;out+=i+' 0 obj\n'+objects[i]+'\nendobj\n';}
- const start=out.length;
- out+='xref\n0 '+objects.length+'\n0000000000 65535 f \n';
- for(let i=1;i<objects.length;i++)out+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
- out+='trailer\n<< /Size '+objects.length+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF';
- return new TextEncoder().encode(out);
+class PhevPdfReport{
+ constructor(title,vehicle,currency){this.title=title;this.vehicle=vehicle;this.currency=currency;this.pages=[];this.newPage();}
+ clean(v){return String(v??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^\x20-\x7e]/g,'?');}
+ esc(v){return this.clean(v).replace(/[\\()]/g,'\\$&');}
+ cmd(s){this.ops.push(s);}
+ color(rgb){this.cmd(rgb.join(' ')+' rg');}
+ rect(x,y,w,h,rgb){this.color(rgb);this.cmd(x+' '+y+' '+w+' '+h+' re f');}
+ text(x,y,v,size=10,rgb=[0.13,0.2,0.3],bold=false){this.color(rgb);this.cmd('BT /'+(bold?'F2':'F1')+' '+size+' Tf 1 0 0 1 '+x+' '+y+' Tm ('+this.esc(v)+') Tj ET');}
+ newPage(){this.ops=[];this.pages.push(this.ops);this.y=745;this.rect(0,786,595,56,[0.06,0.17,0.28]);this.text(40,807,'PHEV TRACKER  /  '+this.title,17,[1,1,1],true);this.text(40,766,this.vehicle+'   |   '+new Date().toLocaleDateString('de-CH'),9);this.rect(40,42,515,1,[0.85,0.88,0.91]);this.text(40,27,'PHEV Tracker  -  Persönlicher Fahrzeugbericht',8,[0.45,0.49,0.55]);}
+ space(h){if(this.y-h<70)this.newPage();}
+ heading(v){this.space(42);this.y-=23;this.text(40,this.y,v,14,[0.07,0.22,0.36],true);this.y-=18;}
+ metrics(items){this.space(83);const w=124;items.forEach((a,i)=>{const x=40+i*130;this.rect(x,this.y-60,w,63,[0.94,0.96,0.98]);this.text(x+9,this.y-20,a[0],9);this.text(x+9,this.y-44,a[1],13,[0.05,0.36,0.53],true);});this.y-=84;}
+ donut(values,labels){this.space(115);const sum=values.reduce((a,b)=>a+b,0);const x=105,y=this.y-49,r=42;let start=-Math.PI/2;values.forEach((v,i)=>{if(v<=0)return;const n=Math.max(2,Math.ceil(v/sum*70)),end=start+2*Math.PI*v/sum;const points=[[x,y]];for(let j=0;j<=n;j++){const t=start+(end-start)*j/n;points.push([x+r*Math.cos(t),y+r*Math.sin(t)]);}this.color(i?[0.96,0.63,0.25]:[0.1,0.57,0.72]);this.cmd(points.map((p,k)=>p[0].toFixed(2)+' '+p[1].toFixed(2)+(k?' l':' m')).join(' ')+' h f');start=end;});if(!sum){this.text(75,y,'Keine Daten',10);}values.forEach((v,i)=>{this.rect(195,this.y-27-i*30,11,11,i?[0.96,0.63,0.25]:[0.1,0.57,0.72]);this.text(216,this.y-24-i*30,labels[i]+': '+v.toFixed(2)+' '+this.currency,11);});this.y-=113;}
+ bars(labels,values){this.space(160);const x=45,y=this.y-126,w=500,h=112,max=Math.max(1,...values);this.rect(x,y,w,1,[0.72,0.77,0.82]);if(!labels.length){this.text(x+8,y+52,'Keine Daten',10);}else{const step=w/labels.length,bw=Math.min(26,step*0.65);labels.forEach((k,i)=>{const bar=values[i]/max*(h-18);this.rect(x+i*step+(step-bw)/2,y,bw,Math.max(0.1,bar),[0.1,0.57,0.72]);if(labels.length<=12||i%Math.ceil(labels.length/12)===0)this.text(x+i*step+step/2-6,y-14,k,8);});this.text(x,y+h-2,'Max. '+max.toFixed(2)+' '+this.currency,9);}this.y-=161;}
+ table(headers,rows,widths){const rowH=23;const drawHeader=()=>{this.space(34);this.rect(40,this.y-25,515,26,[0.08,0.25,0.4]);let x=45;headers.forEach((v,i)=>{this.text(x,this.y-17,v,8,[1,1,1],true);x+=widths[i];});this.y-=26;};drawHeader();if(!rows.length){this.note('Keine Einträge vorhanden.');return;}for(let i=0;i<rows.length;i++){if(this.y-rowH<70){this.newPage();drawHeader();}if(i%2===0)this.rect(40,this.y-rowH,515,rowH,[0.95,0.97,0.98]);let x=45;rows[i].forEach((v,j)=>{const limit=Math.max(5,Math.floor((widths[j]-10)/4.7));let t=this.clean(v);if(t.length>limit)t=t.slice(0,limit-2)+'..';this.text(x,this.y-15,t,8);x+=widths[j];});this.y-=rowH;}this.y-=15;}
+ note(v){this.space(24);this.text(42,this.y-12,v,8,[0.4,0.44,0.5]);this.y-=23;}
+ finish(){const objs=['','<< /Type /Catalog /Pages 2 0 R >>','','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'];const kids=[];for(const ops of this.pages){const p=objs.length,c=p+1;kids.push(p+' 0 R');objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents '+c+' 0 R >>');const stream=ops.join('\n');objs.push('<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream');}objs[2]='<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+kids.length+' >>';let out='%PDF-1.4\n',offsets=[0];for(let i=1;i<objs.length;i++){offsets[i]=out.length;out+=i+' 0 obj\n'+objs[i]+'\nendobj\n';}const pos=out.length;out+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';for(let i=1;i<objs.length;i++)out+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';out+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+pos+'\n%%EOF';return new TextEncoder().encode(out);}
 }
 $('report-year').value=new Date().getFullYear();
 $('report-month').value=String(new Date().getMonth()+1).padStart(2,'0');
