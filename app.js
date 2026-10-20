@@ -602,8 +602,8 @@ function scheduleAutomaticBackup(){
   // Nicht unmittelbar beim Start leere Cloud-Daten über bestehende Sicherungen schreiben.
   if(cloudView&&records.length===0)return;
   const previous=automaticBackupHistory();
-  const snapshot={createdAt:new Date().toISOString(),source:cloudView?'cloud':'local',records:JSON.parse(JSON.stringify(records)),settings:JSON.parse(JSON.stringify(settings)),vehicles:JSON.parse(JSON.stringify(vehicles)),chargingTypes:chargingTypes(),comparison:getCostComparison()};
-  const signature=JSON.stringify([snapshot.records,snapshot.settings,snapshot.vehicles,snapshot.chargingTypes,snapshot.comparison]);
+  const snapshot={createdAt:new Date().toISOString(),source:cloudView?'cloud':'local',records:JSON.parse(JSON.stringify(records)),settings:JSON.parse(JSON.stringify(settings)),vehicles:JSON.parse(JSON.stringify(vehicles)),chargingTypes:chargingTypes(),recordTimes:recordTimes(),comparison:getCostComparison()};
+  const signature=JSON.stringify([snapshot.records,snapshot.settings,snapshot.vehicles,snapshot.chargingTypes,snapshot.recordTimes,snapshot.comparison]);
   if(previous.length&&previous[0].signature===signature){updateAutomaticBackupStatus();return;}
   previous.unshift({...snapshot,signature});
   localStorage.setItem(automaticBackupKey(),JSON.stringify(previous.slice(0,5)));
