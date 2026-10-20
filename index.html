@@ -49,7 +49,7 @@
 <button onclick="tab('add')">Eintragen</button>
 <button onclick="tab('csv')">CSV</button>
 <button onclick="tab('options')">Optionen</button>
-<button onclick="tab('cloud')">Konto</button>
+<button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
 </nav>
 <div class="sidebar-foot">BYD Seal U DM-i<br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
@@ -226,8 +226,8 @@
 <p><small>Deine lokalen Daten bleiben unverändert. Es erfolgt keine automatische Synchronisierung.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js" defer></script>
-<script src="app.js" defer>
+<script src="cloud.js?v=11" defer></script>
+<script src="app.js?v=11" defer>
 </script>
 </main>
 </div>
