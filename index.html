@@ -9,7 +9,9 @@
 <link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
+<!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
 <div class="app-shell">
+<!-- Hauptnavigation und Fahrzeugvorschau -->
 <aside class="sidebar">
 <div class="brand">
 <div class="brand-mark">⚡</div>
@@ -41,6 +43,7 @@
 </div>
 <div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
 </header>
+<!-- Dashboard: Fahrzeug, Filter, Kennzahlen und Auswertungen -->
 <section id="home">
 <div class="hero">
 <div>
@@ -109,6 +112,7 @@
 <div id="entries">
 </div>
 </section>
+<!-- Ausführliches Formular für Lade- und Tankvorgänge -->
 <section id="add" class="hide">
 <h2>Neuer Eintrag</h2>
 <form id="form">
@@ -136,6 +140,7 @@
 <button>Speichern</button>
 </form>
 </section>
+<!-- Fahrzeugverwaltung und Zuordnung vorhandener Einträge -->
 <section id="vehicles" class="hide">
 <h2>Meine Fahrzeuge</h2>
 <p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
@@ -160,6 +165,7 @@
 <button type="button" id="vehicle-cancel">Abbrechen</button>
 </form>
 </section>
+<!-- Gemeinsamer CSV-Import und -Export -->
 <section id="csv" class="hide">
 <h2>CSV Import & Export</h2>
 <p>Alle Einträge als CSV-Datei exportieren.</p>
@@ -172,6 +178,7 @@
 </div>
 <button id="import" class="hide">Einträge importieren</button>
 </section>
+<!-- Währungseinstellungen und lokale Datensicherung -->
 <section id="options" class="hide">
 <h2>Optionen & Backup</h2>
 <label>Auswertungswährung</label>
@@ -190,6 +197,7 @@
 <small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
 </p>
 </section>
+<!-- Cloud-Konto, Synchronisierung und Administration -->
 <section id="cloud" class="hide">
 <h2>Mein Konto</h2>
 <p id="cloud-status" role="status">Nicht angemeldet.</p>
