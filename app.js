@@ -106,6 +106,19 @@ function settingsSave(){
 }
 window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));tab('home');};
 window.showLocalRecords=function(){cloudView=false;records=JSON.parse(localStorage.getItem(key)||'[]');tab('home');};
+function exportCSV(){
+ const columns=['id','type','date','amount','cost','currency','km','place'];
+ const cell=value=>{
+  let s=String(value??'');
+  if(/^[=+@\-\t\r]/.test(s))s="'"+s;
+  return '"'+s.replace(/"/g,'""')+'"';
+ };
+ const lines=[columns.join(';'),...records.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(r=>columns.map(k=>cell(r[k])).join(';'))];
+ const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='phev-export-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
 function backup(){
   let b=new Blob([JSON.stringify({
     records,settings
