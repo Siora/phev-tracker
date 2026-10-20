@@ -76,8 +76,43 @@ if ($action === 'logout') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);respond(200,['ok'=>true]);
 }
+
+if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
+ $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
+}
+if ($action === 'vehicle-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $v=$body['vehicle']??null;if (!is_array($v)) fail(400,'Fahrzeug fehlt');
+ $vid=(int)($v['id']??0);
+ $brand=trim((string)($v['brand']??''));$model=trim((string)($v['model']??''));
+ $plate=trim((string)($v['plate']??''));$drive=trim((string)($v['drivetrain']??''));$notes=trim((string)($v['notes']??''));
+ $year=($v['model_year']??'')===''?null:(int)$v['model_year'];
+ $battery=($v['battery_kwh']??'')===''?null:$v['battery_kwh'];
+ $tank=($v['tank_liters']??'')===''?null:$v['tank_liters'];
+ if (!$brand||!$model||mb_strlen($brand)>100||mb_strlen($model)>100||mb_strlen($plate)>40||mb_strlen($drive)>60||mb_strlen($notes)>5000||
+  ($year!==null&&($year<1900||$year>2200))||
+  ($battery!==null&&(!is_numeric($battery)||(float)$battery<0||(float)$battery>10000))||
+  ($tank!==null&&(!is_numeric($tank)||(float)$tank<0||(float)$tank>10000))) fail(400,'Ungültige Fahrzeugdaten');
+ $params=[$brand,$model,$year,$plate,$drive,$battery,$tank,$notes];
+ if ($vid>0) {
+  $stmt=$db->prepare('UPDATE vehicles SET brand=?,model=?,model_year=?,plate=?,drivetrain=?,battery_kwh=?,tank_liters=?,notes=? WHERE id=? AND user_id=?');
+  $stmt->execute([...$params,$vid,$uid]);
+  if (!$stmt->rowCount()) { $check=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');$check->execute([$vid,$uid]);if (!$check->fetchColumn()) fail(404,'Fahrzeug nicht gefunden'); }
+ } else {
+  $stmt=$db->prepare('INSERT INTO vehicles(brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes,user_id) VALUES (?,?,?,?,?,?,?,?,?)');
+  $stmt->execute([...$params,$uid]);$vid=(int)$db->lastInsertId();
+ }
+ respond(200,['ok'=>true,'id'=>$vid]);
+}
+if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $vid=(int)($body['id']??0);if ($vid<=0) fail(400,'Fahrzeug fehlt');
+ $stmt=$db->prepare('SELECT COUNT(*) FROM records WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
+ if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Einträge. Bitte zuerst die Einträge zuordnen oder das Fahrzeug behalten.');
+ $stmt=$db->prepare('DELETE FROM vehicles WHERE user_id=? AND id=?');$stmt->execute([$uid,$vid]);
+ respond(200,['ok'=>true]);
+}
 if ($action === 'data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
- $stmt=$db->prepare('SELECT id,type,date,amount,cost,currency,km,place FROM records WHERE user_id=? ORDER BY date DESC');
+ $stmt=$db->prepare('SELECT id,type,date,amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
  $stmt->execute([$uid]);$rows=$stmt->fetchAll();
  $stmt=$db->prepare('SELECT base,rate FROM user_settings WHERE user_id=?');$stmt->execute([$uid]);
  respond(200,['records'=>$rows,'settings'=>$stmt->fetch() ?: ['base'=>'CHF','rate'=>0.94]]);
@@ -95,9 +130,11 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   !in_array($r['currency'] ?? '', ['CHF','EUR'],true) ||
   strlen((string)($r['place'] ?? ''))>255 ||
   (isset($r['km']) && (!is_numeric($r['km']) || (float)$r['km']<0 || (float)$r['km']>100000000))) fail(400,'Ungültiger Eintrag');
- $stmt=$db->prepare('INSERT INTO records(id,user_id,type,date,amount,cost,currency,km,place) VALUES (?,?,?,?,?,?,?,?,?)
- ON DUPLICATE KEY UPDATE type=VALUES(type),date=VALUES(date),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place)');
- $stmt->execute([$id,$uid,$r['type'],$date,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'']);
+ $vehicleId=($r['vehicle_id']??null)===null||($r['vehicle_id']??'')===''?null:(int)$r['vehicle_id'];
+ if ($vehicleId!==null) {if ($vehicleId<=0) fail(400,'Ungültiges Fahrzeug');$check=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');$check->execute([$vehicleId,$uid]);if (!$check->fetchColumn()) fail(403,'Fahrzeug nicht erlaubt');}
+ $stmt=$db->prepare('INSERT INTO records(id,user_id,type,date,amount,cost,currency,km,place,vehicle_id) VALUES (?,?,?,?,?,?,?,?,?,?)
+ ON DUPLICATE KEY UPDATE type=VALUES(type),date=VALUES(date),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place),vehicle_id=VALUES(vehicle_id)');
+ $stmt->execute([$id,$uid,$r['type'],$date,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'',$vehicleId]);
  respond(200,['ok'=>true]);
 }
 if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
