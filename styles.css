@@ -719,3 +719,15 @@ button:hover{filter:brightness(1.06)}
 .sidebar-car .vehicle-photo-fallback{font-size:60px}
 .vehicle-photo-credit{font-size:10px;color:#536d87;text-align:center;margin-top:4px;text-decoration:underline}
 @media(max-width:560px){.car-art{min-width:110px;max-width:45%}.vehicle-photo{max-height:145px}.vehicle-photo-fallback{font-size:48px;min-height:85px}.vehicle-photo-credit{font-size:9px}}
+
+/* Mobile navigation: large touch targets and explicit expandable menu. */
+.mobile-menu-toggle{display:none}
+@media(max-width:1050px){
+ .sidebar{position:relative;z-index:5}
+ .mobile-menu-toggle{display:block;width:100%;min-height:48px;text-align:left;font-size:16px;font-weight:700;padding:12px 16px;background:#236fd0;color:#fff}
+ .sidebar #primary-nav{display:none;flex-direction:column;overflow:visible;width:100%;gap:7px}
+ .sidebar #primary-nav.menu-open{display:flex}
+ .sidebar #primary-nav button{display:block;width:100%;min-height:48px;flex:auto;text-align:left;padding:12px 16px;font-size:15px;white-space:normal}
+ .sidebar-foot{font-size:11px}
+}
+@media(min-width:1051px){.sidebar #primary-nav{display:flex!important}}
