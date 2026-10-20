@@ -3,6 +3,41 @@ let cloudView=false;
 let vehicles=[];
 window.setVehicles=function(items){vehicles=items;refreshVehicles();render();};
 function vehicleName(v){return v.brand+' '+v.model+(v.plate?' · '+v.plate:'');}
+
+const vehiclePhotoCache=new Map();
+let photoRequest=0;
+function displayVehiclePhoto(result){
+ for(const id of ['heroVehicleImage','sidebarVehicleImage']){
+  const img=$(id),fallback=img.parentElement.querySelector('.vehicle-photo-fallback');
+  img.hidden=!result;fallback.hidden=!!result;
+  if(result){img.src=result.src;img.alt=result.alt;img.onerror=()=>{img.hidden=true;fallback.hidden=false;};}
+  else img.removeAttribute('src');
+ }
+ const credit=$('vehicleImageCredit');credit.hidden=!result;credit.href=result?.page||'#';
+}
+async function updateVehiclePhoto(vehicle){
+ const request=++photoRequest;
+ if(!vehicle){displayVehiclePhoto(null);return;}
+ const key=(vehicle.brand+' '+vehicle.model).trim().toLowerCase();
+ if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
+ displayVehiclePhoto(null);
+ try{
+  const search=encodeURIComponent(vehicle.brand+' '+vehicle.model);
+  const endpoint='https://de.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+search+'&gsrlimit=6&prop=pageimages|info&inprop=url&pithumbsize=800&format=json&origin=*';
+  const response=await fetch(endpoint,{mode:'cors'});
+  if(!response.ok)throw Error('Bildsuche fehlgeschlagen');
+  const data=await response.json();
+  const pages=Object.values(data.query?.pages||{});
+  const brand=vehicle.brand.toLowerCase(),model=vehicle.model.toLowerCase();
+  const candidates=pages.filter(p=>p.thumbnail?.source&&p.title.toLowerCase().includes(brand)&&model.split(/\s+/).some(word=>word.length>2&&p.title.toLowerCase().includes(word.toLowerCase())));
+  candidates.sort((a,b)=>(a.index||99)-(b.index||99));
+  const match=candidates[0];
+  const result=match?{src:match.thumbnail.source,page:match.fullurl||'https://de.wikipedia.org/wiki/'+encodeURIComponent(match.title),alt:'Foto: '+match.title}:null;
+  vehiclePhotoCache.set(key,result);
+  if(request===photoRequest)displayVehiclePhoto(result);
+ }catch(e){if(request===photoRequest)displayVehiclePhoto(null);}
+}
+
 function refreshVehicles(){
  const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
  filter.replaceChildren(new Option('Alle Fahrzeuge',''),new Option('Ohne Fahrzeugzuordnung','none'),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
@@ -63,6 +98,7 @@ function render(){
   }
   let selectedVehicle=$('vehicleFilter').value;
   const active=vehicles.find(v=>String(v.id)===selectedVehicle);
+  if(window.currentPhotoVehicle!==String(active?.id||'')){window.currentPhotoVehicle=String(active?.id||'');updateVehiclePhoto(active);}
   const title=active?vehicleName(active):(selectedVehicle==='none'?'Ohne Fahrzeugzuordnung':'Alle Fahrzeuge');
   $('brandVehicle').textContent=title;
   $('footerVehicle').textContent=title;
