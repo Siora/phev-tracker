@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=32">
+<link rel="stylesheet" href="styles.css?v=33">
 </head>
 <body>
 <!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
@@ -32,7 +32,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 32</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 33</small>
 </div>
 </aside>
 <main class="main">
@@ -81,6 +81,11 @@
 </select>
 <div id="vehicle-summary" aria-live="polite"></div>
 <h2>Verbrauch pro 100 km</h2><div class="grid" id="consumption-stats"></div><p id="consumption-note"></p>
+<article class="quick-card" id="cost-comparison">
+<h2>⚡ Strom vs. ⛽ Benzin</h2>
+<p id="cost-comparison-result" aria-live="polite">Für den Vergleich werden Lade- und Tankdaten benötigt.</p>
+<small>Modellrechnung mit deinen Durchschnittspreisen im gewählten Zeitraum. Kein gemessener Fahrverbrauch.</small>
+</article>
 <div class="grid" id="stats">
 </div>
 <div class="analytics-grid">
@@ -182,6 +187,10 @@
 <!-- Währungseinstellungen und lokale Datensicherung -->
 <section id="options" class="hide">
 <h2>Optionen & Backup</h2>
+<h3>Kostenvergleich pro 100 km</h3>
+<label>Angenommener Stromverbrauch (kWh/100 km)<input id="comparison-electric" type="number" min="0.1" step="0.1" value="20"></label>
+<label>Angenommener Benzinverbrauch (l/100 km)<input id="comparison-fuel" type="number" min="0.1" step="0.1" value="7"></label>
+<button type="button" onclick="saveCostComparison()">Vergleichswerte speichern</button>
 <label>Auswertungswährung</label>
 <select id="base">
 <option>CHF</option>
@@ -227,8 +236,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=32" defer></script>
-<script src="app.js?v=32" defer>
+<script src="cloud.js?v=33" defer></script>
+<script src="app.js?v=33" defer>
 </script>
 </main>
 </div>
