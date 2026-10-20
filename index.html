@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=34">
+<link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
 <!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
@@ -32,7 +32,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 34</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 35</small>
 </div>
 </aside>
 <main class="main">
@@ -175,6 +175,14 @@
 </section>
 <!-- Gemeinsamer CSV-Import und -Export -->
 <section id="csv" class="hide">
+<h2>Monats- und Jahresberichte (PDF)</h2>
+<p>Berichte mit Energie, Tankmengen und Kosten pro Fahrzeug. Die PDF-Datei wird direkt auf deinem Gerät erzeugt.</p>
+<label>Jahr<input id="report-year" type="number" min="2020" max="2100" value="2026"></label>
+<label>Monat<select id="report-month"><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></label>
+<label>Fahrzeug<select id="report-vehicle"><option value="">Alle Fahrzeuge</option></select></label>
+<button type="button" onclick="exportPdfReport('month')">Monatsbericht als PDF</button>
+<button type="button" onclick="exportPdfReport('year')">Jahresbericht als PDF</button>
+<hr>
 <h2>CSV Import & Export</h2>
 <p>Alle Einträge als CSV-Datei exportieren.</p>
 <button type="button" onclick="exportCSV()">CSV-Export herunterladen</button>
@@ -238,8 +246,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=34" defer></script>
-<script src="app.js?v=34" defer>
+<script src="cloud.js?v=35" defer></script>
+<script src="app.js?v=35" defer>
 </script>
 </main>
 </div>
