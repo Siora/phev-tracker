@@ -7,6 +7,7 @@
  */
 
 const $=x=>document.getElementById(x),key='phev-records-1';
+const costComparisonKey='phev-cost-comparison-v1';
 let cloudView=false;
 let vehicles=[];
 window.setVehicles=function(items){vehicles=items;refreshVehicles();scheduleAutomaticBackup();render();};
@@ -366,7 +367,7 @@ $('trendMetric').addEventListener('change', render);
 tab('home');
 
 /* Modellvergleich: keine Änderung der gespeicherten Lade- oder Tankdatensätze. */
-const costComparisonKey='phev-cost-comparison-v1';
+
 function getCostComparison(){
  try{
   const values=JSON.parse(localStorage.getItem(costComparisonKey)||'{}');
