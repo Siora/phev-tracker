@@ -1,0 +1,56 @@
+name: Deploy PHP API via SFTP
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'server/api.php'
+      - '.github/workflows/deploy-sftp.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phev-production-sftp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Validate deployment configuration
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
+          SFTP_REMOTE_DIR: ${{ vars.SFTP_REMOTE_DIR }}
+        run: |
+          test -n "$SFTP_HOST" || { echo "Missing SFTP_HOST secret"; exit 1; }
+          test -n "$SFTP_USER" || { echo "Missing SFTP_USER secret"; exit 1; }
+          test -n "$SFTP_PRIVATE_KEY" || { echo "Missing SFTP_PRIVATE_KEY secret"; exit 1; }
+          test -n "$SFTP_REMOTE_DIR" || { echo "Missing SFTP_REMOTE_DIR variable"; exit 1; }
+      - name: Upload API over SFTP
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
+          SFTP_PORT: ${{ vars.SFTP_PORT }}
+          SFTP_REMOTE_DIR: ${{ vars.SFTP_REMOTE_DIR }}
+          SFTP_HOST_KEY: ${{ secrets.SFTP_HOST_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SFTP_PRIVATE_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          test -n "$SFTP_HOST_KEY" || { echo "Missing SFTP_HOST_KEY (verified known_hosts entry)"; exit 1; }
+          printf '%s\n' "$SFTP_HOST_KEY" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          port="${SFTP_PORT:-22}"
+          printf 'cd "%s"\nput server/api.php api.php\n' "$SFTP_REMOTE_DIR" > /tmp/deploy.sftp
+          sftp -b /tmp/deploy.sftp -P "$port" -i ~/.ssh/id_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST"
