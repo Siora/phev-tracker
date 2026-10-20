@@ -1,3 +1,10 @@
+/*
+ * PHEV Tracker – Cloud-Synchronisierung und Benutzerverwaltung
+ *
+ * Enthält Anmeldung, Cloud-Datenabgleich, Warteschlange und Admin-Funktionen.
+ * Bestehende Datensätze dürfen bei Synchronisierung nicht verloren gehen.
+ */
+
 const cloudApi='https://tracker.web-produktion.com/api/api.php';
 let cloudToken=null;
 const sessionKey='phev-session-v1';
