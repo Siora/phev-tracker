@@ -15,7 +15,7 @@
 <div class="brand-mark">⚡</div>
 <div>
 <strong>PHEV Tracker</strong>
-<small>BYD Seal U DM-i</small>
+<small id="brandVehicle">Alle Fahrzeuge</small>
 </div>
 </div>
 <div class="sidebar-car">
@@ -52,10 +52,10 @@
 <button onclick="tab('options')">Optionen</button>
 <button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
 </nav>
-<div class="sidebar-foot">BYD Seal U DM-i<br>
+<div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Deine Daten bleiben auf diesem Gerät.</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 22</small>
 </div>
 </aside>
 <main class="main">
@@ -64,14 +64,14 @@
 <small>FAHRZEUG-DASHBOARD</small>
 <h1>Dein PHEV im Überblick</h1>
 </div>
-<div class="topbar-badge">⚡ BYD Seal U DM-i</div>
+<div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
 </header>
 <section id="home">
 <div class="hero">
 <div>
 <small>DEIN FAHRZEUG</small>
-<h2>BYD Seal U DM-i</h2>
-<small>Plug-in-Hybrid · Energie & Kosten</small>
+<h2 id="heroVehicle">Alle Fahrzeuge</h2>
+<small id="heroVehicleDetails">Energie & Kosten</small>
 </div>
 <div class="car-art">
 <svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg">
@@ -160,7 +160,7 @@
 <option value="charge">Stromladung</option>
 <option value="fuel">Benzintankung</option>
 </select>
-<label>Fahrzeug</label><select name="vehicle_id" id="entryVehicle"><option value="">Ohne Fahrzeugzuordnung</option></select>
+<label>Fahrzeug (Pflichtfeld)</label><select name="vehicle_id" id="entryVehicle" required><option value="">Bitte Fahrzeug auswählen</option></select>
 <label>Datum</label>
 <input name="date" type="date" required>
 <label>Menge (kWh / Liter)</label>
@@ -257,8 +257,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=21" defer></script>
-<script src="app.js?v=21" defer>
+<script src="cloud.js?v=22" defer></script>
+<script src="app.js?v=22" defer>
 </script>
 </main>
 </div>
