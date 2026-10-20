@@ -9,6 +9,8 @@
 const $=x=>document.getElementById(x),key='phev-records-1';
 const costComparisonKey='phev-cost-comparison-v1';
 let cloudView=false;
+function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
+window.updateLoginNotice=updateLoginNotice;
 let vehicles=[];
 window.setVehicles=function(items){vehicles=items;refreshVehicles();scheduleAutomaticBackup();render();};
 // Lokale Bildwahl: Die Cloud-Fahrzeugdaten bleiben unverändert.
@@ -110,6 +112,7 @@ function save(){
   render();updateBulkCount()
 }
 function render(){
+  updateLoginNotice();
   const now=new Date(),period=$('period').value;
   let y=now.getFullYear(),m=now.getMonth();
   $('customdates').classList.toggle('hide',period!=='custom');
