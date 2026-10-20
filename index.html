@@ -22,7 +22,8 @@
 </div>
 </div>
 <div class="sidebar-car"><img id="sidebarVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div></div>
-<nav>
+<button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" onclick="toggleMobileMenu()">☰ Menü öffnen</button>
+<nav id="primary-nav">
 <button onclick="tab('home')">Übersicht</button>
 <button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
 <button onclick="tab('csv')">↥ Import / Export</button>
