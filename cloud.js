@@ -46,7 +46,7 @@ ce('cloud-create').onsubmit=async event=>{
  const form=event.currentTarget,button=form.querySelector('button');
  button.disabled=true;
  try{
-  await cloudCall('admin-create-user',{email:form.elements.email.value,password:form.elements.password.value});
+  await cloudCall('admin-create-user',{email:form.elements.email.value,password:form.elements.password.value,role:form.elements.role.value});
   form.reset();cs('Benutzer erstellt.');await cloudUsers();
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
