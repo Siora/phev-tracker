@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=24">
+<link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body>
 <div class="app-shell">
@@ -18,32 +18,7 @@
 <small id="brandVehicle">Alle Fahrzeuge</small>
 </div>
 </div>
-<div class="sidebar-car">
-<svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="paint" x1="0" y1="0" x2="0" y2="1">
-<stop stop-color="#e5eef6"/>
-<stop offset=".52" stop-color="#8da7ba"/>
-<stop offset="1" stop-color="#405a70"/>
-</linearGradient>
-<linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
-<stop stop-color="#54718c"/>
-<stop offset="1" stop-color="#102539"/>
-</linearGradient>
-</defs>
-<ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/>
-<path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/>
-<path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/>
-<path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/>
-<path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/>
-<path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/>
-<circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
-<circle cx="132" cy="188" r="22" fill="#b6c7d3"/>
-<circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
-<circle cx="401" cy="188" r="22" fill="#b6c7d3"/>
-<path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/>
-</svg>
-</div>
+<div class="sidebar-car"><img id="sidebarVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div></div>
 <nav>
 <button onclick="tab('home')">Übersicht</button>
 <button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
@@ -55,7 +30,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 24</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 25</small>
 </div>
 </aside>
 <main class="main">
@@ -73,32 +48,7 @@
 <h2 id="heroVehicle">Alle Fahrzeuge</h2>
 <small id="heroVehicleDetails">Energie & Kosten</small>
 </div>
-<div class="car-art">
-<svg viewBox="0 0 520 245" role="img" aria-label="Stilisierte SUV-Grafik" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="paint" x1="0" y1="0" x2="0" y2="1">
-<stop stop-color="#e5eef6"/>
-<stop offset=".52" stop-color="#8da7ba"/>
-<stop offset="1" stop-color="#405a70"/>
-</linearGradient>
-<linearGradient id="glass" x1="0" x2="1" y1="0" y2="1">
-<stop stop-color="#54718c"/>
-<stop offset="1" stop-color="#102539"/>
-</linearGradient>
-</defs>
-<ellipse cx="258" cy="205" rx="221" ry="21" fill="#020b14" opacity=".65"/>
-<path d="M35 165 Q41 137 72 131 L122 117 L180 67 Q196 54 233 54 L351 57 Q383 58 406 88 L439 125 L477 136 Q494 141 496 164 L493 190 L37 190Z" fill="url(#paint)" stroke="#d9e8f1" stroke-width="3"/>
-<path d="M183 75 Q199 64 230 64 L350 67 Q372 68 392 94 L420 126 L136 120Z" fill="url(#glass)" stroke="#c2d4e2" stroke-width="3"/>
-<path d="M284 67 L284 123 M133 122 L426 129" stroke="#bed0de" stroke-width="3"/>
-<path d="M42 155 L111 143 L101 155 L41 166 M439 139 L488 146 L493 158 L453 154" fill="#e8f7ff"/>
-<path d="M38 173 L110 169 M437 169 L493 172" stroke="#1d3547" stroke-width="6"/>
-<circle cx="132" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
-<circle cx="132" cy="188" r="22" fill="#b6c7d3"/>
-<circle cx="401" cy="188" r="39" fill="#111d29" stroke="#445a6c" stroke-width="7"/>
-<circle cx="401" cy="188" r="22" fill="#b6c7d3"/>
-<path d="M161 153 L361 154" stroke="#ecf5fb" opacity=".6" stroke-width="3"/>
-</svg>
-</div>
+<div class="car-art"><img id="heroVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div><a id="vehicleImageCredit" class="vehicle-photo-credit" href="#" target="_blank" rel="noopener noreferrer" hidden>Bildquelle: Wikipedia / Wikimedia Commons</a></div>
 </div>
 <h2 class="dashboard-label">Dashboard</h2>
 <label>Zeitraum</label>
@@ -264,8 +214,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=24" defer></script>
-<script src="app.js?v=24" defer>
+<script src="cloud.js?v=25" defer></script>
+<script src="app.js?v=25" defer>
 </script>
 </main>
 </div>
