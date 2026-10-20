@@ -29,8 +29,6 @@ async function updateVehiclePhoto(vehicle){
  const request=++photoRequest;
  if(!vehicle){displayVehiclePhoto(null);return;}
  const key=(vehicle.brand+' '+vehicle.model).trim().toLowerCase();
- const custom=localStorage.getItem('phev-photo-'+vehicle.id);
- if(custom){displayVehiclePhoto({src:custom,page:custom,alt:'Fahrzeugfoto: '+vehicle.brand+' '+vehicle.model});return;}
  if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
  displayVehiclePhoto(null);
  try{
@@ -93,9 +91,8 @@ function tab(t){
   window.scrollTo(0,0)
 }
 function save(){
-  if(cloudView){window.queueCloudChanges(records);saveLocalSnapshot();render();return;}
+  if(cloudView){window.queueCloudChanges(records);render();return;}
   localStorage.setItem(key,JSON.stringify(records));
-  saveLocalSnapshot();
   render();updateBulkCount()
 }
 function render(){
@@ -138,7 +135,6 @@ function render(){
     summary.append(details,latest);
    }
   }
-  updateAdvancedReports(filtered,charges,fuel,distance);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
@@ -154,10 +150,10 @@ function render(){
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargeKind(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
-        setChargeKind(x.id,'');records=records.filter(r=>r.id!==x.id);save()
+        records=records.filter(r=>r.id!==x.id);save()
       }
     };div.append(btn);$('entries').append(div)
   })
@@ -180,7 +176,6 @@ $('form').onsubmit=e=>{
   let f=new FormData(e.target),x={
     id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||'',vehicle_id:f.get('vehicle_id')?Number(f.get('vehicle_id')):null
   };
-  const kind=f.get('charge_kind')||'';
   if(!x.vehicle_id||!vehicles.some(v=>String(v.id)===String(x.vehicle_id))){alert('Bitte zuerst ein Fahrzeug auswählen.');return;}
   if(!x.amount)return;
   if(e.target.dataset.editId){
@@ -193,7 +188,6 @@ $('form').onsubmit=e=>{
     e.target.querySelector('button').textContent='Speichern'
   }
   else records.push(x);
-  setChargeKind(x.id,x.type==='charge'?kind:'');
   save();
   e.target.reset();
   $('entryVehicle').value=vehicles.length===1?String(vehicles[0].id):'';
@@ -203,7 +197,7 @@ $('form').onsubmit=e=>{
   tab('home')
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
-document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);setChargeKind(record.id,record.type==='charge'?f.elements.charge_kind.value:'');save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
+document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
@@ -216,7 +210,7 @@ function settingsSave(){
   render();
   alert('Gespeichert')
 }
-window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));saveLocalSnapshot();tab('home');updateBulkCount();};
+window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));tab('home');updateBulkCount();};
 window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
 // CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
 function exportCSV(){
@@ -234,7 +228,7 @@ function exportCSV(){
 }
 function backup(){
   let b=new Blob([JSON.stringify({
-    records,settings,vehicles,chargeKinds:readChargeKinds()
+    records,settings,vehicles
   },null,2)],{
     type:'application/json'
   }),a=document.createElement('a');
@@ -250,7 +244,6 @@ $('restore').onchange=async e=>{
     if(confirm('Bestehende Einträge ersetzen?')){
       records=x.records;
       settings=x.settings||settings;
-      if(x.chargeKinds&&typeof x.chargeKinds==='object')localStorage.setItem(chargeKindKey(),JSON.stringify(x.chargeKinds));
       save();
       tab('home')
     }
@@ -334,68 +327,3 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch
 });
 $('trendMetric').addEventListener('change', render);
 tab('home');
-
-
-/* Zusätzliche Auswertungen – keine Änderung der bestehenden Cloud-Datensätze. */
-function chargeKindKey(){
- const session=JSON.parse(localStorage.getItem('phev-session-v1')||'null');
- return 'phev-charge-kinds-'+(session?.email||'local');
-}
-function readChargeKinds(){try{return JSON.parse(localStorage.getItem(chargeKindKey())||'{}')}catch{return {}}}
-function getChargeKind(id){return readChargeKinds()[id]||''}
-function setChargeKind(id,kind){const data=readChargeKinds();if(kind)data[id]=kind;else delete data[id];localStorage.setItem(chargeKindKey(),JSON.stringify(data))}
-function saveLocalSnapshot(){
- try{
-  const session=JSON.parse(localStorage.getItem('phev-session-v1')||'null');
-  const k='phev-auto-backup-'+(session?.email||'local');
-  const old=JSON.parse(localStorage.getItem(k)||'null');
-  const today=new Date().toISOString().slice(0,10);
-  // Ein täglicher lokaler Snapshot; frühere Daten nicht durch kleinere/leerere Stände ersetzen.
-  if(!old||old.date!==today||records.length>old.records.length)
-   if(!old||records.length>=old.records.length)
-    localStorage.setItem(k,JSON.stringify({date:today,records,settings,chargeKinds:readChargeKinds()}));
-  $('backup-status').textContent='Letzte lokale Sicherung: '+(JSON.parse(localStorage.getItem(k)||'null')?.date||'–');
- }catch(e){console.warn('Lokale Sicherung nicht möglich',e)}
-}
-function downloadAutoBackup(){
- const session=JSON.parse(localStorage.getItem('phev-session-v1')||'null');
- const raw=localStorage.getItem('phev-auto-backup-'+(session?.email||'local'));
- if(!raw)return alert('Noch keine lokale Sicherung vorhanden.');
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([raw],{type:'application/json'}));a.download='phev-auto-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-function saveComparisonSettings(){
- const electric=Number($('assumed-electric').value),fuel=Number($('assumed-fuel').value);
- if(!(electric>0&&fuel>0))return alert('Bitte gültige Verbrauchswerte eingeben.');
- localStorage.setItem('phev-comparison',JSON.stringify({electric,fuel}));render();alert('Vergleich gespeichert.');
-}
-function updateAdvancedReports(entries,charges,fuel,distance){
- const sum=(items,key)=>items.reduce((a,r)=>a+Number(r[key]||0),0);
- const chargeEnergy=sum(charges,'amount'),fuelLiters=sum(fuel,'amount');
- const actualCost=sum(entries.map(r=>({cost:conv(r)})),'cost');
- const node=$('consumption-report');
- node.replaceChildren();
- const h=document.createElement('h2');h.textContent='Verbrauch & Ladearten';node.append(h);
- const p=document.createElement('p');
- p.textContent=distance>0?'Über '+distance.toLocaleString('de-CH')+' km erfasste Kilometerstandsspanne: '+(chargeEnergy/distance*100).toFixed(2)+' kWh/100 km geladen · '+(fuelLiters/distance*100).toFixed(2)+' l/100 km getankt · '+(actualCost/distance*100).toFixed(2)+' '+settings.base+'/100 km.':'Für Werte pro 100 km sind mindestens zwei Kilometerstände nötig.';
- node.append(p);
- const caution=document.createElement('small');caution.textContent='Hinweis: Lade- und Tankmengen sind keine exakten Fahrverbräuche; Kilometerstandsspanne und Zeitraum können abweichen.';node.append(caution);
- const kinds=new Map();charges.forEach(r=>{const kind=getChargeKind(r.id)||'Nicht angegeben';const x=kinds.get(kind)||{count:0,kwh:0,cost:0};x.count++;x.kwh+=Number(r.amount);x.cost+=conv(r);kinds.set(kind,x)});
- for(const [kind,v] of kinds){const line=document.createElement('p');line.textContent=kind+': '+v.count+' Ladungen · '+v.kwh.toFixed(1)+' kWh · '+fmt(v.cost,settings.base);node.append(line)}
- const comp=$('energy-comparison');comp.replaceChildren();const title=document.createElement('h2');title.textContent='Strom vs. Benzin · Kostenvergleich';comp.append(title);
- const assumptions=JSON.parse(localStorage.getItem('phev-comparison')||'{"electric":20,"fuel":7}');
- const avgElectric=chargeEnergy>0?sum(charges.map(r=>({cost:conv(r)})),'cost')/chargeEnergy:0;
- const avgFuel=fuelLiters>0?sum(fuel.map(r=>({cost:conv(r)})),'cost')/fuelLiters:0;
- const text=document.createElement('p');
- text.textContent=avgElectric&&avgFuel?'Strom: '+fmt(avgElectric*assumptions.electric,settings.base)+'/100 km · Benzin: '+fmt(avgFuel*assumptions.fuel,settings.base)+'/100 km · Differenz: '+fmt((avgFuel*assumptions.fuel-avgElectric*assumptions.electric),settings.base)+'/100 km':'Für den Vergleich werden Strom- und Benzineinträge benötigt.';
- comp.append(text);
- const note=document.createElement('small');note.textContent='Modellrechnung mit '+assumptions.electric+' kWh und '+assumptions.fuel+' l je 100 km; Preise aus dem ausgewählten Zeitraum.';comp.append(note);
-}
-function exportAnnualReport(){
- const year=prompt('Für welches Jahr soll der Bericht erstellt werden?',String(new Date().getFullYear()));
- if(!year||!/^20\d{2}$/.test(year))return;
- const rows=[['Monat','Ladungen','kWh','Tankungen','Liter','Kosten '+settings.base]];
- for(let m=1;m<=12;m++){const month=year+'-'+String(m).padStart(2,'0');const group=records.filter(r=>r.date.startsWith(month)),c=group.filter(r=>r.type==='charge'),f=group.filter(r=>r.type==='fuel');rows.push([month,c.length,c.reduce((a,r)=>a+Number(r.amount),0).toFixed(2),f.length,f.reduce((a,r)=>a+Number(r.amount),0).toFixed(2),group.reduce((a,r)=>a+conv(r),0).toFixed(2)])}
- const csv='\uFEFF'+rows.map(row=>row.join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='phev-jahresbericht-'+year+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-try{const saved=JSON.parse(localStorage.getItem('phev-comparison')||'null');if(saved){$('assumed-electric').value=saved.electric;$('assumed-fuel').value=saved.fuel}}catch{}
-saveLocalSnapshot();
