@@ -68,6 +68,7 @@ function refreshVehicles(){
  const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
  filter.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
+ const reportVehicle=$('report-vehicle');if(reportVehicle){const prev=reportVehicle.value;reportVehicle.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));reportVehicle.value=[...reportVehicle.options].some(o=>o.value===prev)?prev:'';}
  entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
  const bulk=$('bulkVehicle'),old=bulk.value;
@@ -437,3 +438,68 @@ function renderChargingTypes(charges){
   target.append(row);
  }
 }
+
+/* Eigenständiger PDF-Export ohne externe Bibliothek oder Serverübertragung. */
+function exportPdfReport(mode){
+ const year=Number($('report-year').value),month=$('report-month').value,vehicleId=$('report-vehicle').value;
+ if(!Number.isInteger(year)||year<2020||year>2100){alert('Bitte ein gültiges Jahr auswählen.');return;}
+ const period=String(year)+(mode==='month'?'-'+month:'');
+ const data=records.filter(r=>r.date.startsWith(period)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
+ const chosen=vehicles.find(v=>String(v.id)===vehicleId);
+ const title=mode==='month'?'Monatsbericht '+month+'.'+year:'Jahresbericht '+year;
+ const heading=chosen?vehicleName(chosen):'Alle Fahrzeuge';
+ const lines=[title,'Fahrzeug: '+heading,'Erstellt: '+new Date().toLocaleDateString('de-CH'),'Waehrung: '+settings.base,''];
+ const addStats=(label,items)=>{
+  const charges=items.filter(r=>r.type==='charge'),fuel=items.filter(r=>r.type==='fuel');
+  const amount=arr=>arr.reduce((total,r)=>total+Number(r.amount||0),0);
+  const cost=arr=>arr.reduce((total,r)=>total+conv(r),0);
+  lines.push(label);
+  lines.push('Ladungen: '+charges.length+' | Energie: '+amount(charges).toFixed(2)+' kWh | Kosten: '+fmt(cost(charges),settings.base));
+  lines.push('Tankungen: '+fuel.length+' | Benzin: '+amount(fuel).toFixed(2)+' l | Kosten: '+fmt(cost(fuel),settings.base));
+  lines.push('Gesamtkosten: '+fmt(cost(items),settings.base),'');
+ };
+ addStats('Zusammenfassung',data);
+ if(mode==='year'){
+  for(let m=1;m<=12;m++){
+   const prefix=year+'-'+String(m).padStart(2,'0');
+   addStats('Monat '+String(m).padStart(2,'0'),data.filter(r=>r.date.startsWith(prefix)));
+  }
+ }else{
+  lines.push('Einzelne Vorgaenge (Datum | Art | Menge | Kosten)');
+  for(const r of data.slice().sort((a,b)=>a.date.localeCompare(b.date))){
+   lines.push(r.date+' | '+(r.type==='charge'?'Strom':'Benzin')+' | '+Number(r.amount).toFixed(2)+(r.type==='charge'?' kWh':' l')+' | '+fmt(conv(r),settings.base));
+  }
+ }
+ if(!data.length)lines.push('Keine Eintraege im ausgewaehlten Zeitraum.');
+ lines.push('Hinweis: Umrechnung gemaess den aktuell gespeicherten Waehrungseinstellungen.');
+ const pdf=makeSimplePdf(lines);
+ const url=URL.createObjectURL(new Blob([pdf],{type:'application/pdf'}));
+ const a=document.createElement('a');a.href=url;a.download='phev-'+(mode==='month'?'monat-':'jahr-')+period+'.pdf';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+function makeSimplePdf(lines){
+ // PDF-Standardfont Helvetica mit WinAnsi-kompatibler ASCII-Umschrift.
+ const plain=text=>String(text).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^\x20-\x7e]/g,'?');
+ const esc=text=>plain(text).replace(/[\\()]/g,'\\$&');
+ const pages=[];
+ for(let i=0;i<lines.length;i+=49)pages.push(lines.slice(i,i+49));
+ if(!pages.length)pages.push([]);
+ const objects=['','<< /Type /Catalog /Pages 2 0 R >>','','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
+ const kids=[];
+ for(const page of pages){
+  const pageId=objects.length,contentId=pageId+1;kids.push(pageId+' 0 R');
+  objects.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents '+contentId+' 0 R >>');
+  const content='BT /F1 11 Tf 45 790 Td 15 TL '+page.map((line,i)=>(i?'T* ':'')+'('+esc(line.slice(0,95))+') Tj').join('\n')+' ET';
+  objects.push('<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream');
+ }
+ objects[2]='<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+kids.length+' >>';
+ let out='%PDF-1.4\n',offsets=[0];
+ for(let i=1;i<objects.length;i++){offsets[i]=out.length;out+=i+' 0 obj\n'+objects[i]+'\nendobj\n';}
+ const start=out.length;
+ out+='xref\n0 '+objects.length+'\n0000000000 65535 f \n';
+ for(let i=1;i<objects.length;i++)out+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+ out+='trailer\n<< /Size '+objects.length+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF';
+ return new TextEncoder().encode(out);
+}
+$('report-year').value=new Date().getFullYear();
+$('report-month').value=String(new Date().getMonth()+1).padStart(2,'0');
