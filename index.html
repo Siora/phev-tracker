@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=26">
+<link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
 <div class="app-shell">
@@ -30,7 +30,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 26</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 27</small>
 </div>
 </aside>
 <main class="main">
@@ -104,7 +104,7 @@
 <article class="quick-card recent-card"><h2>Letzte Einträge</h2><div id="recent-entries"></div><button type="button" class="secondary-action" onclick="document.getElementById('entries').scrollIntoView({behavior:'smooth'})">Alle Einträge anzeigen ↓</button></article>
 <article class="quick-card fleet-card"><h2>🚘 Fahrzeugübersicht</h2><div id="fleet-overview"></div><button type="button" class="secondary-action" onclick="tab('vehicles')">+ Neues Fahrzeug anlegen</button></article>
 </div>
-<div class="dashboard-bottom"><article class="quick-card"><h2>↥ Schnellaktionen</h2><div class="action-buttons"><button onclick="tab('csv')">CSV Import</button><button onclick="exportCSV()">CSV Export</button><button onclick="backup()">Backup erstellen</button><button onclick="tab('options')">Einstellungen</button></div></article><article class="quick-card"><h2>Monatsvergleich</h2><div id="month-compare"></div></article></div>
+<div class="dashboard-bottom"><article class="quick-card"><h2>↥ Schnellaktionen</h2><div class="action-buttons"><button onclick="tab('csv')">CSV Import</button><button onclick="backup()">Backup erstellen</button><button onclick="tab('options')">Einstellungen</button></div></article><article class="quick-card"><h2>Monatsvergleich</h2><div id="month-compare"></div></article></div>
 <h2>Alle Einträge</h2>
 <div id="entries">
 </div>
@@ -161,7 +161,11 @@
 </form>
 </section>
 <section id="csv" class="hide">
-<h2>ChargeLog CSV importieren</h2>
+<h2>CSV Import & Export</h2>
+<p>Alle Einträge als CSV-Datei exportieren.</p>
+<button type="button" onclick="exportCSV()">CSV-Export herunterladen</button>
+<hr>
+<h3>ChargeLog CSV importieren</h3>
 <p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
 <input id="file" type="file" accept=".csv,text/csv">
 <div id="preview">
@@ -179,7 +183,7 @@
 <input id="rate" type="number" step="any" min=".01">
 <button onclick="settingsSave()">Speichern</button>
 <button onclick="backup()">JSON-Backup herunterladen</button>
-<button onclick="exportCSV()">CSV-Export herunterladen</button>
+
 <label>JSON-Backup wiederherstellen</label>
 <input type="file" id="restore" accept=".json">
 <p>
@@ -214,8 +218,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=26" defer></script>
-<script src="app.js?v=26" defer>
+<script src="cloud.js?v=27" defer></script>
+<script src="app.js?v=27" defer>
 </script>
 </main>
 </div>
