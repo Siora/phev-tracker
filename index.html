@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=47">
+<link rel="stylesheet" href="styles.css?v=48">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -121,6 +121,8 @@
 </div>
 <div class="dashboard-bottom"><article class="quick-card"><h2>↥ Schnellaktionen</h2><div class="action-buttons"><button onclick="tab('csv')">CSV Import</button><button onclick="backup()">Backup erstellen</button><button onclick="tab('options')">Einstellungen</button></div></article><article class="quick-card"><h2>Monatsvergleich</h2><div id="month-compare"></div></article></div>
 <h2>Alle Einträge</h2>
+<label for="entry-sort">Sortierung nach Datum und Uhrzeit</label>
+<select id="entry-sort" aria-label="Einträge nach Datum und Uhrzeit sortieren"><option value="desc">Neueste zuerst</option><option value="asc">Älteste zuerst</option></select>
 <div id="entries">
 </div>
 </section>
@@ -256,8 +258,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=47" defer></script>
-<script src="app.js?v=47" defer>
+<script src="cloud.js?v=48" defer></script>
+<script src="app.js?v=48" defer>
 </script>
 </main>
 </div>
