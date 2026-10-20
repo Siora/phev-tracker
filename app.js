@@ -11,6 +11,12 @@ const costComparisonKey='phev-cost-comparison-v1';
 const fuelEnergyKey='phev-fuel-energy-factor-v1';
 
 /* Uhrzeiten bleiben als lokale Zusatzdaten erhalten, ohne das Cloud-Datumsschema zu ändern. */
+
+function chargeModeKey(){let email='local';try{email=JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{}return 'phev-charge-modes-'+email;}
+function chargeModes(){try{return JSON.parse(localStorage.getItem(chargeModeKey())||'{}')||{};}catch{return {};}}
+function getChargeMode(id){return chargeModes()[id]||'';}
+function setChargeMode(id,mode){const data=chargeModes();if(mode==='AC'||mode==='DC')data[id]=mode;else delete data[id];localStorage.setItem(chargeModeKey(),JSON.stringify(data));}
+
 function recordTimeKey(){let email='local';try{email=JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{}return 'phev-record-times-'+email;}
 function recordTimes(){try{return JSON.parse(localStorage.getItem(recordTimeKey())||'{}')||{};}catch{return {};}}
 function recordTime(id){return recordTimes()[id]||'';}
@@ -196,14 +202,14 @@ function render(){
   AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
   AnalyticsCharts.providers($('providerchart'), charges);
   const recent=$('recent-entries');recent.replaceChildren();
-  filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).forEach(r=>{const p=document.createElement('p');p.className='recent-row';p.textContent=(r.type==='charge'?'⚡ ':'⛽ ')+recordDateTime(r)+' · '+r.amount+(r.type==='charge'?' kWh':' l')+' · '+fmt(r.cost,r.currency);recent.append(p);});
+  filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).forEach(r=>{const p=document.createElement('p');p.className='recent-row';p.textContent=(r.type==='charge'?'⚡ ':'⛽ ')+recordDateTime(r)+(r.type==='charge'&&getChargeMode(r.id)?' · '+getChargeMode(r.id):'')+' · '+r.amount+(r.type==='charge'?' kWh':' l')+' · '+fmt(r.cost,r.currency);recent.append(p);});
   if(!recent.children.length)recent.textContent='Noch keine Einträge im Zeitraum.';
   const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
   const compare=$('month-compare');compare.replaceChildren();const monthsMap=new Map();filtered.forEach(r=>{const month=r.date.slice(0,7);monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));});const maxMonth=Math.max(1,...monthsMap.values());[...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{const line=document.createElement('div');line.className='compare-row';const label=document.createElement('span');label.textContent=month;const track=document.createElement('div');track.className='compare-track';const bar=document.createElement('div');bar.className='compare-fill';bar.style.width=(value/maxMonth*100)+'%';track.append(bar);const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);line.append(label,track,amount);compare.append(line);});if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
-    let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+    let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+(x.type==='charge'&&getChargeMode(x.id)?' · '+getChargeMode(x.id):'')+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -244,6 +250,7 @@ $('form').onsubmit=e=>{
   }
   else records.push(x);
   setRecordTime(x.id,String(f.get('time')||''));
+  setChargeMode(x.id,x.type==='charge'?String(f.get('charge_mode')||''):'');
   setChargingType(x.id,chargeKind);
   save();
   e.target.reset();
@@ -254,7 +261,7 @@ $('form').onsubmit=e=>{
   tab('home')
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
-document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);setRecordTime(record.id,f.elements.time.value);if(record.type==='charge')setChargingType(record.id,f.elements.charge_kind.value);save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
+document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);setRecordTime(record.id,f.elements.time.value);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
@@ -602,8 +609,8 @@ function scheduleAutomaticBackup(){
   // Nicht unmittelbar beim Start leere Cloud-Daten über bestehende Sicherungen schreiben.
   if(cloudView&&records.length===0)return;
   const previous=automaticBackupHistory();
-  const snapshot={createdAt:new Date().toISOString(),source:cloudView?'cloud':'local',records:JSON.parse(JSON.stringify(records)),settings:JSON.parse(JSON.stringify(settings)),vehicles:JSON.parse(JSON.stringify(vehicles)),chargingTypes:chargingTypes(),recordTimes:recordTimes(),comparison:getCostComparison()};
-  const signature=JSON.stringify([snapshot.records,snapshot.settings,snapshot.vehicles,snapshot.chargingTypes,snapshot.recordTimes,snapshot.comparison]);
+  const snapshot={createdAt:new Date().toISOString(),source:cloudView?'cloud':'local',records:JSON.parse(JSON.stringify(records)),settings:JSON.parse(JSON.stringify(settings)),vehicles:JSON.parse(JSON.stringify(vehicles)),chargingTypes:chargingTypes(),recordTimes:recordTimes(),chargeModes:chargeModes(),comparison:getCostComparison()};
+  const signature=JSON.stringify([snapshot.records,snapshot.settings,snapshot.vehicles,snapshot.chargingTypes,snapshot.recordTimes,snapshot.chargeModes,snapshot.comparison]);
   if(previous.length&&previous[0].signature===signature){updateAutomaticBackupStatus();return;}
   previous.unshift({...snapshot,signature});
   localStorage.setItem(automaticBackupKey(),JSON.stringify(previous.slice(0,5)));
