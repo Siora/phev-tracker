@@ -1,0 +1,31 @@
+name: Check SFTP host key
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Retrieve and verify server host key fingerprint
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ vars.SFTP_PORT }}
+        run: |
+          set -euo pipefail
+          test -n "$SFTP_HOST" || { echo "Missing SFTP_HOST secret"; exit 1; }
+          port="${SFTP_PORT:-22}"
+          ssh-keyscan -T 10 -p "$port" -t ed25519 "$SFTP_HOST" 2>/dev/null | grep -E '^[^#[:space:]]+[[:space:]]+ssh-ed25519[[:space:]]+' > /tmp/sftp_host_key
+          test -s /tmp/sftp_host_key || { echo "No ED25519 host key received"; exit 1; }
+          echo "Server host key fingerprint:"
+          ssh-keygen -lf /tmp/sftp_host_key -E sha256
+          echo "Expected Termius fingerprint: SHA256:xhMd3PNSYd8mVB6yDCUsNN6maH9YyXhAAy2PQGL9cts"
+          actual="$(ssh-keygen -lf /tmp/sftp_host_key -E sha256 | awk '{print $2}')"
+          test "$actual" = "SHA256:xhMd3PNSYd8mVB6yDCUsNN6maH9YyXhAAy2PQGL9cts" || { echo "FINGERPRINT MISMATCH - DO NOT TRUST THIS KEY"; exit 1; }
+          echo "MATCH: Host key fingerprint matches the key previously seen in Termius."
+          echo "Copy the following complete line into GitHub Actions secret SFTP_HOST_KEY:"
+          cat /tmp/sftp_host_key
