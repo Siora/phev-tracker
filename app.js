@@ -1,4 +1,5 @@
 const $=x=>document.getElementById(x),key='phev-records-1';
+let cloudView=false;
 let records=JSON.parse(localStorage.getItem(key)||'[]'),settings=JSON.parse(localStorage.getItem('phev-settings-1')||'{"base":"CHF","rate":0.94}'),pending=[];
 const n=x=>{
   let s=String(x??'').replace(/[^0-9,.-]/g,'');
@@ -16,6 +17,7 @@ function tab(t){
   window.scrollTo(0,0)
 }
 function save(){
+  if(cloudView){alert('Cloud-Ansicht: Bearbeiten folgt mit der Synchronisierung.');return;}
   localStorage.setItem(key,JSON.stringify(records));
   render()
 }
@@ -51,7 +53,7 @@ function render(){
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'');edit.textContent='Bearbeiten';edit.onclick=()=>{
       let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-    };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
+    };edit.disabled=cloudView;div.append(edit);btn.textContent='Löschen';btn.disabled=cloudView;btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
       }
@@ -72,6 +74,7 @@ for(let i=new Date().getFullYear();i>=2020;i--)$('chosenYear').add(new Option(i,
 $('form').elements.date.value=new Date().toISOString().slice(0,10);
 $('form').onsubmit=e=>{
   e.preventDefault();
+  if(cloudView)return alert('Cloud-Ansicht ist derzeit schreibgeschützt.');
   let f=new FormData(e.target),x={
     id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||''
   };
@@ -102,6 +105,8 @@ function settingsSave(){
   render();
   alert('Gespeichert')
 }
+window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));tab('home');};
+window.showLocalRecords=function(){cloudView=false;records=JSON.parse(localStorage.getItem(key)||'[]');tab('home');};
 function backup(){
   let b=new Blob([JSON.stringify({
     records,settings
@@ -181,6 +186,7 @@ $('file').onchange=async e=>{
   $('import').classList.toggle('hide',!pending.length)
 };
 $('import').onclick=()=>{
+  if(cloudView)return alert('Cloud-Ansicht ist derzeit schreibgeschützt.');
   let updated=0,added=0;
   pending.forEach(x=>{
     let i=records.findIndex(r=>r.type==='charge'&&r.date===x.date&&r.place.trim().toLowerCase()===x.place.trim().toLowerCase()&&Math.abs(r.cost-x.cost)<0.011&&r.currency===x.currency);if(i>=0){
