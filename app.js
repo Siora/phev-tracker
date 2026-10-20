@@ -22,15 +22,19 @@ async function updateVehiclePhoto(vehicle){
  if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
  displayVehiclePhoto(null);
  try{
-  const search=encodeURIComponent(vehicle.brand+' '+vehicle.model);
-  const endpoint='https://de.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+search+'&gsrlimit=6&prop=pageimages|info&inprop=url&pithumbsize=800&format=json&origin=*';
+  const normalize=text=>String(text).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,' ').trim();
+  const brand=normalize(vehicle.brand),model=normalize(vehicle.model);
+  const requested=normalize(vehicle.brand+' '+vehicle.model);
+  // Nur exakte Modellbezeichnungen; keine unscharfen Treffer anderer Baureihen.
+  const expected=[requested];
+  if(brand==='byd'&&model==='seal u dm i')expected.push('byd seal u');
+  const endpoint='https://de.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent('"'+vehicle.brand+' '+vehicle.model+'"')+'&gsrlimit=15&prop=pageimages|info&inprop=url&pithumbsize=900&format=json&origin=*';
   const response=await fetch(endpoint,{mode:'cors'});
   if(!response.ok)throw Error('Bildsuche fehlgeschlagen');
   const data=await response.json();
   const pages=Object.values(data.query?.pages||{});
-  const brand=vehicle.brand.toLowerCase(),model=vehicle.model.toLowerCase();
-  const candidates=pages.filter(p=>p.thumbnail?.source&&p.title.toLowerCase().includes(brand)&&model.split(/\s+/).some(word=>word.length>2&&p.title.toLowerCase().includes(word.toLowerCase())));
-  candidates.sort((a,b)=>(a.index||99)-(b.index||99));
+  const candidates=pages.filter(p=>p.thumbnail?.source&&expected.includes(normalize(p.title)));
+  candidates.sort((a,b)=>expected.indexOf(normalize(a.title))-expected.indexOf(normalize(b.title)));
   const match=candidates[0];
   const result=match?{src:match.thumbnail.source,page:match.fullurl||'https://de.wikipedia.org/wiki/'+encodeURIComponent(match.title),alt:'Foto: '+match.title}:null;
   vehiclePhotoCache.set(key,result);
