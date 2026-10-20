@@ -8,6 +8,7 @@
 
 const $=x=>document.getElementById(x),key='phev-records-1';
 const costComparisonKey='phev-cost-comparison-v1';
+const fuelEnergyKey='phev-fuel-energy-factor-v1';
 let cloudView=false;
 function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
 window.updateLoginNotice=updateLoginNotice;
@@ -372,7 +373,7 @@ tab('home');
 
 
 /* Energiegehalt von Benzin: chemische Energie, keine nutzbare Radenergie. */
-const fuelEnergyKey='phev-fuel-energy-factor-v1';
+
 function fuelEnergyFactor(){const v=Number(localStorage.getItem(fuelEnergyKey));return v>=1&&v<=20?v:8.8;}
 function saveFuelEnergyFactor(){
  const v=Number($('fuel-energy-factor').value);
