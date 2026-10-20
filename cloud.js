@@ -63,3 +63,22 @@ ce('cloud-logout').onclick=async()=>{
  ce('cloud-count').textContent='';
  cs('Abgemeldet.');
 };
+
+ce('cloud-upload').onclick=async()=>{
+ const btn=ce('cloud-upload');
+ if(!cloudToken)return;
+ const local=JSON.parse(localStorage.getItem('phev-records-1')||'[]');
+ const remote=await cloudCall('data');
+ const ids=new Set(remote.records.map(r=>r.id));
+ const todo=local.filter(r=>!ids.has(r.id));
+ if(!todo.length)return cs('Keine neuen lokalen Einträge.');
+ if(!confirm(todo.length+' Einträge hochladen?'))return;
+ btn.disabled=true;
+ try{
+  for(const record of todo)await cloudCall('save',{record});
+  const check=await cloudCall('data');
+  ce('cloud-upload-info').textContent='Cloud-Einträge: '+check.records.length;
+  cs('Import abgeschlossen. Lokale Daten unverändert.');
+ }catch(e){cs('Import unterbrochen: '+e.message);}
+ finally{btn.disabled=false;}
+};
