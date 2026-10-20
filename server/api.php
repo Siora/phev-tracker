@@ -119,7 +119,7 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  respond(200,['ok'=>true]);
 }
 if ($action === 'data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
- $stmt=$db->prepare('SELECT id,type,date,amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
+ $stmt=$db->prepare('SELECT id,type,date,time,charge_mode,amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
  $stmt->execute([$uid]);$rows=$stmt->fetchAll();
  $stmt=$db->prepare('SELECT base,rate FROM user_settings WHERE user_id=?');$stmt->execute([$uid]);
  respond(200,['records'=>$rows,'settings'=>$stmt->fetch() ?: ['base'=>'CHF','rate'=>0.94]]);
@@ -129,6 +129,11 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  if (!is_array($r)) fail(400,'Eintrag fehlt');
  $id=(string)($r['id'] ?? '');
  $date=(string)($r['date'] ?? '');
+ $time=(string)($r['time'] ?? '');
+ $chargeMode=(string)($r['charge_mode'] ?? '');
+ if ($time!=='' && !preg_match('/^[0-2][0-9]:[0-5][0-9]$/D',$time)) fail(400,'Ungültige Uhrzeit');
+ if ($time!=='' && (int)substr($time,0,2)>23) fail(400,'Ungültige Uhrzeit');
+ if (!in_array($chargeMode,['','AC','DC'],true)) fail(400,'Ungültiger Ladestrom');
  $dt=DateTimeImmutable::createFromFormat('!Y-m-d',$date);
  if (!preg_match('/^[a-zA-Z0-9_-]{1,64}$/D',$id) || !in_array($r['type'] ?? '', ['charge','fuel'],true) ||
   !$dt || $dt->format('Y-m-d')!==$date ||
@@ -139,9 +144,9 @@ if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   (isset($r['km']) && (!is_numeric($r['km']) || (float)$r['km']<0 || (float)$r['km']>100000000))) fail(400,'Ungültiger Eintrag');
  $vehicleId=($r['vehicle_id']??null)===null||($r['vehicle_id']??'')===''?null:(int)$r['vehicle_id'];
  if ($vehicleId!==null) {if ($vehicleId<=0) fail(400,'Ungültiges Fahrzeug');$check=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');$check->execute([$vehicleId,$uid]);if (!$check->fetchColumn()) fail(403,'Fahrzeug nicht erlaubt');}
- $stmt=$db->prepare('INSERT INTO records(id,user_id,type,date,amount,cost,currency,km,place,vehicle_id) VALUES (?,?,?,?,?,?,?,?,?,?)
- ON DUPLICATE KEY UPDATE type=VALUES(type),date=VALUES(date),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place),vehicle_id=VALUES(vehicle_id)');
- $stmt->execute([$id,$uid,$r['type'],$date,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'',$vehicleId]);
+ $stmt=$db->prepare('INSERT INTO records(id,user_id,type,date,time,charge_mode,amount,cost,currency,km,place,vehicle_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+ ON DUPLICATE KEY UPDATE type=VALUES(type),date=VALUES(date),time=VALUES(time),charge_mode=VALUES(charge_mode),amount=VALUES(amount),cost=VALUES(cost),currency=VALUES(currency),km=VALUES(km),place=VALUES(place),vehicle_id=VALUES(vehicle_id)');
+ $stmt->execute([$id,$uid,$r['type'],$date,$time?:null,$chargeMode?:null,$r['amount'],$r['cost'],$r['currency'],$r['km']??null,$r['place']??'',$vehicleId]);
  respond(200,['ok'=>true]);
 }
 if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
