@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=29">
+<link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
 <!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
@@ -32,7 +32,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 29</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 30</small>
 </div>
 </aside>
 <main class="main">
@@ -80,8 +80,6 @@
 <option value="">Alle Orte / Tankstellen</option>
 </select>
 <div id="vehicle-summary" aria-live="polite"></div>
-<div id="consumption-report" class="quick-card"></div>
-<div id="energy-comparison" class="quick-card"></div>
 <div class="grid" id="stats">
 </div>
 <div class="analytics-grid">
@@ -104,7 +102,7 @@
 </div>
 <small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
 <div class="dashboard-actions">
-<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Ladeart<select name="charge_kind"><option value="">Nicht angegeben</option><option>Zuhause</option><option>Öffentlich</option><option>Arbeitsplatz</option><option>Kostenlos</option></select></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
+<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
 <article class="quick-card quick-fuel"><h2>⛽ Neue Tankung</h2><form class="quick-form" data-type="fuel"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Getankte Menge (Liter)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Tankstelle / Notizen<input name="place" placeholder="z. B. Autobahn"></label><button type="submit">⛽ Tankung speichern</button></form></article>
 <article class="quick-card recent-card"><h2>Letzte Einträge</h2><div id="recent-entries"></div><button type="button" class="secondary-action" onclick="document.getElementById('entries').scrollIntoView({behavior:'smooth'})">Alle Einträge anzeigen ↓</button></article>
 <article class="quick-card fleet-card"><h2>🚘 Fahrzeugübersicht</h2><div id="fleet-overview"></div><button type="button" class="secondary-action" onclick="tab('vehicles')">+ Neues Fahrzeug anlegen</button></article>
@@ -137,7 +135,6 @@
 </select>
 <label>Kilometerstand (optional)</label>
 <input name="km" type="number" min="0">
-<label>Ladeart (bei Stromladung)</label><select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select>
 <label>Ladeort / Tankstelle</label>
 <input name="place">
 <button>Speichern</button>
@@ -163,7 +160,6 @@
 <label>Antriebsart<input name="drivetrain" maxlength="60" placeholder="z. B. Plug-in-Hybrid"></label>
 <label>Batteriekapazität (kWh)<input name="battery_kwh" type="number" step="any" min="0"></label>
 <label>Tankvolumen (Liter)<input name="tank_liters" type="number" step="any" min="0"></label>
-<label>Fahrzeugfoto (Bild-URL, optional)<input name="photo_url" type="url" placeholder="https://…"></label>
 <label>Notizen<textarea name="notes" maxlength="5000"></textarea></label>
 <button type="submit">Fahrzeug speichern</button>
 <button type="button" id="vehicle-cancel">Abbrechen</button>
@@ -174,7 +170,6 @@
 <h2>CSV Import & Export</h2>
 <p>Alle Einträge als CSV-Datei exportieren.</p>
 <button type="button" onclick="exportCSV()">CSV-Export herunterladen</button>
-<button type="button" onclick="exportAnnualReport()">Jahresbericht als CSV herunterladen</button>
 <hr>
 <h3>ChargeLog CSV importieren</h3>
 <p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
@@ -195,9 +190,6 @@
 <input id="rate" type="number" step="any" min=".01">
 <button onclick="settingsSave()">Speichern</button>
 <button onclick="backup()">JSON-Backup herunterladen</button>
-<p id="backup-status"></p><button type="button" onclick="downloadAutoBackup()">Automatische lokale Sicherung herunterladen</button>
-<p><small>Eine lokale Sicherung wird regelmäßig auf diesem Gerät aktualisiert. Für Schutz bei Geräteverlust bitte die Sicherungsdatei zusätzlich extern aufbewahren.</small></p>
-<h3>Kostenvergleich: Annahmen</h3><label>Stromverbrauch (kWh/100 km)<input id="assumed-electric" type="number" min="1" step=".1" value="20"></label><label>Benzinverbrauch (l/100 km)<input id="assumed-fuel" type="number" min="1" step=".1" value="7"></label><button type="button" onclick="saveComparisonSettings()">Vergleich speichern</button>
 
 <label>JSON-Backup wiederherstellen</label>
 <input type="file" id="restore" accept=".json">
@@ -234,8 +226,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=29" defer></script>
-<script src="app.js?v=29" defer>
+<script src="cloud.js?v=30" defer></script>
+<script src="app.js?v=30" defer>
 </script>
 </main>
 </div>
