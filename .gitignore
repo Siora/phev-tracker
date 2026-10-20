@@ -1,0 +1,3 @@
+server/config.php
+server/.env
+*.log
