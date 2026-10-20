@@ -572,3 +572,88 @@ button:hover { filter: brightness(1.08); }
   .donut-ring { width: 145px; height: 145px; padding: 20px; }
   .provider-row { grid-template-columns: minmax(75px, 115px) minmax(0, 1fr) 70px; gap: 6px; }
 }
+
+
+/* V23 – helles, mobiles Dashboard nach Designvorlage */
+:root{color-scheme:light;--bg:#f1f6fc;--panel:#fff;--panel2:#f5f9ff;--stroke:#dce7f2;--blue:#2379ed;--muted:#637790}
+body{background:linear-gradient(135deg,#f8fbff,#eaf3fb 65%,#f8fbff);color:#142443;line-height:1.55}
+.app-shell{max-width:1900px;grid-template-columns:240px minmax(0,1fr);gap:0}
+.sidebar{background:linear-gradient(165deg,#102c49,#091e33);border-right:0;color:#f5f9ff;border-radius:0 20px 20px 0;box-shadow:5px 0 25px #183d6014}
+.brand-mark{background:#2cc773;color:white;border-radius:50%;font-size:23px}
+.brand small,.sidebar small{color:#a9bfd4}
+.sidebar nav button{color:#dce9f5;border-radius:12px;transition:background .2s}
+.sidebar nav button:hover,.sidebar nav button.active{background:linear-gradient(100deg,#1663c7,#328efa);color:#fff;box-shadow:0 5px 16px #030f2040}
+.sidebar-foot{background:#ffffff0d;border-color:#ffffff29;overflow-wrap:anywhere}
+.sidebar-foot hr{border-top-color:#ffffff29}
+.main{padding:26px clamp(14px,2.5vw,40px)}
+.topbar h1{font-size:clamp(24px,2.5vw,36px);font-weight:800;letter-spacing:-1px}
+.topbar-badge{background:#fff;border:1px solid #dce7f2;color:#153154;box-shadow:0 5px 18px #1939550c}
+h2{color:#132b4d;font-weight:750}
+small{color:#667c97}
+label{color:#334b68}
+input,select,textarea{background:#f8fbff;color:#182f50;border:1px solid #d5e2ef;border-radius:11px;box-shadow:0 1px 2px #0c2a4708}
+input:focus,select:focus,textarea:focus{outline:2px solid #69a8fa;outline-offset:1px}
+button{background:linear-gradient(100deg,#1e75e8,#398fff);color:#fff;border-radius:11px;box-shadow:0 3px 10px #246cba16}
+button:hover{filter:brightness(1.06)}
+.hero{background:linear-gradient(110deg,#fff,#e9f5ff);border:1px solid #dce8f4;border-radius:22px;min-height:170px;box-shadow:0 6px 22px #1641670a}
+.hero h2{color:#112d50}
+.car-art svg{filter:drop-shadow(0 10px 13px #3d5a7755)}
+.grid{gap:14px}
+.tile{background:#fff;border:1px solid #e2eaf3;border-radius:19px;box-shadow:0 7px 20px #1b46700c;min-height:120px;padding:19px}
+.tile b{color:#112749;font-size:clamp(20px,2vw,28px)}
+.tile:nth-child(8n+1){border-top:4px solid #38c871}
+.tile:nth-child(8n+2){border-top:4px solid #3b95ff}
+.tile:nth-child(8n+3){border-top:4px solid #ffbb4d}
+.tile:nth-child(8n+4){border-top:4px solid #38c871}
+.analytics-grid{gap:15px}
+.analytics-card{background:#fff;border:1px solid #e0e9f2;border-radius:20px;box-shadow:0 6px 22px #1b46700d}
+.chart-heading h2{color:#142c4d}
+.chart-empty,.chart-hint,.trend-label,.trend-amount,.line-labels span{color:#617791}
+.trend-track{border-bottom-color:#d8e4f0}
+.trend-bar{background:linear-gradient(0deg,#27bf69,#83e5a9)}
+.donut-center{background:#fff;color:#183154}
+.legend-name.electric::before{color:#39c76d}
+.legend-name.petrol::before{color:#3d95fa}
+.provider-track,.track{background:#eaf1f8}
+.provider-fill{background:linear-gradient(90deg,#33c875,#84e3a6)}
+#entries{background:#fff;border:1px solid #dfe9f3;border-radius:20px;box-shadow:0 5px 20px #1b46700c}
+.item{border-bottom:1px solid #e5edf5;color:#274361}
+.item button:last-child{background:#fff1f1;color:#b83245;border:1px solid #f5d8dc;box-shadow:none}
+#add,#csv,#options,#vehicles,#cloud{background:#fff;border:1px solid #dce8f4;border-radius:22px;padding:clamp(16px,2.5vw,28px);box-shadow:0 8px 25px #1b46700c}
+#vehicle-summary:not(:empty){background:#eff8ff;border:1px solid #d5eafa;border-radius:15px;padding:10px 18px;margin:12px 0;color:#244b6c}
+#vehicle-summary p{margin:6px 0}
+#vehicle-list p{background:#f3f8fd;border:1px solid #e1eaf3;border-radius:13px;padding:12px}
+#vehicle-list button{margin:4px}
+#home>label{font-weight:700}
+@media(min-width:1150px){
+ #home{display:block}
+ #home>.hero{margin-bottom:20px}
+ #home>.grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #home>.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1050px){
+ .app-shell{grid-template-columns:1fr}
+ .sidebar{border-radius:0 0 20px 20px;position:static;height:auto;padding:14px 16px;gap:12px}
+ .sidebar nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}
+ .sidebar nav button{flex:0 0 auto}
+ .sidebar-foot{display:block;margin-top:0;padding:8px 12px;font-size:12px}
+ .sidebar-foot hr{display:none}
+ .sidebar-car{display:none}
+ .main{padding:16px}
+}
+@media(max-width:560px){
+ .topbar{align-items:flex-start;flex-wrap:wrap}
+ .topbar-badge{display:block;font-size:12px;padding:9px 12px}
+ .brand strong{font-size:20px}
+ .hero{min-height:145px;padding:15px}
+ .hero h2{font-size:20px;overflow-wrap:anywhere}
+ .car-art{min-width:105px;width:38%}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .tile{padding:13px;min-height:103px}
+ .tile b{font-size:20px;overflow-wrap:anywhere}
+ .analytics-card{padding:15px}
+ .donut-ring{width:145px;height:145px}
+ .sidebar nav button{font-size:13px;padding:10px 12px}
+ .main{padding:12px}
+ .topbar h1{font-size:25px}
+}
