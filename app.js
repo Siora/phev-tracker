@@ -14,13 +14,13 @@ const fuelEnergyKey='phev-fuel-energy-factor-v1';
 
 function chargeModeKey(){let email='local';try{email=JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{}return 'phev-charge-modes-'+email;}
 function chargeModes(){try{return JSON.parse(localStorage.getItem(chargeModeKey())||'{}')||{};}catch{return {};}}
-function getChargeMode(id){return chargeModes()[id]||'';}
+function getChargeMode(id){const record=records.find(r=>r.id===id);return record?.charge_mode||chargeModes()[id]||'';}
 function setChargeMode(id,mode){const data=chargeModes();if(mode==='AC'||mode==='DC')data[id]=mode;else delete data[id];localStorage.setItem(chargeModeKey(),JSON.stringify(data));}
 
 function recordTimeKey(){let email='local';try{email=JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{}return 'phev-record-times-'+email;}
 function recordTimes(){try{return JSON.parse(localStorage.getItem(recordTimeKey())||'{}')||{};}catch{return {};}}
-function recordTime(id){return recordTimes()[id]||'';}
-function setRecordTime(id,time){const times=recordTimes();if(/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time))times[id]=time;else delete times[id];localStorage.setItem(recordTimeKey(),JSON.stringify(times));}
+function recordTime(id){const record=records.find(r=>r.id===id);return String(record?.time||'').slice(0,5)||recordTimes()[id]||'';}
+function setRecordTime(id,time){const times=recordTimes();if(/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(time))times[id]=time;else delete times[id];localStorage.setItem(recordTimeKey(),JSON.stringify(times));}
 function recordDateTime(r){return String(r.date||'')+(recordTime(r.id)?' '+recordTime(r.id):'');}
 function localClock(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
@@ -249,8 +249,10 @@ $('form').onsubmit=e=>{
     e.target.querySelector('button').textContent='Speichern'
   }
   else records.push(x);
-  setRecordTime(x.id,String(f.get('time')||''));
-  setChargeMode(x.id,x.type==='charge'?String(f.get('charge_mode')||''):'');
+  x.time=String(f.get('time')||'');
+  x.charge_mode=x.type==='charge'?String(f.get('charge_mode')||''):'';
+  setRecordTime(x.id,x.time);
+  setChargeMode(x.id,x.charge_mode);
   setChargingType(x.id,chargeKind);
   save();
   e.target.reset();
@@ -261,7 +263,7 @@ $('form').onsubmit=e=>{
   tab('home')
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
-document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);setRecordTime(record.id,f.elements.time.value);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
+document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;record.time=f.elements.time.value;record.charge_mode=record.type==='charge'?f.elements.charge_mode.value:'';records.push(record);setRecordTime(record.id,record.time);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
@@ -274,7 +276,7 @@ function settingsSave(){
   render();
   alert('Gespeichert')
 }
-window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
+window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
 window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
 // CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
 function exportCSV(){
