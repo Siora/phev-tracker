@@ -172,6 +172,7 @@ function render(){
       ? 'Basis: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand. Lade- und Tankmengen sind nur Näherungswerte.'
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
+  renderEnergyBalance(filtered);
   renderCostComparison(charges,fuel);
   renderChargingTypes(charges);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
@@ -369,6 +370,37 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch
 $('trendMetric').addEventListener('change', render);
 tab('home');
 
+
+/* Energiegehalt von Benzin: chemische Energie, keine nutzbare Radenergie. */
+const fuelEnergyKey='phev-fuel-energy-factor-v1';
+function fuelEnergyFactor(){const v=Number(localStorage.getItem(fuelEnergyKey));return v>=1&&v<=20?v:8.8;}
+function saveFuelEnergyFactor(){
+ const v=Number($('fuel-energy-factor').value);
+ if(!Number.isFinite(v)||v<1||v>20){alert('Bitte einen Faktor zwischen 1 und 20 eingeben.');return;}
+ localStorage.setItem(fuelEnergyKey,String(v));render();alert('Umrechnungsfaktor gespeichert.');
+}
+function energyBalance(items){
+ const km=items.map(r=>Number(r.km)).filter(v=>v>0);
+ const distance=km.length>1?Math.max(...km)-Math.min(...km):0;
+ const electric=items.filter(r=>r.type==='charge').reduce((a,r)=>a+Number(r.amount||0),0);
+ const liters=items.filter(r=>r.type==='fuel').reduce((a,r)=>a+Number(r.amount||0),0);
+ const fuelKwh=liters*fuelEnergyFactor();
+ return {distance,electric,liters,fuelKwh,total:electric+fuelKwh};
+}
+function renderEnergyBalance(items){
+ const target=$('energy-balance');if(!target)return;
+ const b=energyBalance(items);
+ if(!b.distance){target.textContent='Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.';$('energy-balance-note').textContent='Erfasste Lade- und Tankmengen sind Näherungswerte.';return;}
+ const f=v=>(100*v/b.distance).toFixed(2);
+ target.replaceChildren();
+ const p=document.createElement('p');p.textContent='⚡ Strom: '+f(b.electric)+' kWh/100 km · ⛽ Benzin: '+f(b.fuelKwh)+' kWh/100 km · Gesamt: '+f(b.total)+' kWh/100 km';target.append(p);
+ const bar=document.createElement('div');bar.style.cssText='display:flex;height:16px;border-radius:8px;overflow:hidden;background:#e5e7eb';
+ const e=document.createElement('div');e.style.cssText='background:#1795be;width:'+(b.total?b.electric/b.total*100:0)+'%';
+ const g=document.createElement('div');g.style.cssText='background:#e9a145;flex:1';bar.append(e,g);target.append(bar);
+ $('energy-balance-note').textContent='Benzin: '+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString('de-CH')+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
+}
+try{$('fuel-energy-factor').value=fuelEnergyFactor();}catch(error){console.warn(error);}
+
 /* Modellvergleich: keine Änderung der gespeicherten Lade- oder Tankdatensätze. */
 
 function getCostComparison(){
@@ -460,6 +492,12 @@ function exportPdfReport(mode){
  const total=sum(data,conv),energy=sum(charges,r=>Number(r.amount||0)),liters=sum(fuel,r=>Number(r.amount||0));
  pdf.heading('Übersicht');
  pdf.metrics([['Gesamtkosten',total.toFixed(2)+' '+settings.base],['Strom',energy.toFixed(1)+' kWh'],['Benzin',liters.toFixed(1)+' l'],['Vorgänge',String(data.length)]]);
+ const balance=energyBalance(data);
+ pdf.heading('Kombinierte Energiebilanz');
+ if(balance.distance){pdf.metrics([['Strom / 100 km',(balance.electric*100/balance.distance).toFixed(1)+' kWh'],['Benzin / 100 km',(balance.fuelKwh*100/balance.distance).toFixed(1)+' kWh'],['Gesamt / 100 km',(balance.total*100/balance.distance).toFixed(1)+' kWh'],['Benzinfaktor',fuelEnergyFactor().toFixed(1)+' kWh/l']]);}else{pdf.note('kWh/100 km: mindestens zwei unterschiedliche Kilometerstände nötig.');}
+ pdf.note('Chemischer Benzin-Energiegehalt; Verbrauch aus erfassten Mengen geschätzt.');
+ pdf.heading('Energieanteile');
+ pdf.donut([balance.electric,balance.fuelKwh],['Strom kWh','Benzin kWh']);
  pdf.heading('Kostenverteilung');
  pdf.donut([sum(charges,conv),sum(fuel,conv)],['Strom','Benzin']);
  pdf.heading(mode==='year'?'Kosten nach Monat':'Kosten nach Tag');
