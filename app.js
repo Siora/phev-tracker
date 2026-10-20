@@ -167,6 +167,7 @@ function render(){
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
   renderCostComparison(charges,fuel);
+  renderChargingTypes(charges);
   let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
@@ -182,7 +183,7 @@ function render(){
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=x.date+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -208,6 +209,7 @@ $('form').onsubmit=e=>{
   let f=new FormData(e.target),x={
     id:crypto.randomUUID(),type:f.get('type'),date:f.get('date'),amount:n(f.get('amount')),cost:n(f.get('cost')),currency:f.get('currency'),km:f.get('km')?n(f.get('km')):null,place:f.get('place')||'',vehicle_id:f.get('vehicle_id')?Number(f.get('vehicle_id')):null
   };
+  const chargeKind=x.type==='charge'?String(f.get('charge_kind')||''):'';
   if(!x.vehicle_id||!vehicles.some(v=>String(v.id)===String(x.vehicle_id))){alert('Bitte zuerst ein Fahrzeug auswählen.');return;}
   if(!x.amount)return;
   if(e.target.dataset.editId){
@@ -220,6 +222,7 @@ $('form').onsubmit=e=>{
     e.target.querySelector('button').textContent='Speichern'
   }
   else records.push(x);
+  setChargingType(x.id,chargeKind);
   save();
   e.target.reset();
   $('entryVehicle').value=vehicles.length===1?String(vehicles[0].id):'';
@@ -229,7 +232,7 @@ $('form').onsubmit=e=>{
   tab('home')
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
-document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
+document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:f.elements.place.value||'',vehicle_id:vid};if(record.amount<=0)return;records.push(record);if(record.type==='charge')setChargingType(record.id,f.elements.charge_kind.value);save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
 $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
@@ -397,3 +400,40 @@ try{
  $('comparison-electric').value=comparison.electric;
  $('comparison-fuel').value=comparison.fuel;
 }catch(error){console.warn('Vergleichseinstellungen nicht geladen',error);}
+
+/* Ladearten: zusätzliche lokale Metadaten, unabhängig vom Cloud-Datensatz. */
+function chargingTypeStorageKey(){
+ let email='local';
+ try{email=JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{}
+ return 'phev-charge-types-'+email;
+}
+function chargingTypes(){
+ try{return JSON.parse(localStorage.getItem(chargingTypeStorageKey())||'{}')||{};}catch{return {};}
+}
+function getChargingType(id){return chargingTypes()[id]||'';}
+function setChargingType(id,type){
+ const allowed=['Zuhause','Öffentlich','Arbeitsplatz','Kostenlos'];
+ const data=chargingTypes();
+ if(allowed.includes(type))data[id]=type;else delete data[id];
+ localStorage.setItem(chargingTypeStorageKey(),JSON.stringify(data));
+}
+function renderChargingTypes(charges){
+ const target=$('charging-types-report');
+ if(!target)return;
+ const groups=new Map();
+ for(const record of charges){
+  const type=getChargingType(record.id)||'Nicht angegeben';
+  const value=groups.get(type)||{count:0,energy:0,cost:0};
+  value.count++;
+  value.energy+=Number(record.amount||0);
+  value.cost+=conv(record);
+  groups.set(type,value);
+ }
+ target.replaceChildren();
+ if(!groups.size){target.textContent='Noch keine Ladungen im gewählten Zeitraum.';return;}
+ for(const [type,data] of groups){
+  const row=document.createElement('p');
+  row.textContent=type+': '+data.count+' Ladungen · '+data.energy.toFixed(1)+' kWh · '+fmt(data.cost,settings.base);
+  target.append(row);
+ }
+}
