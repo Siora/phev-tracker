@@ -1,0 +1,5 @@
+Options -Indexes
+<FilesMatch "^(config\.php|config\.example\.php|schema\.sql|README\.md)$">
+ Require all denied
+</FilesMatch>
+Header always set X-Content-Type-Options "nosniff"
