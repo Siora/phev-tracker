@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=35">
+<link rel="stylesheet" href="styles.css?v=36">
 </head>
 <body>
 <!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
@@ -32,7 +32,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 35</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 36</small>
 </div>
 </aside>
 <main class="main">
@@ -197,6 +197,11 @@
 <!-- Währungseinstellungen und lokale Datensicherung -->
 <section id="options" class="hide">
 <h2>Optionen & Backup</h2>
+<h3>Automatische lokale Sicherungen</h3>
+<p>Bei Änderungen und nach dem Laden deiner Cloud-Daten werden automatisch lokale Sicherungen angelegt. Die letzten fünf Sicherungen bleiben auf diesem iPhone gespeichert.</p>
+<p id="auto-backup-status" role="status">Noch keine automatische Sicherung erstellt.</p>
+<button type="button" onclick="downloadLatestAutoBackup()">Letzte automatische Sicherung herunterladen</button>
+<small>Wichtig: Lokale Sicherungen ersetzen kein extern gespeichertes Backup. Bitte die heruntergeladene Datei regelmäßig in der Dateien-App oder iCloud Drive sichern.</small>
 <h3>Kostenvergleich pro 100 km</h3>
 <label>Angenommener Stromverbrauch (kWh/100 km)<input id="comparison-electric" type="number" min="0.1" step="0.1" value="20"></label>
 <label>Angenommener Benzinverbrauch (l/100 km)<input id="comparison-fuel" type="number" min="0.1" step="0.1" value="7"></label>
@@ -246,8 +251,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=35" defer></script>
-<script src="app.js?v=35" defer>
+<script src="cloud.js?v=36" defer></script>
+<script src="app.js?v=36" defer>
 </script>
 </main>
 </div>
