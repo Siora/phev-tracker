@@ -59,7 +59,7 @@ const AnalyticsCharts = (() => {
     const ratio = charge / total * 100;
     const layout = element('div', 'donut-layout');
     const ring = element('div', 'donut-ring');
-    ring.style.background = 'conic-gradient(#8ab7ff 0% ' + ratio + '%, #e6ae73 ' + ratio + '% 100%)';
+    ring.style.background = 'conic-gradient(#38c86a 0% ' + ratio + '%, #3b95ff ' + ratio + '% 100%)';
     const center = element('div', 'donut-center');
     center.append(element('small', '', 'Gesamt'), element('strong', '', money(total, currency)));
     ring.append(center);
