@@ -24,3 +24,11 @@ Ein Simulator-Artefakt ist **keine** iPhone-installierbare App. Für ein echtes 
 
 ## Sicherheitsgrenzen
 Keine Apple-Schlüssel, Tokens oder Zertifikate ins Repository hochladen. Niemals bestehende Daten oder Fahrzeuge löschen, und die PHP/MySQL-Produktion nicht für Buildtests verändern.
+
+## Automatische Prüfungen (21.10.2026)
+- `npm run ios:check` prüft zusätzlich Cloud-API-Ziel, Entwicklungs-CORS-Konfiguration, Safe-Area-Einbindung und unerwünschte Service-Worker-Registrierung.
+- GitHub Actions meldet fehlende Simulator-Artefakte künftig als Fehler.
+- Diese Änderungen sind eingecheckt, aber der **erneute** Workflow-Lauf nach diesen Commits ist noch ausstehend.
+
+## Vor realem Cloud-Test zwingend
+Die CORS-Freigabe `capacitor://localhost` steht aktuell nur in `ios-app/server/api.php`. Der laufende PHP-Server übernimmt diese Änderung **nicht automatisch**. Eine gezielte, vorher geprüfte Serverbereitstellung muss separat autorisiert und durchgeführt werden. Niemals die gesamte `ios-app`-Branch in die produktive PWA deployen. Bestehende Datenbank, `config.php`, Konten und Einträge unverändert lassen.
