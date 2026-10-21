@@ -13,6 +13,26 @@ let preferencesTimer=null;
 const sessionKey='phev-session-v1';
 const ce=id=>document.getElementById(id);
 const cs=message=>ce('cloud-status').textContent=message;
+let syncError='';
+let syncingPreferences=false;
+function pendingCount(){
+ const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
+ if(!email)return 0;
+ try{return JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]').length;}catch{return 0;}
+}
+function updateSyncIndicator(){
+ const el=ce('cloud-sync-indicator');if(!el)return;
+ const pending=pendingCount();
+ let message='Nicht angemeldet',state='idle';
+ if(cloudToken){
+  if(!navigator.onLine){message='Offline – Änderungen warten auf Verbindung';state='waiting';}
+  else if(cloudSyncing||syncingPreferences){message='Synchronisierung läuft …';state='syncing';}
+  else if(syncError){message='Synchronisierungsfehler – '+syncError;state='error';}
+  else if(pending){message=pending+' Änderung(en) warten auf Synchronisierung';state='waiting';}
+  else{message='Synchronisiert';state='ok';}
+ }
+ el.textContent=message;el.dataset.state=state;
+}
 async function cloudCall(action,data){
  const response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
   method:data===undefined?'GET':'POST',
@@ -24,7 +44,7 @@ async function cloudCall(action,data){
  if(!response.ok)throw Error(json.error||'Serverfehler');
  return json;
 }
-async function loadCloudOverview(){const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+async function loadCloudOverview(){syncError='';updateSyncIndicator();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
 async function loadVehicles(){
  try {
@@ -104,7 +124,7 @@ ce('cloud-login').onsubmit=async event=>{
  button.disabled=true;cs('Anmeldung läuft …');
  try{
   const result=await cloudCall('login',{email:form.elements.email.value,password:form.elements.password.value});
-  cloudToken=result.token;
+  cloudToken=result.token;updateSyncIndicator();
   localStorage.setItem(sessionKey,JSON.stringify({token:result.token,email:result.email,role:result.role}));
   showAccount(result.email,result.role);
   await loadCloudOverview();
@@ -132,7 +152,7 @@ ce('cloud-check').onclick=async()=>{
 };
 ce('cloud-logout').onclick=async()=>{
  try{await cloudCall('logout',{});}catch(error){}
- cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;
+ cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';updateSyncIndicator();
  document.body.classList.add('login-locked');
  localStorage.removeItem(sessionKey);
  window.showLocalRecords();
@@ -169,14 +189,16 @@ ce('cloud-upload').onclick=async()=>{
 window.scheduleCloudPreferences=function(){
  if(!cloudPreferencesReady||!cloudToken)return;
  clearTimeout(preferencesTimer);
+ syncingPreferences=true;updateSyncIndicator();
  preferencesTimer=setTimeout(async()=>{
   try{
    const current=window.collectCloudPreferences();
    const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
    await cloudCall('preferences',{preferences:merged});
-   cloudPreferences=merged;
+   cloudPreferences=merged;syncError='';
    cs('Einstellungen in der Cloud gespeichert.');
-  }catch(e){cs('Einstellungen lokal gespeichert; Cloud-Sync fehlgeschlagen: '+e.message);}
+  }catch(e){syncError=e.message;cs('Einstellungen lokal gespeichert; Cloud-Sync fehlgeschlagen: '+e.message);}
+  finally{syncingPreferences=false;updateSyncIndicator();}
  },700);
 };
 ce('cloud-preferences-upload').onclick=async()=>{
@@ -187,13 +209,16 @@ ce('cloud-preferences-upload').onclick=async()=>{
   const current=window.collectCloudPreferences();
   const merged={...(cloudPreferences||{}),...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
   await cloudCall('preferences',{preferences:merged});
-  cloudPreferences=merged;cloudPreferencesReady=true;
+  cloudPreferences=merged;cloudPreferencesReady=true;syncError='';updateSyncIndicator();
   cs('Lokale Einstellungen erfolgreich in die Cloud übernommen.');
  }catch(e){cs('Übernahme fehlgeschlagen: '+e.message);}
  finally{button.disabled=false;}
 };
 
 let cloudSyncing=false;
-window.queueCloudChanges=function(items){const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const cacheKey='phev-cache-'+email,queueKey='phev-queue-'+email;const old=JSON.parse(localStorage.getItem(cacheKey)||'[]');const previous=new Map(old.map(r=>[r.id,r]));const next=new Map(items.map(r=>[r.id,r]));let queue=JSON.parse(localStorage.getItem(queueKey)||'[]');for(const r of items)if(JSON.stringify(previous.get(r.id))!==JSON.stringify(r))queue.push({action:'save',record:r});for(const r of old)if(!next.has(r.id))queue.push({action:'delete',id:r.id});localStorage.setItem(queueKey,JSON.stringify(queue));localStorage.setItem(cacheKey,JSON.stringify(items));syncCloudQueue();};
-async function syncCloudQueue(){if(cloudSyncing||!cloudToken||!navigator.onLine)return;const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const key='phev-queue-'+email;cloudSyncing=true;try{let queue=JSON.parse(localStorage.getItem(key)||'[]');while(queue.length){const op=queue[0];await cloudCall(op.action,op.action==='save'?{record:op.record}:{id:op.id});const latest=JSON.parse(localStorage.getItem(key)||'[]');latest.shift();localStorage.setItem(key,JSON.stringify(latest));queue=latest;}cs('Alle Änderungen synchronisiert.');}catch(e){cs('Änderungen lokal vorgemerkt: '+e.message);}finally{cloudSyncing=false;}}
-window.addEventListener('online',syncCloudQueue);
+window.queueCloudChanges=function(items){const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const cacheKey='phev-cache-'+email,queueKey='phev-queue-'+email;const old=JSON.parse(localStorage.getItem(cacheKey)||'[]');const previous=new Map(old.map(r=>[r.id,r]));const next=new Map(items.map(r=>[r.id,r]));let queue=JSON.parse(localStorage.getItem(queueKey)||'[]');for(const r of items)if(JSON.stringify(previous.get(r.id))!==JSON.stringify(r))queue.push({action:'save',record:r});for(const r of old)if(!next.has(r.id))queue.push({action:'delete',id:r.id});localStorage.setItem(queueKey,JSON.stringify(queue));localStorage.setItem(cacheKey,JSON.stringify(items));syncError='';updateSyncIndicator();syncCloudQueue();};
+async function syncCloudQueue(){if(cloudSyncing||!cloudToken||!navigator.onLine)return;const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const key='phev-queue-'+email;cloudSyncing=true;updateSyncIndicator();try{let queue=JSON.parse(localStorage.getItem(key)||'[]');while(queue.length){const op=queue[0];await cloudCall(op.action,op.action==='save'?{record:op.record}:{id:op.id});const latest=JSON.parse(localStorage.getItem(key)||'[]');latest.shift();localStorage.setItem(key,JSON.stringify(latest));queue=latest;}syncError='';cs('Alle Änderungen synchronisiert.');}catch(e){syncError=e.message;cs('Änderungen lokal vorgemerkt: '+e.message);}finally{cloudSyncing=false;updateSyncIndicator();}}
+window.addEventListener('online',()=>{syncError='';updateSyncIndicator();syncCloudQueue();});
+window.addEventListener('offline',updateSyncIndicator);
+window.addEventListener('storage',updateSyncIndicator);
+updateSyncIndicator();
