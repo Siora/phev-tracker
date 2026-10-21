@@ -764,3 +764,8 @@ button:hover{filter:brightness(1.06)}
 .management-actions{white-space:nowrap}
 .management-actions button{margin:2px 4px 2px 0;padding:8px 10px;font-size:.86rem}
 @media(max-width:700px){.management-table{font-size:.88rem}.management-table th,.management-table td{padding:10px 12px}}
+
+/* v59: vehicle table with mobile horizontal scrolling */
+#vehicle-list{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1rem 0;border:1px solid #dbe4ef;border-radius:14px;background:#fff}
+.vehicle-management-table{min-width:850px}
+.vehicle-management-table td:first-child{font-weight:600}
