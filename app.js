@@ -129,6 +129,48 @@ function save(){
   render();updateBulkCount()
 }
 $('entry-sort')?.addEventListener('change',render);
+
+function renderConsumptionInsights(items,charges,fuel,distance){
+ const target=$('consumption-insights');if(!target)return;
+ target.replaceChildren();
+ const add=(title,value,note)=>{
+  const card=document.createElement('div');card.className='insight-item';
+  const heading=document.createElement('strong');heading.textContent=title;
+  const figure=document.createElement('b');figure.textContent=value;
+  const detail=document.createElement('small');detail.textContent=note;
+  card.append(heading,figure,detail);target.append(card);
+ };
+ if(!items.length){add('Noch keine Daten','–','Erfasse Ladungen oder Tankungen für eine Auswertung.');return;}
+ const total=items.reduce((sum,r)=>sum+conv(r),0);
+ add('Gesamtkosten',fmt(total,settings.base),items.length+' Einträge im gewählten Zeitraum');
+ if(distance>0)add('Kosten je 100 km',fmt(total/distance*100,settings.base),'Näherung aus '+distance.toLocaleString('de-CH')+' km Kilometerstandsspanne');
+ else add('Kosten je 100 km','–','Mindestens zwei unterschiedliche Kilometerstände erforderlich');
+ const valid=charges.filter(r=>Number(r.amount)>0&&Number.isFinite(conv(r))&&conv(r)>=0);
+ const sumKwh=valid.reduce((a,r)=>a+Number(r.amount),0);
+ const sumCost=valid.reduce((a,r)=>a+conv(r),0);
+ if(sumKwh>0){
+  const avg=sumCost/sumKwh;
+  add('Gewichteter Strompreis',fmt(avg,settings.base)+' / kWh',valid.length+' Ladevorgänge berücksichtigt');
+  const costly=valid.filter(r=>Number(r.amount)>=1&&conv(r)/Number(r.amount)>avg*1.5&&conv(r)/Number(r.amount)>avg+0.05).sort((a,b)=>conv(b)/Number(b.amount)-conv(a)/Number(a.amount));
+  if(valid.length>=3&&costly.length){
+   const highest=costly[0],price=conv(highest)/Number(highest.amount);
+   add('Auffälliger Ladepreis',fmt(price,settings.base)+' / kWh',(highest.place||'Unbekannter Ladeort')+' · '+highest.date+' · über 50 % über dem Durchschnitt');
+  }else add('Ladepreis-Prüfung','Keine Auffälligkeit',valid.length<3?'Ab 3 Ladevorgängen wird auf hohe Einzelpreise geprüft.':'Kein Einzelpreis liegt deutlich über dem Durchschnitt.');
+ }
+ const sorted=items.filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)).slice().sort((a,b)=>a.date.localeCompare(b.date));
+ if(sorted.length>=4){
+  const midpoint=Math.floor(sorted.length/2),earlier=sorted.slice(0,midpoint),later=sorted.slice(midpoint);
+  const avgCost=arr=>arr.reduce((sum,r)=>sum+conv(r),0)/arr.length;
+  const before=avgCost(earlier),after=avgCost(later);
+  if(before>0){
+   const delta=(after/before-1)*100;
+   add('Kostenentwicklung je Eintrag',(delta>0?'+':'')+delta.toFixed(1)+' %','Vergleich der früheren und neueren Hälfte der Einträge; kein Verbrauchstrend pro km');
+  }
+ }
+ const liters=fuel.reduce((sum,r)=>sum+Number(r.amount||0),0);
+ if(liters>0)add('Erfasste Benzinmenge',liters.toFixed(1)+' Liter','Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.');
+}
+
 function render(){
   updateLoginNotice();
   const now=new Date(),period=$('period').value;
@@ -190,6 +232,7 @@ function render(){
       ? 'Basis: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand. Lade- und Tankmengen sind nur Näherungswerte.'
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
+  renderConsumptionInsights(filtered,charges,fuel,distance);
   renderEnergyBalance(filtered);
   renderConsumptionTrend();
   renderCostComparison(charges,fuel);
