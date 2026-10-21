@@ -1,0 +1,50 @@
+name: iOS simulator build (manual)
+
+# Development-only check. Does not sign, distribute, or deploy anything.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - name: Checkout iOS development branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install JavaScript dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Compile unsigned iOS Simulator app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload simulator build for diagnostics
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phev-tracker-ios-simulator
+          path: build/DerivedData/Build/Products/Debug-iphonesimulator/App.app/
+          retention-days: 7
