@@ -459,14 +459,59 @@ function settingsSave(){
 }
 
 // Cloud preferences are applied only after a successful authenticated fetch.
+
+/* Operating costs are stored per account in existing cloud preferences, without database migrations. */
+let vehicleExpenses=[];
+function expenseCurrency(amount,currency){return currency===settings.base?amount:settings.base==='CHF'?amount*settings.rate:amount/settings.rate;}
+function applyVehicleExpenses(value){if(!Array.isArray(value))return;vehicleExpenses=value.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);renderVehicleExpenses();}
+window.setVehicleExpenses=applyVehicleExpenses;
+function renderVehicleExpenses(){
+ const form=$('expense-form'),list=$('expense-list'),summary=$('expense-summary');if(!form||!list||!summary)return;
+ const select=form.elements.vehicle_id,previous=select.value;
+ select.replaceChildren(new Option('Fahrzeug wählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ if(vehicles.some(v=>String(v.id)===previous))select.value=previous;
+ else if(vehicles.length===1)select.value=String(vehicles[0].id);
+ list.replaceChildren();summary.replaceChildren();
+ const selected=select.value;
+ const expenses=vehicleExpenses.filter(x=>!selected||String(x.vehicle_id)===selected).slice().sort((a,b)=>b.date.localeCompare(a.date));
+ const extra=expenses.reduce((sum,x)=>sum+expenseCurrency(Number(x.amount),x.currency),0);
+ const matching=records.filter(x=>!selected||String(x.vehicle_id)===selected);
+ const running=matching.reduce((sum,x)=>sum+conv(x),0);
+ const distances=matching.map(x=>Number(x.km)).filter(x=>Number.isFinite(x)&&x>0);
+ const distance=distances.length>1?Math.max(...distances)-Math.min(...distances):0;
+ const caption=document.createElement('p');caption.className='expense-total';caption.textContent='Gesamtkosten aller erfassten Zeiträume: '+fmt(extra+running,settings.base);
+ const detail=document.createElement('small');detail.textContent='Strom & Benzin: '+fmt(running,settings.base)+' · Weitere Ausgaben: '+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+' / km (Näherung)':' · Für Kosten/km fehlen Kilometerstände.');
+ summary.append(caption,detail);
+ for(const x of expenses){
+  const row=document.createElement('div');row.className='expense-row';
+  const info=document.createElement('span');info.textContent=x.date+' · '+x.category+' · '+fmt(Number(x.amount),x.currency)+(x.note?' · '+x.note:'');
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
+  remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.saveVehicleExpenses(vehicleExpenses.filter(item=>item.id!==x.id));$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
+  row.append(info,remove);list.append(row);
+ }
+ if(!expenses.length){const empty=document.createElement('p');empty.textContent='Noch keine zusätzlichen Fahrzeugausgaben erfasst.';list.append(empty);}
+}
+$('expense-form').elements.vehicle_id.addEventListener('change',renderVehicleExpenses);
+$('expense-form').onsubmit=async e=>{
+ e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]'),el=form.elements;
+ if(!el.vehicle_id.value)return $('expense-status').textContent='Bitte ein Fahrzeug wählen.';
+ const amount=Number(el.amount.value);if(!Number.isFinite(amount)||amount<=0)return;
+ const item={id:(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random()),vehicle_id:el.vehicle_id.value,category:el.category.value,date:el.date.value,amount,currency:el.currency.value,note:el.note.value.trim()};
+ button.disabled=true;$('expense-status').textContent='Ausgabe wird gespeichert …';
+ try{await window.saveVehicleExpenses([...vehicleExpenses,item]);const v=el.vehicle_id.value;form.reset();el.vehicle_id.value=v;$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
+ catch(error){$('expense-status').textContent='Speichern fehlgeschlagen: '+error.message;}
+ finally{button.disabled=false;}
+};
+
 window.collectCloudPreferences=function(){
  const photos={};
  for(const vehicle of vehicles){const url=localStorage.getItem('phev-photo-'+vehicle.id);if(url)photos[String(vehicle.id)]=url;}
- return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
+ return {photos,vehicle_expenses:vehicleExpenses,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
 };
 window.applyCloudPreferences=function(prefs){
  if(!prefs||typeof prefs!=='object')return;
  
+ if(Array.isArray(prefs.vehicle_expenses))applyVehicleExpenses(prefs.vehicle_expenses);
  if(prefs.photos&&typeof prefs.photos==='object'){
   for(const vehicle of vehicles){
    const id=String(vehicle.id),url=prefs.photos[id];
