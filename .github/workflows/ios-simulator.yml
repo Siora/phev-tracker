@@ -51,3 +51,4 @@ jobs:
           name: phev-tracker-ios-simulator
           path: build/DerivedData/Build/Products/Debug-iphonesimulator/App.app/
           retention-days: 7
+          if-no-files-found: error
