@@ -156,6 +156,7 @@
 <h2>Meine Fahrzeuge</h2>
 <p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
 <div id="vehicle-list"></div>
+<div class="expense-section"><h3>💳 Fahrzeug-Gesamtkosten</h3><p>Versicherung, Verkehrssteuer, Wartung, Reifen und weitere Ausgaben pro Fahrzeug erfassen. Strom und Benzin werden aus deinen bisherigen Einträgen ergänzt.</p><form id="expense-form"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Kategorie<select name="category" required><option>Versicherung</option><option>Verkehrssteuer</option><option>Service</option><option>Reifen</option><option>Reparatur</option><option>Parken</option><option>Sonstiges</option></select></label><label>Datum<input name="date" type="date" required></label><label>Betrag<input name="amount" type="number" step="0.01" min="0.01" required inputmode="decimal"></label><label>Währung<select name="currency"><option>CHF</option><option>EUR</option></select></label><label>Notiz<input name="note" maxlength="160" placeholder="Optional"></label><button type="submit">Ausgabe speichern</button></form><p id="expense-status" role="status"></p><div id="expense-summary"></div><div id="expense-list"></div></div>
 <h3>Fahrzeug hinzufügen / bearbeiten</h3>
 <form id="vehicle-form">
 <label>Marke<input name="brand" maxlength="100" required></label>
