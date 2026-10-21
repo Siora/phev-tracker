@@ -935,3 +935,21 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .insight-item b{font-size:clamp(19px,2vw,26px);font-weight:750;letter-spacing:-.5px;color:#eefaff;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .insight-item small{font-size:12px;line-height:1.5;color:#b1c3d0;overflow-wrap:anywhere}
 @media(max-width:700px){#consumption-insights{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.insight-item{padding:14px}.insight-item b{font-size:19px}}
+
+
+/* V73 — charging and fueling activity timeline */
+.timeline-intro{font-size:13px;color:#a6baca;margin:0 0 17px}
+.activity-timeline{position:relative;padding:3px 0 2px 0}
+.activity-timeline::before{content:"";position:absolute;left:17px;top:23px;bottom:25px;width:2px;background:linear-gradient(#43c9d0,#376083 80%,transparent);opacity:.55}
+.timeline-event{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:13px;padding:0 0 19px;min-width:0}
+.timeline-event:last-child{padding-bottom:0}
+.timeline-marker{z-index:1;display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#193e4a;border:1px solid #4fc4c9;color:#d5fbf8;box-shadow:0 0 0 4px #132437;font-size:17px}
+.timeline-fuel .timeline-marker{background:#423329;border-color:#c4a06a;color:#ffe2b1}
+.timeline-content{min-width:0;padding:10px 14px 12px;background:linear-gradient(130deg,#1b3345,#15293b);border:1px solid #ffffff19;border-radius:15px}
+.timeline-head{display:flex;align-items:baseline;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.timeline-head strong{font-size:14px;color:#f2f8fc}
+.timeline-head time{font-size:11px;color:#b0c7d3;font-variant-numeric:tabular-nums}
+.timeline-details{font-size:15px;font-weight:700;color:#e3f8ff;margin-top:7px;font-variant-numeric:tabular-nums}
+.timeline-notes{display:block;margin-top:7px;font-size:11px;line-height:1.5;color:#aac0d0;overflow-wrap:anywhere}
+.timeline-empty{color:#b1c5d4;font-size:13px;margin:5px 0 10px}
+@media(max-width:700px){.timeline-head{gap:4px}.timeline-content{padding:11px 12px}.timeline-event{gap:10px}}
