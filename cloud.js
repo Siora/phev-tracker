@@ -73,7 +73,7 @@ window.syncManagedCharging=async function(next){
  finally{syncingPreferences=false;updateSyncIndicator();}
 };
 
-async function loadCloudOverview(){syncError='';updateSyncIndicator();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();await loadChargingCatalog();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
 async function loadVehicles(){
  try {
@@ -225,6 +225,7 @@ ce('cloud-upload').onclick=async()=>{
   saved=JSON.parse(localStorage.getItem(sessionKey)||'null');
   if(!saved?.token){ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');return;}
   cloudToken=saved.token;
+  showAccount(saved.email,saved.role);
   await loadCloudOverview();
   showAccount(saved.email,saved.role);
   cs('Sitzung wiederhergestellt.');
