@@ -953,3 +953,20 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .timeline-notes{display:block;margin-top:7px;font-size:11px;line-height:1.5;color:#aac0d0;overflow-wrap:anywhere}
 .timeline-empty{color:#b1c5d4;font-size:13px;margin:5px 0 10px}
 @media(max-width:700px){.timeline-head{gap:4px}.timeline-content{padding:11px 12px}.timeline-event{gap:10px}}
+
+
+/* V74 — operating costs / TCO */
+.expense-section{margin:25px 0;padding:22px;border:1px solid #ffffff1b;border-radius:20px;background:linear-gradient(145deg,#182d3e,#102033)}
+.expense-section h3{color:#f0f8fc;font-size:19px;margin:0 0 8px}
+.expense-section>p{color:#b1c5d2;line-height:1.6}
+#expense-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 15px;align-items:end}
+#expense-form label{min-width:0}
+#expense-form button{grid-column:1/-1;margin:8px 0}
+#expense-status{color:#9bdcdb;min-height:1.4em}
+#expense-summary{padding:15px;background:#193648;border:1px solid #5a9ca840;border-radius:14px;margin:12px 0}
+.expense-total{font-size:19px;font-weight:750;color:#e9f9fc;margin:0 0 7px}
+#expense-summary small{color:#b9ceda;line-height:1.6}
+.expense-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #ffffff17;color:#e0edf5;font-size:13px}
+.expense-row span{overflow-wrap:anywhere}
+.expense-row button{width:auto!important;margin:0!important;flex-shrink:0;padding:9px 12px;background:#53313a;color:#ffe0e5}
+@media(max-width:700px){.expense-section{padding:15px}#expense-form{grid-template-columns:minmax(0,1fr)}.expense-row{align-items:flex-start}}
