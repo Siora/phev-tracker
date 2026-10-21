@@ -120,8 +120,8 @@ const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
 // Wechsel zwischen den Bereichen der Single-Page-Anwendung.
 function tab(t){
-  ['home','add','csv','vehicles','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','vehicles','options','cloud'][i]===t));
+  ['home','add','csv','vehicles','charging-management','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','vehicles','charging-management','options','cloud'][i]===t));
   render();
   window.scrollTo(0,0)
 }
