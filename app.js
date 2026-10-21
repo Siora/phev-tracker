@@ -217,7 +217,7 @@ function render(){
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+(x.type==='charge'&&getChargeMode(x.id)?' · '+getChargeMode(x.id):'')+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -260,6 +260,41 @@ function installPriceCalculator(form){
  cost.addEventListener('input',()=>{mode='total';});
  form.addEventListener('reset',()=>{mode='total';});
 }
+
+const managedChargingKey='phev-managed-charging-v1';
+function chargingAccountKey(){try{return JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{return 'local';}}
+function chargingData(){try{const d=JSON.parse(localStorage.getItem(managedChargingKey+'-'+chargingAccountKey())||'null');return {locations:Array.isArray(d?.locations)?d.locations:[],providers:Array.isArray(d?.providers)?d.providers:[]};}catch{return {locations:[],providers:[]};}}
+function storeChargingData(d){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));window.scheduleCloudPreferences?.();renderChargingManagement();}
+window.getManagedCharging=()=>chargingData();
+window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.providers)){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));renderChargingManagement();}};
+function renderChargingManagement(){
+ const data=chargingData();
+ for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
+  const list=$(listId);if(!list)continue;list.replaceChildren();
+  for(const item of data[type]){
+   const row=document.createElement('p'),edit=document.createElement('button'),del=document.createElement('button');
+   row.append(document.createTextNode(item.name+(item.kind?' · '+item.kind:'')+(item.price!==null?' · '+item.price+' '+settings.base+'/kWh':'')+' '));
+   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';};
+   del.textContent='Löschen';del.type='button';del.onclick=()=>{if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;data[type]=data[type].filter(x=>x.id!==item.id);storeChargingData(data);};
+   row.append(edit,del);list.append(row);
+  }
+  document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{const select=form.elements[field];if(!select)return;const previous=select.value;select.replaceChildren(new Option(type==='locations'?'Kein gespeicherter Ladeort':'Kein Anbieter',''),...data[type].map(x=>new Option(x.name,x.id)));select.value=data[type].some(x=>x.id===previous)?previous:'';});
+ }
+}
+for(const [type,id] of [['locations','managed-location-form'],['providers','managed-provider-form']]){
+ const form=$(id);if(!form)continue;
+ form.addEventListener('reset',()=>{delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Speichern';});
+ form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert('Name oder Preis ungültig.');const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();storeChargingData(data);$('managed-charging-status').textContent='Gespeichert. Cloud-Synchronisierung wird gestartet.';});
+}
+function applyManagedPrice(form){
+ const data=chargingData(),loc=data.locations.find(x=>x.id===form.elements.managed_location?.value),provider=data.providers.find(x=>x.id===form.elements.managed_provider?.value);
+ if(loc){form.elements.place.value=loc.name;if(form.elements.charge_kind)form.elements.charge_kind.value=loc.kind||'';}
+ const price=provider?.price??loc?.price;
+ if(price!==null&&price!==undefined){const unit=form.elements.unit_price;unit.value=String(price);unit.dispatchEvent(new Event('input',{bubbles:true}));}
+}
+document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{for(const field of ['managed_location','managed_provider'])form.elements[field]?.addEventListener('change',()=>applyManagedPrice(form));});
+renderChargingManagement();
+
 installPriceCalculator($('form'));
 document.querySelectorAll('.quick-form').forEach(installPriceCalculator);
 
@@ -315,10 +350,11 @@ function settingsSave(){
 window.collectCloudPreferences=function(){
  const photos={};
  for(const vehicle of vehicles){const url=localStorage.getItem('phev-photo-'+vehicle.id);if(url)photos[String(vehicle.id)]=url;}
- return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
+ return {photos,managed_charging:chargingData(),fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
 };
 window.applyCloudPreferences=function(prefs){
  if(!prefs||typeof prefs!=='object')return;
+ if(prefs.managed_charging)window.setManagedCharging(prefs.managed_charging);
  if(prefs.photos&&typeof prefs.photos==='object'){
   for(const vehicle of vehicles){
    const id=String(vehicle.id),url=prefs.photos[id];
