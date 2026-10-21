@@ -126,7 +126,7 @@
 <div id="entries">
 </div>
 </section>
-<!-- Ausführliches Formular für Lade- und Tankvorgänge -->
+<section id="charging-management" class="hide"><h2>Ladeorte & Anbieter</h2><p>Getrennte Verwaltung. Anbieterpreis hat Vorrang. Preise in Basiswährung.</p><div class="dashboard-actions"><article class="quick-card"><h3>Ladeorte</h3><form id="managed-location-form"><label>Name<input name="name" required maxlength="100"></label><label>Typ<select name="kind"><option value="">Nicht angegeben</option><option>Zuhause</option><option>Öffentlich</option><option>Arbeitsplatz</option><option>Kostenlos</option></select></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-locations-list"></div></article><article class="quick-card"><h3>Anbieter</h3><form id="managed-provider-form"><label>Name<input name="name" required maxlength="100"></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-providers-list"></div></article></div><p id="managed-charging-status" role="status"></p></section><!-- Ausführliches Formular für Lade- und Tankvorgänge -->
 <section id="add" class="hide">
 <h2>Neuer Eintrag</h2>
 <form id="form">
