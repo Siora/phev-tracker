@@ -124,6 +124,22 @@ if ($action === 'preferences' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  if (!$hasPreferences) fail(503,'Cloud-Einstellungen noch nicht aktiviert');
  $prefs=$body['preferences']??null;
  if (!is_array($prefs)) fail(400,'Ungültige Einstellungen');
+ $keys=['photos','fuel_energy_factor','cost_comparison','base','rate'];
+ foreach ($prefs as $key=>$value) if (!in_array($key,$keys,true)) fail(400,'Unbekannte Einstellung');
+ if (isset($prefs['photos'])) {
+  if (!is_array($prefs['photos']) || count($prefs['photos'])>100) fail(400,'Ungültige Fotos');
+  foreach ($prefs['photos'] as $vid=>$url) {
+   if (!ctype_digit((string)$vid) || !is_string($url) || strlen($url)>2048 || ($url!=='' && !preg_match('~^https://[^[:space:]]+$~i',$url))) fail(400,'Ungültige Bildadresse');
+   $check=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');$check->execute([(int)$vid,$uid]);if (!$check->fetchColumn()) fail(403,'Fahrzeug nicht erlaubt');
+  }
+ }
+ if (isset($prefs['fuel_energy_factor']) && (!is_numeric($prefs['fuel_energy_factor']) || $prefs['fuel_energy_factor']<1 || $prefs['fuel_energy_factor']>20)) fail(400,'Ungültiger Energiefaktor');
+ if (isset($prefs['cost_comparison'])) {
+  $c=$prefs['cost_comparison'];
+  if (!is_array($c) || !is_numeric($c['electric']??null) || !is_numeric($c['fuel']??null) || $c['electric']<=0 || $c['electric']>200 || $c['fuel']<=0 || $c['fuel']>100) fail(400,'Ungültige Verbrauchswerte');
+ }
+ if (isset($prefs['base']) && !in_array($prefs['base'],['CHF','EUR'],true)) fail(400,'Ungültige Währung');
+ if (isset($prefs['rate']) && (!is_numeric($prefs['rate']) || $prefs['rate']<=0 || $prefs['rate']>100)) fail(400,'Ungültiger Kurs');
  $json=json_encode($prefs,JSON_UNESCAPED_UNICODE);
  if ($json===false || strlen($json)>30000) fail(400,'Ungültige Einstellungen');
  $stmt=$db->prepare('INSERT INTO user_settings(user_id,prefs_json) VALUES (?,?) ON DUPLICATE KEY UPDATE prefs_json=VALUES(prefs_json)');
