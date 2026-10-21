@@ -34,12 +34,14 @@ function updateSyncIndicator(){
  el.textContent=message;el.dataset.state=state;
 }
 async function cloudCall(action,data){
- const response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
+ let response;
+ try{response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
   method:data===undefined?'GET':'POST',
   headers:{...(data===undefined?{}:{'Content-Type':'application/json'}),...(cloudToken?{'Authorization':'Bearer '+cloudToken}:{})},
   ...(data===undefined?{}:{body:JSON.stringify(data)}),
   cache:'no-store'
- });
+ });}
+ catch{throw Error('Keine Verbindung zur Cloud-API. Bitte Internet und Serverfreigabe prüfen.');}
  let json;
  try{json=await response.json();}
  catch{throw Error('Ungültige Serverantwort (HTTP '+response.status+').');}
