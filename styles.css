@@ -731,3 +731,6 @@ button:hover{filter:brightness(1.06)}
  .sidebar-foot{font-size:11px}
 }
 @media(min-width:1051px){.sidebar #primary-nav{display:flex!important}}
+
+/* v56: hidden form fields must override generic label display styles */
+#form label[hidden] { display: none !important; }
