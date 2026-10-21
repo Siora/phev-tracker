@@ -827,3 +827,73 @@ button:focus-visible,.sidebar nav button:focus-visible{outline:2px solid #62f4e7
 .vehicle-photo-credit{color:#a4d9ed}
 @media(max-width:780px){.sidebar{box-shadow:0 5px 24px #0005}.hero{border-radius:18px}.tile,.analytics-card{border-radius:16px}.main{padding:18px 14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+
+/* V70 — premium automotive cockpit refinement: restrained materials, typography, spacing. */
+:root{--bg:#080e18;--panel:#111e2d;--panel2:#172738;--stroke:#304255;--blue:#56c7d9;--muted:#a3b2c2}
+body{background:radial-gradient(ellipse 70% 60% at 95% -20%,#1b3449 0%,transparent 80%),#080e18;color:#edf3f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:.005em;-webkit-font-smoothing:antialiased}
+body::before{opacity:.3;background-size:64px 64px}
+.app-shell{max-width:1680px}
+.sidebar{background:linear-gradient(165deg,#142232,#0a1421 75%);border-right:1px solid #ffffff12;border-radius:0;box-shadow:8px 0 50px #0003;padding:30px 19px;gap:22px}
+.brand{gap:13px;padding:3px 5px 18px;border-bottom:1px solid #ffffff12}
+.brand-mark{border-radius:14px;background:linear-gradient(145deg,#5fd7dc,#247ba6);box-shadow:0 6px 20px #0a9bba30;font-size:24px}
+.brand strong{font-size:20px;font-weight:750;letter-spacing:-.7px}
+.brand small{font-size:11px;letter-spacing:.06em}
+.sidebar nav{gap:5px}
+.sidebar nav button{font-weight:550;font-size:14px;padding:13px 15px;border-radius:12px;transition:background .18s,border-color .18s,transform .18s}
+.sidebar nav button:hover{transform:translateX(2px)}
+.sidebar nav button.active{background:linear-gradient(95deg,#1d5268,#18364c);border:1px solid #75d4df44;box-shadow:inset 3px 0 #78e4e4,0 8px 18px #0002}
+.sidebar-foot{padding:18px;background:#ffffff06;border:1px solid #ffffff16;border-radius:17px}
+.main{padding:34px clamp(18px,3vw,52px) 70px}
+.topbar{margin-bottom:26px;align-items:center}
+.topbar h1{font-size:clamp(28px,3vw,42px);font-weight:750;letter-spacing:-1.5px;line-height:1.12}
+.topbar small{font-size:10px;font-weight:700;letter-spacing:.19em;color:#8ebfcb}
+.topbar-badge{font-size:12px;letter-spacing:.02em;border-radius:100px;padding:11px 16px;background:#162938;border-color:#ffffff1f;box-shadow:none}
+h2{font-weight:700;letter-spacing:-.5px}
+.dashboard-label{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:#8ea6b7;margin:30px 0 15px}
+.hero{min-height:245px;padding:30px clamp(22px,3vw,42px);border-radius:24px;border:1px solid #7fb1c52d;background:radial-gradient(ellipse at 78% 50%,#2a54605e,transparent 65%),linear-gradient(115deg,#1a3444,#0e1b2b 68%);box-shadow:0 20px 60px #0005,inset 0 1px #ffffff20}
+.hero::after{content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;background:linear-gradient(125deg,#ffffff08,transparent 45%);z-index:0}
+.hero>div{position:relative;z-index:1}
+.hero h2{font-size:clamp(26px,3.1vw,43px);font-weight:740;line-height:1.08;letter-spacing:-1.3px;text-shadow:none}
+.hero small{letter-spacing:.12em;font-size:11px;color:#a5c4ce}
+.car-art{max-width:450px}
+.vehicle-photo{border-radius:15px}
+.grid{gap:16px}
+.tile,.analytics-card,.chart,.quick-card,#entries,#add,#csv,#options,#vehicles,#cloud,#charging-management{background:linear-gradient(155deg,#172637,#101c2b);border:1px solid #ffffff16;box-shadow:0 12px 35px #0003,inset 0 1px #ffffff09;border-radius:20px}
+.tile{min-height:128px;padding:21px 20px;transition:transform .18s,border-color .18s,box-shadow .18s}
+.tile:hover{transform:translateY(-2px);border-color:#74d8e448;box-shadow:0 18px 35px #0005}
+.tile:nth-child(n){border-top:1px solid #ffffff16}
+.tile::before{content:"";display:block;width:27px;height:3px;border-radius:3px;background:linear-gradient(90deg,#63d8d7,#2b86af);margin-bottom:9px}
+.tile:nth-child(3n+2)::before{background:linear-gradient(90deg,#83a9e9,#b4baf6)}
+.tile:nth-child(3n+3)::before{background:linear-gradient(90deg,#d5aa69,#f1d49d)}
+.tile small{font-size:12px;letter-spacing:.02em}
+.tile b{font-size:clamp(24px,2.6vw,34px);font-weight:740;letter-spacing:-1px;color:#f4f9fb;text-shadow:none;margin-top:9px;font-variant-numeric:tabular-nums}
+.analytics-card,.quick-card,.chart{padding:clamp(19px,2vw,28px)}
+.analytics-grid{gap:18px}
+.chart-heading h2{font-size:18px;letter-spacing:-.4px}
+input,select,textarea{background:#101f30;border:1px solid #42576a;border-radius:12px;color:#edf7fb;min-height:47px;transition:border-color .16s,box-shadow .16s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:#65d8df;box-shadow:0 0 0 3px #50cadb24}
+button{border-radius:12px;background:linear-gradient(110deg,#247e9e,#2d9fb1);border:1px solid #ffffff16;box-shadow:0 5px 14px #0002;font-weight:650;transition:filter .16s,transform .16s}
+button:active{transform:scale(.985)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.management-table th,.entry-history-table th{background:#1b3042;color:#bfe3e9;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.management-table td,.entry-history-table td{line-height:1.5}
+.management-table tbody tr:nth-child(even),.entry-history-table tbody tr:nth-child(even){background:#152638}
+.management-table tbody tr:hover{background:#20384b}
+#vehicle-list,#managed-locations-list,#managed-providers-list,#cloud-users{border-color:#ffffff1c;border-radius:16px}
+#vehicle-summary:not(:empty){background:#183242;border-color:#5bafc034;color:#d2e8f0}
+#cloud-sync-indicator{font-variant-numeric:tabular-nums}
+@media(max-width:780px){
+ .main{padding:18px 14px 54px}
+ .sidebar{padding:16px;border-radius:0}
+ .brand{padding-bottom:12px}
+ .topbar{gap:9px;margin-bottom:18px}
+ .topbar h1{font-size:27px}
+ .topbar-badge{font-size:11px;padding:9px 11px}
+ .hero{min-height:190px;padding:22px 18px;border-radius:20px}
+ .hero h2{font-size:clamp(23px,6vw,32px)}
+ .tile{min-height:105px;padding:16px}
+ .tile b{font-size:clamp(21px,5vw,28px)}
+ .grid{gap:10px}
+ .analytics-card,.quick-card,.chart{padding:18px}
+}
