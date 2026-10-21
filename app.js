@@ -214,16 +214,44 @@ function render(){
   if(!recent.children.length)recent.textContent='Noch keine Einträge im Zeitraum.';
   const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
   const compare=$('month-compare');compare.replaceChildren();const monthsMap=new Map();filtered.forEach(r=>{const month=r.date.slice(0,7);monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));});const maxMonth=Math.max(1,...monthsMap.values());[...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{const line=document.createElement('div');line.className='compare-row';const label=document.createElement('span');label.textContent=month;const track=document.createElement('div');track.className='compare-track';const bar=document.createElement('div');bar.className='compare-fill';bar.style.width=(value/maxMonth*100)+'%';track.append(bar);const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);line.append(label,track,amount);compare.append(line);});if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
-  $('entries').replaceChildren();
-  filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
-    let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+(x.type==='charge'&&getChargeMode(x.id)?' · '+getChargeMode(x.id):'')+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
+  // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
+  const entries=$('entries');
+  entries.replaceChildren();
+  const table=document.createElement('table');
+  table.className='entry-history-table';
+  const head=document.createElement('thead'),heading=document.createElement('tr');
+  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
+    const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
+  }
+  head.append(heading);table.append(head);
+  const tbody=document.createElement('tbody');
+  const ordered=records.slice().sort(compareRecordDateTime);
+  if(!ordered.length){
+    const tr=document.createElement('tr'),td=document.createElement('td');
+    td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
+  }
+  for(const x of ordered){
+    const tr=document.createElement('tr');
+    const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
+    const values=[
+      recordDateTime(x),
+      x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
+      vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
+      String(x.amount)+(x.type==='charge'?' kWh':' l'),
+      fmt(x.cost,x.currency),
+      x.place||'–'
+    ];
+    for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
+    const actions=document.createElement('td');actions.className='entry-table-actions';
+    const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+    edit.onclick=()=>{
       let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-    };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
-      if(confirm('Eintrag löschen?')){
-        records=records.filter(r=>r.id!==x.id);save()
-      }
-    };div.append(btn);$('entries').append(div)
-  })
+    };
+    const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
+    remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
+    actions.append(edit,remove);tr.append(actions);tbody.append(tr);
+  }
+  table.append(tbody);entries.append(table);
 }
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g,c=>({
