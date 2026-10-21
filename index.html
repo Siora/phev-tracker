@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=60">
+<link rel="stylesheet" href="styles.css?v=61">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -155,12 +155,6 @@
 <h2>Meine Fahrzeuge</h2>
 <p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
 <div id="vehicle-list"></div>
-<h3>Bestehende Einträge zuordnen</h3>
-<p>Wähle ein Fahrzeug und übertrage alle bisher nicht zugeordneten Einträge. Bestehende Zuordnungen bleiben unverändert.</p>
-<label>Ziel-Fahrzeug<select id="bulkVehicle"><option value="">Fahrzeug auswählen</option></select></label>
-<p id="bulk-count"></p>
-<button type="button" id="bulk-assign">Nicht zugeordnete Einträge übernehmen</button>
-<p id="bulk-status" role="status"></p>
 <h3>Fahrzeug hinzufügen / bearbeiten</h3>
 <form id="vehicle-form">
 <label>Marke<input name="brand" maxlength="100" required></label>
@@ -256,8 +250,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=60" defer></script>
-<script src="app.js?v=60" defer>
+<script src="cloud.js?v=61" defer></script>
+<script src="app.js?v=61" defer>
 </script>
 </main>
 </div>
