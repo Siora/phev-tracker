@@ -107,13 +107,35 @@ async function loadVehicles(){
     try{await cloudCall('vehicle-delete',{id:v.id});await loadVehicles();}catch(e){ce('vehicle-status').textContent=e.message;}
    };
    const photo=document.createElement('button');
-   photo.type='button';photo.textContent='Foto festlegen';
+   photo.type='button';photo.textContent='Bild hochladen';
    photo.onclick=()=>{
-    const previous=localStorage.getItem('phev-photo-'+v.id)||'';
-    const url=prompt('HTTPS-Adresse eines Fahrzeugfotos eingeben. Leer lassen, um wieder das automatische Bild zu verwenden:',previous);
-    if(url===null)return;
-    try{window.setVehiclePhoto(v.id,url);ce('vehicle-status').textContent=url.trim()?'Fahrzeugfoto gespeichert.':'Automatische Bildauswahl wieder aktiviert.';}
-    catch(error){ce('vehicle-status').textContent=error.message;}
+    const picker=document.createElement('input');
+    picker.type='file';picker.accept='image/jpeg,image/png,image/webp';picker.style.display='none';
+    document.body.append(picker);
+    picker.onchange=async()=>{
+     const file=picker.files?.[0];picker.remove();
+     if(!file)return;
+     if(!['image/jpeg','image/png','image/webp'].includes(file.type)){ce('vehicle-status').textContent='Bitte JPEG, PNG oder WebP auswählen.';return;}
+     if(file.size>5000000){ce('vehicle-status').textContent='Das Bild darf höchstens 5 MB gross sein.';return;}
+     photo.disabled=true;ce('vehicle-status').textContent='Bild wird hochgeladen …';
+     try{
+      const body=new FormData();body.append('vehicle_id',String(v.id));body.append('photo',file);
+      const headers=/^[a-f0-9]{64}$/.test(cloudToken||'')?{'Authorization':'Bearer '+cloudToken}:{};
+      const response=await fetch(cloudApi+'?action=vehicle-photo-upload',{method:'POST',credentials:'same-origin',headers,body,cache:'no-store'});
+      const result=await response.json();
+      if(!response.ok||!result.photo_url)throw Error(result.error||'Bild-Upload fehlgeschlagen');
+      const url=new URL(result.photo_url,location.origin).href;
+      const current=window.collectCloudPreferences();
+      const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{}),[String(v.id)]:url}};
+      await cloudCall('preferences',{preferences:merged});
+      cloudPreferences=merged;cloudPreferencesReady=true;
+      window.setVehiclePhoto(v.id,url);
+      ce('vehicle-status').textContent='Fahrzeugbild auf dem Server gespeichert.';
+     }catch(error){ce('vehicle-status').textContent='Bild konnte nicht vollständig gespeichert werden: '+error.message;}
+     finally{photo.disabled=false;}
+    };
+    picker.oncancel=()=>picker.remove();
+    picker.click();
    };
 
    actions.append(edit,photo,del);row.append(actions);tbody.append(row);
