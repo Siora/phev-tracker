@@ -925,3 +925,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
 #home .compare-track{background:#24384a}
 #home .compare-fill{background:linear-gradient(90deg,#2a9cc4,#60d5cb)}
 @media(max-width:780px){#home .fleet-row{padding:15px 16px}#home .action-buttons button{min-height:48px;padding:12px 9px}}
+
+/* V72 — consumption insight cards */
+.consumption-insights{margin:20px 0}
+.insights-intro{color:#b0c3d0;margin:0 0 16px}
+#consumption-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.insight-item{display:flex;flex-direction:column;gap:8px;padding:18px;border:1px solid #45617480;border-radius:16px;background:linear-gradient(145deg,#1b3445,#122536);min-width:0}
+.insight-item strong{font-size:12px;font-weight:650;color:#a6c9d5;letter-spacing:.03em}
+.insight-item b{font-size:clamp(19px,2vw,26px);font-weight:750;letter-spacing:-.5px;color:#eefaff;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.insight-item small{font-size:12px;line-height:1.5;color:#b1c3d0;overflow-wrap:anywhere}
+@media(max-width:700px){#consumption-insights{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.insight-item{padding:14px}.insight-item b{font-size:19px}}
