@@ -897,3 +897,31 @@ button:disabled{opacity:.55;cursor:not-allowed}
  .grid{gap:10px}
  .analytics-card,.quick-card,.chart{padding:18px}
 }
+
+
+/* V71 — dashboard secondary actions and list surfaces match the premium dark theme. */
+#home .fleet-row,#home .secondary-action,#home .action-buttons button{
+ background:linear-gradient(115deg,#1b3548,#173044);
+ color:#e3f5fc;
+ border:1px solid #42677c;
+ box-shadow:inset 0 1px #ffffff10,0 5px 15px #0002;
+ text-shadow:none;
+ font-weight:650;
+}
+#home .fleet-row{padding:17px 20px;line-height:1.45;text-align:left}
+#home .secondary-action{padding:15px 18px}
+#home .action-buttons button{padding:14px 12px;min-height:51px}
+#home .fleet-row:hover,#home .secondary-action:hover,#home .action-buttons button:hover{
+ background:linear-gradient(115deg,#24465b,#1b4355);
+ border-color:#62c4d0;
+ filter:none;
+}
+#home .fleet-row:focus-visible,#home .secondary-action:focus-visible,#home .action-buttons button:focus-visible{
+ outline:2px solid #78e1e0;outline-offset:3px;
+}
+#home .recent-row{border-color:#2c455a;color:#bdcddd}
+#home .entry-table-section{border-top-color:#2d455a}
+#home .entry-table-scroll{background:#0e1e2e;border-color:#354e61}
+#home .compare-track{background:#24384a}
+#home .compare-fill{background:linear-gradient(90deg,#2a9cc4,#60d5cb)}
+@media(max-width:780px){#home .fleet-row{padding:15px 16px}#home .action-buttons button{min-height:48px;padding:12px 9px}}
