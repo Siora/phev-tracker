@@ -1,0 +1,736 @@
+:root{
+  color-scheme:dark;
+  --bg:#081521;
+  --panel:#112337;
+  --panel2:#172d43;
+  --stroke:#263d52;
+  --blue:#278cff;
+  --muted:#9fb5ca
+}
+*{
+  box-sizing:border-box
+}
+body{
+  margin:0;
+  background:radial-gradient(circle at 90% 0%,#172d48 0%,#081521 55%);
+  color:#f2f7fc;
+  font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  min-height:100vh
+}
+.app-shell{
+  display:grid;
+  grid-template-columns:250px minmax(0,1fr);
+  max-width:1720px;
+  margin:auto;
+  min-height:100vh
+}
+.sidebar{
+  background:linear-gradient(160deg,#152b42,#0c1c2c);
+  border-right:1px solid #274057;
+  padding:24px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  position:sticky;
+  top:0;
+  height:100vh
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+.brand-mark{
+  font-size:25px;
+  background:#173d65;
+  border-radius:12px;
+  padding:10px
+}
+.brand strong{
+  font-size:21px;
+  letter-spacing:-.7px
+}
+.brand small{
+  display:block;
+  margin-top:3px
+}
+.sidebar-car{
+  margin:15px 0 6px
+}
+.sidebar-car svg{
+  width:100%;
+  filter:drop-shadow(0 8px 15px #010811)
+}
+.sidebar nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+.sidebar nav button{
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:0;
+  padding:14px 16px;
+  margin:0;
+  border-radius:10px;
+  color:#d8e6f4;
+  font-size:15px;
+  cursor:pointer
+}
+.sidebar nav button:hover,.sidebar nav button.active{
+  background:linear-gradient(90deg,#1474ed,#409bff);
+  color:white
+}
+.sidebar-foot{
+  margin-top:auto;
+  padding:15px;
+  border:1px solid #30495e;
+  border-radius:13px;
+  font-weight:600
+}
+.sidebar-foot small{
+  font-weight:400
+}
+.sidebar-foot hr{
+  border:0;
+  border-top:1px solid #30495e;
+  margin:13px 0
+}
+.main{
+  padding:24px 30px;
+  min-width:0
+}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:20px
+}
+.topbar h1{
+  font-size:27px;
+  margin:6px 0
+}
+.topbar-badge{
+  background:#16334f;
+  padding:12px 16px;
+  border:1px solid #294d71;
+  border-radius:14px;
+  font-weight:600
+}
+section{
+  background:transparent;
+  margin:0;
+  padding:0
+}
+#add,#csv,#options{
+  max-width:750px;
+  background:var(--panel);
+  padding:24px;
+  border:1px solid var(--stroke);
+  border-radius:18px
+}
+h2{
+  font-size:18px;
+  letter-spacing:-.3px;
+  margin:20px 0 15px
+}
+label{
+  display:block;
+  color:#c9d8e7;
+  font-size:13px;
+  font-weight:600;
+  margin-top:10px
+}
+small{
+  color:var(--muted);
+  font-size:12px
+}
+input,select,button{
+  font:inherit
+}
+input,select{
+  display:block;
+  width:100%;
+  background:#1b3046;
+  color:#f0f6fd;
+  border:1px solid #3b536b;
+  border-radius:9px;
+  padding:12px;
+  margin:7px 0 12px;
+  min-height:45px
+}
+button{
+  background:var(--blue);
+  color:white;
+  border:0;
+  border-radius:9px;
+  padding:12px 16px;
+  cursor:pointer;
+  font-weight:600
+}
+#form button,#options button,#import{
+  margin:10px 0;
+  width:100%
+}
+.hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:205px;
+  padding:20px 26px;
+  border-radius:18px;
+  border:1px solid #29445e;
+  background:radial-gradient(ellipse at 77% 65%,#284c6d,#12253b 70%);
+  overflow:hidden
+}
+.hero h2{
+  font-size:27px;
+  margin:10px 0
+}
+.car-art{
+  width:45%;
+  max-width:420px;
+  min-width:200px
+}
+.car-art svg{
+  width:100%;
+  filter:drop-shadow(0 10px 12px #07121e)
+}
+#home>label,#home>#period,#home>#provider,#customdates{
+  max-width:460px
+}
+#home>#period,#home>#provider{
+  margin-bottom:12px
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px
+}
+.tile{
+  background:linear-gradient(155deg,#172e45,#112237);
+  padding:19px 15px;
+  border-radius:15px;
+  border:1px solid #284056;
+  min-height:112px
+}
+.tile b{
+  display:block;
+  font-size:23px;
+  margin-top:13px;
+  letter-spacing:-.5px
+}
+.tile small{
+  font-size:13px
+}
+.chart{
+  background:linear-gradient(155deg,#152a40,#0e2032);
+  padding:20px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  min-height:100px
+}
+.barrow{
+  display:grid;
+  grid-template-columns:minmax(100px,155px) minmax(0,1fr) 105px;
+  gap:12px;
+  align-items:center;
+  margin:12px 0;
+  font-size:13px
+}
+.barrow span:first-child{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+.barrow span:last-child{
+  text-align:right
+}
+.track{
+  height:17px;
+  background:#263f56;
+  border-radius:5px;
+  overflow:hidden
+}
+.fill{
+  height:100%;
+  background:linear-gradient(90deg,#1679e9,#5aaeff);
+  border-radius:4px
+}
+.fill.fuel{
+  background:linear-gradient(90deg,#e9771c,#ffaf49)
+}
+#entries{
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:15px;
+  padding:4px 17px
+}
+.item{
+  padding:12px 0;
+  border-bottom:1px solid #294259;
+  line-height:1.7
+}
+.item:last-child{
+  border-bottom:0
+}
+.item button{
+  display:inline-block;
+  width:auto;
+  margin:7px 7px 0 0;
+  padding:7px 11px;
+  font-size:12px
+}
+.item button:last-child{
+  background:#713b48
+}
+.hide{
+  display:none!important
+}
+@media(min-width:1150px){
+  #home{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px
+  }
+  #home>.hero,#home>h2:first-of-type,#home>label,#home>#period,#home>#provider,#home>#customdates,#home>#stats{
+    grid-column:1/-1
+  }
+  #home>.hero{
+    margin-bottom:4px
+  }
+  #home>h2{
+    margin:8px 0 0
+  }
+  #home>#stats{
+    margin:4px 0 10px
+  }
+  #home>#monthchart,#home>#costchart,#home>#providerchart{
+    grid-column:auto
+  }
+  #home>#entries{
+    grid-column:1/-1
+  }
+  #home>small{
+    grid-column:1/-1
+  }
+}
+@media(max-width:1050px){
+  .app-shell{
+    grid-template-columns:1fr
+  }
+  .sidebar{
+    position:static;
+    height:auto;
+    padding:14px;
+    gap:12px
+  }
+  .sidebar-car,.sidebar-foot{
+    display:none
+  }
+  .sidebar nav{
+    flex-direction:row;
+    overflow-x:auto
+  }
+  .sidebar nav button{
+    white-space:nowrap;
+    text-align:center;
+    padding:12px 14px
+  }
+  .main{
+    padding:17px
+  }
+  .topbar h1{
+    font-size:23px
+  }
+  .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+}
+@media(max-width:560px){
+  .topbar-badge{
+    display:none
+  }
+  .hero{
+    min-height:150px;
+    padding:16px
+  }
+  .hero h2{
+    font-size:20px
+  }
+  .car-art{
+    min-width:135px;
+    width:49%
+  }
+  .tile{
+    padding:13px;
+    min-height:95px
+  }
+  .tile b{
+    font-size:19px
+  }
+  .barrow{
+    grid-template-columns:90px minmax(0,1fr) 85px;
+    gap:6px;
+    font-size:11px
+  }
+  .chart{
+    padding:12px
+  }
+  .main{
+    padding:12px
+  }
+  .sidebar{
+    padding:12px
+  }
+  .sidebar nav button{
+    font-size:13px
+  }
+  .brand strong{
+    font-size:19px
+  }
+}
+
+
+/* Clean Dark — ruhige Flächen, klare Typografie, dezente Akzente */
+:root {
+  --bg: #0d1118;
+  --panel: #171d26;
+  --panel2: #1e2631;
+  --stroke: #303b49;
+  --blue: #7aaef8;
+  --muted: #a3afbe;
+}
+body {
+  background: #0d1118;
+  color: #edf1f6;
+  line-height: 1.5;
+}
+.sidebar {
+  background: #121821;
+  border-right-color: #27313d;
+}
+.brand-mark { background: #202c3b; }
+.sidebar nav button { color: #cbd5e1; }
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: #26364a;
+  color: #e7f0ff;
+}
+.sidebar-foot {
+  border-color: #303b49;
+  background: #19212c;
+}
+.sidebar-foot hr { border-top-color: #303b49; }
+.topbar h1 { font-weight: 700; letter-spacing: -.8px; }
+.topbar-badge {
+  background: #1d2836;
+  border-color: #354355;
+  color: #cbdcf2;
+}
+#add, #csv, #options {
+  background: var(--panel);
+  border-color: var(--stroke);
+  box-shadow: 0 10px 28px #00000014;
+}
+h2 { font-weight: 650; }
+label { color: #c4cfdb; }
+input, select {
+  background: #202936;
+  border: 1px solid #3a4858;
+  color: #f2f5f9;
+  border-radius: 12px;
+}
+input:focus, select:focus {
+  outline: 2px solid #7aaef8;
+  outline-offset: 1px;
+}
+button {
+  background: #739fe0;
+  color: #0d1826;
+  border-radius: 12px;
+}
+button:hover { filter: brightness(1.08); }
+.hero {
+  background: linear-gradient(130deg, #202b38, #161e28);
+  border-color: #364455;
+  border-radius: 22px;
+}
+.tile {
+  background: #19212c;
+  border: 1px solid #303c4a;
+  border-radius: 17px;
+  box-shadow: 0 6px 20px #00000014;
+}
+
+
+/* Clean Dark Analytics */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 22px 0;
+}
+.analytics-card {
+  min-width: 0;
+  padding: 22px;
+  background: #19212c;
+  border: 1px solid #303c4a;
+  border-radius: 20px;
+}
+.analytics-wide { grid-column: 1 / -1; }
+.chart-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.chart-heading h2 { margin: 4px 0; }
+.chart-heading select { width: auto; min-width: 150px; margin: 0; }
+.interactive-chart { min-width: 0; }
+.chart-empty, .chart-hint { color: #a3afbe; font-size: 12px; }
+.trend-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-height: 215px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+.trend-item {
+  flex: 1 0 42px;
+  max-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.trend-amount, .trend-label { font-size: 11px; color: #c7d3e0; white-space: nowrap; }
+.trend-track {
+  width: min(100%, 46px);
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid #405063;
+}
+.trend-bar {
+  width: 100%;
+  background: linear-gradient(0deg, #5b92e3, #a6cbff);
+  border-radius: 7px 7px 0 0;
+  cursor: help;
+}
+.trend-bar:focus, .provider-fill:focus { outline: 2px solid #f1f5f9; outline-offset: 2px; }
+.donut-layout { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.donut-ring {
+  width: 175px;
+  height: 175px;
+  border-radius: 50%;
+  padding: 23px;
+  flex-shrink: 0;
+}
+.donut-center {
+  background: #19212c;
+  border-radius: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+}
+.donut-center strong { font-size: 16px; }
+.donut-legend { flex: 1; min-width: 135px; }
+.legend-row { display: flex; justify-content: space-between; gap: 12px; margin: 14px 0; }
+.legend-name::before { content: '●'; margin-right: 8px; }
+.legend-name.electric::before { color: #8ab7ff; }
+.legend-name.petrol::before { color: #e6ae73; }
+#pricechart svg { display: block; width: 100%; height: auto; }
+.line-labels { display: flex; justify-content: space-between; gap: 4px; overflow-x: auto; }
+.line-labels span { font-size: 10px; color: #a3afbe; cursor: help; }
+.provider-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 180px) minmax(0, 1fr) 90px;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.provider-label { overflow-wrap: anywhere; }
+.provider-track { background: #2b3949; height: 14px; border-radius: 8px; overflow: hidden; }
+.provider-fill { height: 100%; background: #8ab7ff; border-radius: 8px; cursor: help; }
+.provider-value { text-align: right; }
+@media (max-width: 780px) {
+  .analytics-grid { grid-template-columns: minmax(0, 1fr); }
+  .analytics-wide { grid-column: auto; }
+  .analytics-card { padding: 16px; }
+  .chart-heading { align-items: flex-start; flex-wrap: wrap; }
+  .donut-ring { width: 145px; height: 145px; padding: 20px; }
+  .provider-row { grid-template-columns: minmax(75px, 115px) minmax(0, 1fr) 70px; gap: 6px; }
+}
+
+
+/* ================================================================
+ * DESIGN V23: Helles Dashboard, Navigation und responsive Karten
+ * Frühere Styles bleiben als Basis erhalten; spätere Blöcke überschreiben sie.
+ * ================================================================ */
+/* V23 – helles, mobiles Dashboard nach Designvorlage */
+:root{color-scheme:light;--bg:#f1f6fc;--panel:#fff;--panel2:#f5f9ff;--stroke:#dce7f2;--blue:#2379ed;--muted:#637790}
+body{background:linear-gradient(135deg,#f8fbff,#eaf3fb 65%,#f8fbff);color:#142443;line-height:1.55}
+.app-shell{max-width:1900px;grid-template-columns:240px minmax(0,1fr);gap:0}
+.sidebar{background:linear-gradient(165deg,#102c49,#091e33);border-right:0;color:#f5f9ff;border-radius:0 20px 20px 0;box-shadow:5px 0 25px #183d6014}
+.brand-mark{background:#2cc773;color:white;border-radius:50%;font-size:23px}
+.brand small,.sidebar small{color:#a9bfd4}
+.sidebar nav button{color:#dce9f5;border-radius:12px;transition:background .2s}
+.sidebar nav button:hover,.sidebar nav button.active{background:linear-gradient(100deg,#1663c7,#328efa);color:#fff;box-shadow:0 5px 16px #030f2040}
+.sidebar-foot{background:#ffffff0d;border-color:#ffffff29;overflow-wrap:anywhere}
+.sidebar-foot hr{border-top-color:#ffffff29}
+.main{padding:26px clamp(14px,2.5vw,40px)}
+.topbar h1{font-size:clamp(24px,2.5vw,36px);font-weight:800;letter-spacing:-1px}
+.topbar-badge{background:#fff;border:1px solid #dce7f2;color:#153154;box-shadow:0 5px 18px #1939550c}
+h2{color:#132b4d;font-weight:750}
+small{color:#667c97}
+label{color:#334b68}
+input,select,textarea{background:#f8fbff;color:#182f50;border:1px solid #d5e2ef;border-radius:11px;box-shadow:0 1px 2px #0c2a4708}
+input:focus,select:focus,textarea:focus{outline:2px solid #69a8fa;outline-offset:1px}
+button{background:linear-gradient(100deg,#1e75e8,#398fff);color:#fff;border-radius:11px;box-shadow:0 3px 10px #246cba16}
+button:hover{filter:brightness(1.06)}
+.hero{background:linear-gradient(110deg,#fff,#e9f5ff);border:1px solid #dce8f4;border-radius:22px;min-height:170px;box-shadow:0 6px 22px #1641670a}
+.hero h2{color:#112d50}
+.car-art svg{filter:drop-shadow(0 10px 13px #3d5a7755)}
+.grid{gap:14px}
+.tile{background:#fff;border:1px solid #e2eaf3;border-radius:19px;box-shadow:0 7px 20px #1b46700c;min-height:120px;padding:19px}
+.tile b{color:#112749;font-size:clamp(20px,2vw,28px)}
+.tile:nth-child(8n+1){border-top:4px solid #38c871}
+.tile:nth-child(8n+2){border-top:4px solid #3b95ff}
+.tile:nth-child(8n+3){border-top:4px solid #ffbb4d}
+.tile:nth-child(8n+4){border-top:4px solid #38c871}
+.analytics-grid{gap:15px}
+.analytics-card{background:#fff;border:1px solid #e0e9f2;border-radius:20px;box-shadow:0 6px 22px #1b46700d}
+.chart-heading h2{color:#142c4d}
+.chart-empty,.chart-hint,.trend-label,.trend-amount,.line-labels span{color:#617791}
+.trend-track{border-bottom-color:#d8e4f0}
+.trend-bar{background:linear-gradient(0deg,#27bf69,#83e5a9)}
+.donut-center{background:#fff;color:#183154}
+.legend-name.electric::before{color:#39c76d}
+.legend-name.petrol::before{color:#3d95fa}
+.provider-track,.track{background:#eaf1f8}
+.provider-fill{background:linear-gradient(90deg,#33c875,#84e3a6)}
+#entries{background:#fff;border:1px solid #dfe9f3;border-radius:20px;box-shadow:0 5px 20px #1b46700c}
+.item{border-bottom:1px solid #e5edf5;color:#274361}
+.item button:last-child{background:#fff1f1;color:#b83245;border:1px solid #f5d8dc;box-shadow:none}
+#add,#csv,#options,#vehicles,#cloud{background:#fff;border:1px solid #dce8f4;border-radius:22px;padding:clamp(16px,2.5vw,28px);box-shadow:0 8px 25px #1b46700c}
+#vehicle-summary:not(:empty){background:#eff8ff;border:1px solid #d5eafa;border-radius:15px;padding:10px 18px;margin:12px 0;color:#244b6c}
+#vehicle-summary p{margin:6px 0}
+#vehicle-list p{background:#f3f8fd;border:1px solid #e1eaf3;border-radius:13px;padding:12px}
+#vehicle-list button{margin:4px}
+#home>label{font-weight:700}
+@media(min-width:1150px){
+ #home{display:block}
+ #home>.hero{margin-bottom:20px}
+ #home>.grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #home>.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1050px){
+ .app-shell{grid-template-columns:1fr}
+ .sidebar{border-radius:0 0 20px 20px;position:static;height:auto;padding:14px 16px;gap:12px}
+ .sidebar nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}
+ .sidebar nav button{flex:0 0 auto}
+ .sidebar-foot{display:block;margin-top:0;padding:8px 12px;font-size:12px}
+ .sidebar-foot hr{display:none}
+ .sidebar-car{display:none}
+ .main{padding:16px}
+}
+@media(max-width:560px){
+ .topbar{align-items:flex-start;flex-wrap:wrap}
+ .topbar-badge{display:block;font-size:12px;padding:9px 12px}
+ .brand strong{font-size:20px}
+ .hero{min-height:145px;padding:15px}
+ .hero h2{font-size:20px;overflow-wrap:anywhere}
+ .car-art{min-width:105px;width:38%}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .tile{padding:13px;min-height:103px}
+ .tile b{font-size:20px;overflow-wrap:anywhere}
+ .analytics-card{padding:15px}
+ .donut-ring{width:145px;height:145px}
+ .sidebar nav button{font-size:13px;padding:10px 12px}
+ .main{padding:12px}
+ .topbar h1{font-size:25px}
+}
+
+
+/* ================================================================
+ * DESIGN V24: Dashboard-Schnellformulare, Fahrzeug- und Monatskarten
+ * ================================================================ */
+/* V24 – Layout der Referenz mit echten Live-Daten */
+#home{display:flex;flex-direction:column;gap:14px}
+#home>.hero{order:0}
+#home>.dashboard-label{order:1;margin:0}
+#home>label,#home>#period,#home>#vehicleFilter,#home>#provider,#home>#customdates{order:2}
+#home>#vehicle-summary{order:3}
+#home>#stats{order:4}
+#home>.analytics-grid{order:5}
+#home>.dashboard-actions{order:6}
+#home>.dashboard-bottom{order:7}
+#home>small{order:8}
+#home>h2:last-of-type,#home>#entries{order:9}
+.dashboard-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.dashboard-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quick-card{min-width:0;background:#fff;border:1px solid #e1eaf3;border-radius:20px;padding:18px;box-shadow:0 6px 20px #1b46700d}
+.quick-card h2{margin:0 0 16px;font-size:17px}
+.quick-charge{background:linear-gradient(145deg,#f0fff6,#fff 75%)}
+.quick-fuel{background:linear-gradient(145deg,#eef7ff,#fff 75%)}
+.quick-form label{font-size:12px;margin-top:10px}
+.quick-form input,.quick-form select{min-height:40px;padding:9px;margin:5px 0}
+.quick-form button{width:100%;margin-top:10px;background:linear-gradient(90deg,#26b65b,#35ca72)}
+.quick-fuel button{background:linear-gradient(90deg,#1d75e8,#388ff8)}
+.recent-row{padding:12px 0;border-bottom:1px solid #e4edf5;font-size:13px;color:#38516c}
+.fleet-row{display:block;width:100%;text-align:left;background:#f0f7ff;color:#163d66;border:1px solid #dceaf8;margin:8px 0;box-shadow:none}
+.secondary-action{width:100%;background:#eff6ff;color:#1767c6;border:1px solid #d8e8f9;margin-top:15px;box-shadow:none}
+.action-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.action-buttons button{background:#f0f7ff;color:#195d9c;border:1px solid #dce9f5;box-shadow:none}
+.compare-row{display:grid;grid-template-columns:75px 1fr 100px;align-items:center;gap:8px;margin:14px 0;font-size:12px}
+.compare-row strong{text-align:right;font-size:12px}
+.compare-track{height:13px;border-radius:6px;background:#eaf0f7;overflow:hidden}
+.compare-fill{height:100%;border-radius:6px;background:#80b8fa}
+#home>.analytics-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin:0}
+#home>.analytics-grid>.analytics-card{grid-column:auto}
+#home>.analytics-grid>.analytics-card:first-child{grid-column:span 2}
+#home>.analytics-grid>.analytics-card:last-child{grid-column:span 2}
+#home>#stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1300px){.dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:span 2}}
+@media(max-width:780px){.dashboard-bottom{grid-template-columns:1fr}#home>.analytics-grid{grid-template-columns:1fr}#home>.analytics-grid>.analytics-card:first-child,#home>.analytics-grid>.analytics-card:last-child{grid-column:auto}}
+@media(max-width:560px){.dashboard-actions{grid-template-columns:1fr}#home>#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-card{padding:16px}}
+
+/* ================================================================
+ * DESIGN V25: Modellbezogene Fahrzeugfotos und responsive Platzhalter
+ * ================================================================ */
+/* Version 25: realistische, modellbezogene Fahrzeugbilder */
+.car-art,.sidebar-car{position:relative}
+.car-art{min-width:220px;max-width:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.vehicle-photo{display:block;width:100%;max-height:235px;object-fit:contain;border-radius:12px;filter:drop-shadow(0 9px 12px #1b42602c)}
+.sidebar-car .vehicle-photo{max-height:125px}
+.vehicle-photo[hidden],.vehicle-photo-fallback[hidden],.vehicle-photo-credit[hidden]{display:none!important}
+.vehicle-photo-fallback{display:grid;place-items:center;font-size:80px;min-height:125px;opacity:.7}
+.sidebar-car .vehicle-photo-fallback{font-size:60px}
+.vehicle-photo-credit{font-size:10px;color:#536d87;text-align:center;margin-top:4px;text-decoration:underline}
+@media(max-width:560px){.car-art{min-width:110px;max-width:45%}.vehicle-photo{max-height:145px}.vehicle-photo-fallback{font-size:48px;min-height:85px}.vehicle-photo-credit{font-size:9px}}
+
+/* Mobile navigation: large touch targets and explicit expandable menu. */
+.mobile-menu-toggle{display:none}
+@media(max-width:1050px){
+ .sidebar{position:relative;z-index:5}
+ .mobile-menu-toggle{display:block;width:100%;min-height:48px;text-align:left;font-size:16px;font-weight:700;padding:12px 16px;background:#236fd0;color:#fff}
+ .sidebar #primary-nav{display:none;flex-direction:column;overflow:visible;width:100%;gap:7px}
+ .sidebar #primary-nav.menu-open{display:flex}
+ .sidebar #primary-nav button{display:block;width:100%;min-height:48px;flex:auto;text-align:left;padding:12px 16px;font-size:15px;white-space:normal}
+ .sidebar-foot{font-size:11px}
+}
+@media(min-width:1051px){.sidebar #primary-nav{display:flex!important}}
+
+/* v56: hidden form fields must override generic label display styles */
+#form label[hidden] { display: none !important; }
