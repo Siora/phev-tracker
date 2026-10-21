@@ -234,7 +234,36 @@ ce('cloud-upload').onclick=async()=>{
  finally{btn.disabled=false;}
 };
 
-(async()=>{try{const saved=JSON.parse(localStorage.getItem(sessionKey)||'null');if(!saved?.token)return;cloudToken=saved.token;await loadCloudOverview();showAccount(saved.email,saved.role);cs('Sitzung wiederhergestellt.');if(saved.role==='admin')await cloudUsers();}catch(e){if(e.message==='Sitzung abgelaufen'||e.message==='Anmeldung erforderlich'){cloudToken=null;localStorage.removeItem(sessionKey);window.showLocalRecords();document.body.classList.add('login-locked');cs('Bitte erneut anmelden.');}else {const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const cached=JSON.parse(localStorage.getItem('phev-cache-'+email)||'[]');if(cached.length){window.showCloudRecords(cached);showAccount(saved.email,saved.role);document.body.classList.add('login-locked');loadVehicles();cs('Offline: gespeicherte Einträge verfügbar.');}else cs('Cloud momentan nicht erreichbar.');}}})();
+(async()=>{
+ let saved=null;
+ try{
+  saved=JSON.parse(localStorage.getItem(sessionKey)||'null');
+  if(!saved?.token)return;
+  cloudToken=saved.token;
+  await loadCloudOverview();
+  showAccount(saved.email,saved.role);
+  cs('Sitzung wiederhergestellt.');
+  if(saved.role==='admin')await cloudUsers();
+ }catch(e){
+  const message=String(e?.message||'');
+  if(message==='Sitzung abgelaufen'||message==='Anmeldung erforderlich'){
+   cloudToken=null;
+   localStorage.removeItem(sessionKey);
+   window.showLocalRecords();
+   document.body.classList.add('login-locked');
+   cs('Die Serversitzung ist abgelaufen. Bitte erneut anmelden.');
+  }else{
+   // A temporary network/server error is not a logout: keep the token and pending changes.
+   let cached=[];
+   try{cached=JSON.parse(localStorage.getItem('phev-cache-'+saved?.email)||'[]');}catch{}
+   if(saved?.email&&saved?.role)showAccount(saved.email,saved.role);
+   if(cached.length)window.showCloudRecords(cached);
+   cs('Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.');
+   syncError=message||'Verbindung unterbrochen';
+   updateSyncIndicator();
+  }
+ }
+})();
 
 
 window.scheduleCloudPreferences=function(){
