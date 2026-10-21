@@ -293,6 +293,17 @@ ce('cloud-upload').onclick=async()=>{
  }
 })();
 
+window.saveVehicleExpenses=async function(items){
+ if(!cloudToken||!cloudPreferencesReady)throw Error('Bitte anmelden und Cloud-Daten vollständig laden.');
+ if(!Array.isArray(items)||items.some(x=>!x||!x.vehicle_id||!x.date||!Number.isFinite(Number(x.amount))||Number(x.amount)<=0))throw Error('Ungültige Ausgabendaten.');
+ // Commit remotely first. Keep the existing list untouched if the request fails.
+ const current=window.collectCloudPreferences();
+ const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})},vehicle_expenses:items};
+ await cloudCall('preferences',{preferences:merged});
+ cloudPreferences=merged;
+ window.setVehicleExpenses(items);
+ cs('Fahrzeugkosten in der Cloud gespeichert.');
+};
 window.scheduleCloudPreferences=function(){
  if(!cloudPreferencesReady||!cloudToken)return;
  clearTimeout(preferencesTimer);
