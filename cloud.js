@@ -44,7 +44,36 @@ async function cloudCall(action,data){
  if(!response.ok)throw Error(json.error||'Serverfehler');
  return json;
 }
-async function loadCloudOverview(){syncError='';updateSyncIndicator();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+
+let catalogSynced={locations:[],providers:[]};
+async function loadChargingCatalog(){
+ const catalog=await cloudCall('charging-catalog');
+ window.setManagedCharging(catalog);
+ catalogSynced=structuredClone(catalog);
+}
+window.syncManagedCharging=async function(next){
+ if(!cloudToken)return;
+ syncingPreferences=true;updateSyncIndicator();
+ try{
+  for(const category of ['locations','providers']){
+   const previous=catalogSynced[category]||[];
+   const current=next[category]||[];
+   for(const item of current){
+    const old=previous.find(x=>x.id===item.id);
+    if(!old || old.name!==item.name || (old.kind||'')!==(item.kind||'') || String(old.price??'')!==String(item.price??'')){
+     await cloudCall('charging-catalog-save',{category,entry:item});
+    }
+   }
+   for(const item of previous)if(!current.some(x=>x.id===item.id))await cloudCall('charging-catalog-delete',{category,id:item.id});
+  }
+  catalogSynced=structuredClone(next);
+  syncError='';
+  ce('managed-charging-status').textContent='Ladeorte und Anbieter in MySQL synchronisiert.';
+ }catch(e){syncError=e.message;ce('managed-charging-status').textContent='Cloud-Speicherung fehlgeschlagen: '+e.message;}
+ finally{syncingPreferences=false;updateSyncIndicator();}
+};
+
+async function loadCloudOverview(){syncError='';updateSyncIndicator();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();await loadChargingCatalog();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
 async function loadVehicles(){
  try {
