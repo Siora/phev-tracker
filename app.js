@@ -212,7 +212,7 @@ function render(){
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+(x.type==='charge'&&getChargeMode(x.id)?' · '+getChargeMode(x.id):'')+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -234,6 +234,30 @@ for(let i=new Date().getFullYear();i>=2020;i--)$('chosenYear').add(new Option(i,
 $('form').elements.date.value=new Date().toISOString().slice(0,10);
 $('form').elements.time.value=localClock();
 // Neuer Lade-/Tank-Eintrag oder Aktualisierung eines vorhandenen Eintrags.
+
+// v51: Preis pro Einheit ist ein Eingabehelfer; die Gesamtkosten bleiben das gespeicherte Cloud-Feld.
+function setUnitPriceFromTotal(form){
+ const amount=Number(form.elements.amount.value),cost=Number(form.elements.cost.value);
+ form.elements.unit_price.value=amount>0&&Number.isFinite(cost)?String(Math.round(cost/amount*1000000)/1000000):'';
+}
+function installPriceCalculator(form){
+ const amount=form.elements.amount,unit=form.elements.unit_price,cost=form.elements.cost;
+ if(!amount||!unit||!cost)return;
+ let mode='total';
+ function calculate(){
+  if(mode!=='unit'||unit.value==='')return;
+  const qty=Number(amount.value),price=Number(unit.value);
+  if(!Number.isFinite(qty)||!Number.isFinite(price)||qty<0||price<0)return;
+  cost.value=(Math.round((qty*price+Number.EPSILON)*100)/100).toFixed(2);
+ }
+ unit.addEventListener('input',()=>{mode=unit.value===''?'total':'unit';calculate();});
+ amount.addEventListener('input',calculate);
+ cost.addEventListener('input',()=>{mode='total';});
+ form.addEventListener('reset',()=>{mode='total';});
+}
+installPriceCalculator($('form'));
+document.querySelectorAll('.quick-form').forEach(installPriceCalculator);
+
 $('form').onsubmit=e=>{
   e.preventDefault();
   let f=new FormData(e.target),x={
