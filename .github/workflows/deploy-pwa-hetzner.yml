@@ -1,0 +1,85 @@
+name: Deploy PWA to Hetzner
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "PWA-Dateien wirklich hochladen? (false = nur Verbindung testen)"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hetzner-pwa-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PWA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify server identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -T 15 -p 22 -t ed25519 www35.your-server.de > ~/.ssh/known_hosts
+          test -s ~/.ssh/known_hosts
+          fingerprint="$(ssh-keygen -lf ~/.ssh/known_hosts -E sha256 | awk '{print $2}')"
+          test "$fingerprint" = "SHA256:xhMd3PNSYd8mVB6yDCUsNN6maH9YyXhAAy2PQGL9cts" || { echo "Host fingerprint mismatch"; exit 1; }
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Prepare private deployment key
+        env:
+          DEPLOY_KEY: ${{ secrets.HETZNER_SFTP_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_KEY"
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
+
+      - name: Check destination (no upload)
+        env:
+          SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
+          SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
+          SFTP_DIR: ${{ vars.HETZNER_PWA_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$SFTP_HOST" = "www35.your-server.de"
+          test -n "$SFTP_USER"
+          test "$SFTP_DIR" = "public_html/phev-tracker"
+          printf 'cd "%s"\npwd\nls -la\n' "$SFTP_DIR" > /tmp/check.batch
+          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check.batch "$SFTP_USER@$SFTP_HOST"
+
+      - name: Upload only PWA files (never api/)
+        if: ${{ inputs.upload }}
+        env:
+          SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
+          SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
+          SFTP_DIR: ${{ vars.HETZNER_PWA_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest; do
+            test -f "$file"
+          done
+          {
+            printf 'cd "%s"\n' "$SFTP_DIR"
+            for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest; do
+              printf 'put "%s"\n' "$file"
+            done
+          } > /tmp/upload.batch
+          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload.batch "$SFTP_USER@$SFTP_HOST"
