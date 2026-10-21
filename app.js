@@ -202,6 +202,7 @@ function render(){
   let all=records.filter(x=>{
     let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
+  renderVehicleExpenses();
   const summary=$('vehicle-summary');summary.replaceChildren();
   if(selectedVehicle&&selectedVehicle!=='none'){
    const v=vehicles.find(v=>String(v.id)===selectedVehicle);
