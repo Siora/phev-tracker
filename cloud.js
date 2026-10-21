@@ -79,6 +79,8 @@ async function loadVehicles(){
  try {
   const data=await cloudCall('vehicles');
   window.setVehicles(data.vehicles);
+  const accountEmail=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
+  if(accountEmail)localStorage.setItem('phev-vehicles-cache-'+accountEmail,JSON.stringify(data.vehicles));
   ce('vehicle-status').textContent=data.vehicles.length+' Fahrzeuge in deinem Konto.';
   const list=ce('vehicle-list');list.replaceChildren();
   const table=document.createElement('table');table.className='management-table vehicle-management-table';
@@ -226,6 +228,13 @@ ce('cloud-upload').onclick=async()=>{
   if(!saved?.token){ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');return;}
   cloudToken=saved.token;
   showAccount(saved.email,saved.role);
+  // Restore last confirmed cloud data before attempting network requests.
+  try{
+   const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+saved.email)||'null');
+   if(Array.isArray(cachedVehicles)){window.setVehicles(cachedVehicles);ce('vehicle-status').textContent=cachedVehicles.length+' gespeicherte Fahrzeuge (Cloud wird aktualisiert).';}
+   const cachedRecords=JSON.parse(localStorage.getItem('phev-cache-'+saved.email)||'null');
+   if(Array.isArray(cachedRecords))window.showCloudRecords(cachedRecords);
+  }catch(cacheError){console.warn('Cloud cache could not be restored',cacheError);}
   await loadCloudOverview();
   showAccount(saved.email,saved.role);
   cs('Sitzung wiederhergestellt.');
@@ -248,6 +257,7 @@ ce('cloud-upload').onclick=async()=>{
    try{cached=JSON.parse(localStorage.getItem('phev-cache-'+saved?.email)||'[]');}catch{}
    if(saved?.email&&saved?.role){showAccount(saved.email,saved.role);ce('cloud-admin').classList.add('hide');}
    if(cached.length)window.showCloudRecords(cached);
+   ce('vehicle-status').textContent=ce('vehicle-status').textContent.includes('gespeicherte Fahrzeuge')?ce('vehicle-status').textContent+' Verbindung momentan nicht verfügbar.':'Fahrzeugdaten momentan nicht erreichbar. Bitte Verbindung prüfen.';
    cs('Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.');
    syncError=message||'Verbindung unterbrochen';
    updateSyncIndicator();
