@@ -197,7 +197,12 @@ function render(){
   renderConsumptionTrend();
   renderCostComparison(charges,fuel);
   renderChargingTypes(charges);
-  let tiles=[['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
+  // Gewichteter Durchschnitt: Gesamtkosten geteilt durch Gesamtmenge, in der gewählten Auswertungswährung.
+  const chargedKwh=charges.reduce((sum,r)=>sum+Number(r.amount||0),0);
+  const fueledLiters=fuel.reduce((sum,r)=>sum+Number(r.amount||0),0);
+  const averageElectric=chargedKwh>0?fmt(electric/chargedKwh,settings.base)+' / kWh':'–';
+  const averageFuel=fueledLiters>0?fmt(petrol/fueledLiters,settings.base)+' / Liter':'–';
+  let tiles=[['⚡ Ø Preis pro kWh',averageElectric],['⛽ Ø Preis pro Liter',averageFuel],['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
   AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
