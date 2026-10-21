@@ -806,8 +806,20 @@ function exportPdfReport(mode){
  const charges=data.filter(r=>r.type==='charge'),fuel=data.filter(r=>r.type==='fuel');
  const sum=(arr,fn)=>arr.reduce((n,r)=>n+fn(r),0);
  const total=sum(data,conv),energy=sum(charges,r=>Number(r.amount||0)),liters=sum(fuel,r=>Number(r.amount||0));
+ const extraExpenses=vehicleExpenses.filter(x=>String(x.date||'').startsWith(period)&&(!vehicleId||String(x.vehicle_id)===vehicleId));
+ const extras=extraExpenses.reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0);
+ const combined=total+extras;
+ const kmValues=data.map(x=>Number(x.km)).filter(x=>Number.isFinite(x)&&x>0);
+ const kmSpan=kmValues.length>1?Math.max(...kmValues)-Math.min(...kmValues):0;
  pdf.heading('Übersicht');
- pdf.metrics([['Gesamtkosten',total.toFixed(2)+' '+settings.base],['Strom',energy.toFixed(1)+' kWh'],['Benzin',liters.toFixed(1)+' l'],['Vorgänge',String(data.length)]]);
+ pdf.metrics([['Gesamtkosten',combined.toFixed(2)+' '+settings.base],['Strom',energy.toFixed(1)+' kWh'],['Benzin',liters.toFixed(1)+' l'],['Vorgänge',String(data.length)]]);
+ pdf.heading('Fahrzeugkosten im Berichtszeitraum');
+ pdf.metrics([['Strom und Benzin',total.toFixed(2)+' '+settings.base],['Weitere Ausgaben',extras.toFixed(2)+' '+settings.base],['Kosten gesamt',combined.toFixed(2)+' '+settings.base],['Kosten / km',kmSpan>0?(combined/kmSpan).toFixed(2)+' '+settings.base:'–']]);
+ pdf.note('Kosten/km: Näherung aus Kilometerstandsspanne. Keine Abschreibung oder nicht erfassten Kosten enthalten.');
+ if(extraExpenses.length){
+  pdf.heading('Weitere Fahrzeugausgaben');
+  pdf.table(['Datum','Kategorie','Fahrzeug','Kosten '+settings.base],extraExpenses.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(x=>{const v=vehicles.find(v=>String(v.id)===String(x.vehicle_id));return [x.date,x.category,v?vehicleName(v):'–',expenseCurrency(Number(x.amount),x.currency).toFixed(2)];}),[95,140,165,95]);
+ }
  const balance=energyBalance(data);
  pdf.heading('Kombinierte Energiebilanz');
  if(balance.distance){pdf.metrics([['Strom / 100 km',(balance.electric*100/balance.distance).toFixed(1)+' kWh'],['Benzin / 100 km',(balance.fuelKwh*100/balance.distance).toFixed(1)+' kWh'],['Gesamt / 100 km',(balance.total*100/balance.distance).toFixed(1)+' kWh'],['Benzinfaktor',fuelEnergyFactor().toFixed(1)+' kWh/l']]);}else{pdf.note('kWh/100 km: mindestens zwei unterschiedliche Kilometerstände nötig.');}
@@ -815,14 +827,14 @@ function exportPdfReport(mode){
  pdf.heading('Energieanteile');
  pdf.donut([balance.electric,balance.fuelKwh],['Strom kWh','Benzin kWh']);
  pdf.heading('Kostenverteilung');
- pdf.donut([sum(charges,conv),sum(fuel,conv)],['Strom','Benzin']);
+ pdf.donut([sum(charges,conv),sum(fuel,conv),extras],['Strom','Benzin','Weitere Ausgaben']);
  pdf.heading(mode==='year'?'Kosten nach Monat':'Kosten nach Tag');
  const buckets=mode==='year'?Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')):[...new Set(data.map(r=>r.date.slice(8,10)))].sort();
- const points=buckets.map(k=>sum(data.filter(r=>(mode==='year'?r.date.slice(5,7):r.date.slice(8,10))===k),conv));
+ const points=buckets.map(k=>sum(data.filter(r=>(mode==='year'?r.date.slice(5,7):r.date.slice(8,10))===k),conv)+extraExpenses.filter(x=>(mode==='year'?x.date.slice(5,7):x.date.slice(8,10))===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0));
  pdf.bars(buckets,points);
  if(mode==='year'){
   pdf.heading('Monatsübersicht');
-  pdf.table(['Monat','Ladungen','Tankungen','Kosten '+settings.base],buckets.map((k,i)=>{const rows=data.filter(r=>r.date.slice(5,7)===k);return [k,String(rows.filter(r=>r.type==='charge').length),String(rows.filter(r=>r.type==='fuel').length),sum(rows,conv).toFixed(2)];}),[70,125,125,165]);
+  pdf.table(['Monat','Ladungen','Tankungen','Kosten '+settings.base],buckets.map((k,i)=>{const rows=data.filter(r=>r.date.slice(5,7)===k);return [k,String(rows.filter(r=>r.type==='charge').length),String(rows.filter(r=>r.type==='fuel').length),(sum(rows,conv)+extraExpenses.filter(x=>x.date.slice(5,7)===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0)).toFixed(2)];}),[70,125,125,165]);
  }
  pdf.heading('Einzelne Einträge');
  const sorted=data.slice().sort((x,y)=>String(x.date).localeCompare(String(y.date)));
