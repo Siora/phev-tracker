@@ -119,11 +119,25 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  respond(200,['ok'=>true]);
 }
 $chargeKindColumn=(bool)$db->query("SHOW COLUMNS FROM records LIKE 'charge_kind'")->fetch();
+$hasPreferences=(bool)$db->query("SHOW COLUMNS FROM user_settings LIKE 'prefs_json'")->fetch();
+if ($action === 'preferences' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ if (!$hasPreferences) fail(503,'Cloud-Einstellungen noch nicht aktiviert');
+ $prefs=$body['preferences']??null;
+ if (!is_array($prefs)) fail(400,'Ungültige Einstellungen');
+ $json=json_encode($prefs,JSON_UNESCAPED_UNICODE);
+ if ($json===false || strlen($json)>30000) fail(400,'Ungültige Einstellungen');
+ $stmt=$db->prepare('INSERT INTO user_settings(user_id,prefs_json) VALUES (?,?) ON DUPLICATE KEY UPDATE prefs_json=VALUES(prefs_json)');
+ $stmt->execute([$uid,$json]);
+ respond(200,['ok'=>true]);
+}
 if ($action === 'data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,type,date,time,charge_mode,'.($chargeKindColumn?'charge_kind':'NULL AS charge_kind').',amount,cost,currency,km,place,vehicle_id FROM records WHERE user_id=? ORDER BY date DESC');
  $stmt->execute([$uid]);$rows=$stmt->fetchAll();
  $stmt=$db->prepare('SELECT base,rate FROM user_settings WHERE user_id=?');$stmt->execute([$uid]);
- respond(200,['records'=>$rows,'settings'=>$stmt->fetch() ?: ['base'=>'CHF','rate'=>0.94]]);
+ $settings=$stmt->fetch() ?: ['base'=>'CHF','rate'=>0.94];
+ $prefs=null;
+ if ($hasPreferences) { $stmt=$db->prepare('SELECT prefs_json FROM user_settings WHERE user_id=?');$stmt->execute([$uid]);$prefs=json_decode((string)$stmt->fetchColumn(),true); }
+ respond(200,['records'=>$rows,'settings'=>$settings,'preferences'=>$prefs,'preferences_available'=>$hasPreferences]);
 }
 if ($action === 'save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $r=$body['record'] ?? null;
