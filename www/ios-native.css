@@ -15,3 +15,29 @@
     font-size: max(16px, 1em);
   }
 }
+
+/* Keep navigation and form actions comfortably tappable on a phone. */
+@media (pointer: coarse) {
+  button, select, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+  }
+}
+
+/* Avoid accidental horizontal page movement in the native WebView. */
+html {
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-x: none;
+}
+body {
+  overflow-wrap: break-word;
+}
+
+/* Respect iOS Accessibility > Motion > Reduce Motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
