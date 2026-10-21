@@ -84,6 +84,43 @@ if ($action === 'logout') {
  $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);respond(200,['ok'=>true]);
 }
 
+
+if ($action === 'charging-catalog' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $result=[];
+ foreach (['locations'=>'charging_locations','providers'=>'charging_providers'] as $key=>$table) {
+  $stmt=$db->prepare('SELECT id,name,'.($key==='locations'?'kind,':'').'price FROM '.$table.' WHERE user_id=? ORDER BY name,id');
+  $stmt->execute([$uid]);$result[$key]=$stmt->fetchAll();
+ }
+ respond(200,$result);
+}
+if ($action === 'charging-catalog-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $category=$body['category']??'';
+ $table=['locations'=>'charging_locations','providers'=>'charging_providers'][$category]??null;
+ if (!$table) fail(400,'Ungültige Kategorie');
+ $entry=$body['entry']??null;
+ if (!is_array($entry)) fail(400,'Eintrag fehlt');
+ $id=$entry['id']??null;$name=trim((string)($entry['name']??''));
+ $price=$entry['price']??null;
+ if (!is_string($id) || !preg_match('/^[a-zA-Z0-9-]{1,80}$/D',$id) || $name==='' || mb_strlen($name)>100 || ($price!==null && (!is_numeric($price) || (float)$price<0 || (float)$price>1000))) fail(400,'Ungültiger Eintrag');
+ if ($category==='locations') {
+  $kind=$entry['kind']??'';
+  if (!in_array($kind,['','Zuhause','Öffentlich','Arbeitsplatz','Kostenlos'],true)) fail(400,'Ungültiger Ladeorttyp');
+  $stmt=$db->prepare('INSERT INTO charging_locations(id,user_id,name,kind,price) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),kind=VALUES(kind),price=VALUES(price)');
+  $stmt->execute([$id,$uid,$name,$kind,$price]);
+ } else {
+  $stmt=$db->prepare('INSERT INTO charging_providers(id,user_id,name,price) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),price=VALUES(price)');
+  $stmt->execute([$id,$uid,$name,$price]);
+ }
+ respond(200,['ok'=>true]);
+}
+if ($action === 'charging-catalog-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $table=['locations'=>'charging_locations','providers'=>'charging_providers'][$body['category']??'']??null;
+ $id=$body['id']??null;
+ if (!$table || !is_string($id)) fail(400,'Ungültige Anfrage');
+ $stmt=$db->prepare('DELETE FROM '.$table.' WHERE user_id=? AND id=?');$stmt->execute([$uid,$id]);
+ respond(200,['ok'=>true]);
+}
+
 if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
  $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
