@@ -149,7 +149,7 @@ ce('vehicle-form').onsubmit=async e=>{
  finally{button.disabled=false;}
 };
 
-function showAccount(email,role){document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');}
+function showAccount(email,role){document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
  const container=ce('cloud-users');container.replaceChildren();
@@ -238,7 +238,7 @@ ce('cloud-upload').onclick=async()=>{
  let saved=null;
  try{
   saved=JSON.parse(localStorage.getItem(sessionKey)||'null');
-  if(!saved?.token)return;
+  if(!saved?.token){ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');return;}
   cloudToken=saved.token;
   await loadCloudOverview();
   showAccount(saved.email,saved.role);
@@ -249,6 +249,10 @@ ce('cloud-upload').onclick=async()=>{
   if(message==='Sitzung abgelaufen'||message==='Anmeldung erforderlich'){
    cloudToken=null;
    localStorage.removeItem(sessionKey);
+   ce('cloud-account').classList.add('hide');
+   ce('cloud-login').classList.remove('hide');
+   ce('cloud-admin').classList.add('hide');
+   updateSyncIndicator();
    window.showLocalRecords();
    document.body.classList.add('login-locked');
    cs('Die Serversitzung ist abgelaufen. Bitte erneut anmelden.');
@@ -256,7 +260,7 @@ ce('cloud-upload').onclick=async()=>{
    // A temporary network/server error is not a logout: keep the token and pending changes.
    let cached=[];
    try{cached=JSON.parse(localStorage.getItem('phev-cache-'+saved?.email)||'[]');}catch{}
-   if(saved?.email&&saved?.role)showAccount(saved.email,saved.role);
+   if(saved?.email&&saved?.role){showAccount(saved.email,saved.role);ce('cloud-admin').classList.add('hide');}
    if(cached.length)window.showCloudRecords(cached);
    cs('Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.');
    syncError=message||'Verbindung unterbrochen';
