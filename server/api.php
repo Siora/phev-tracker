@@ -15,7 +15,9 @@ function fail(int $code, string $message): never { respond($code, ['error'=>$mes
 if (!is_file(__DIR__.'/config.php')) fail(503, 'Serverkonfiguration fehlt');
 $config = require __DIR__.'/config.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin && $origin !== $config['allowed_origin']) fail(403, 'Origin nicht erlaubt');
+// iOS Capacitor uses capacitor://localhost; keep the existing web origin explicitly allowed.
+$allowedOrigins = [$config['allowed_origin'], 'capacitor://localhost'];
+if ($origin && !in_array($origin, $allowedOrigins, true)) fail(403, 'Origin nicht erlaubt');
 if ($origin) { header('Access-Control-Allow-Origin: '.$origin); header('Vary: Origin'); }
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
