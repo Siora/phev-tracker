@@ -94,13 +94,10 @@ function refreshVehicles(){
  const reportVehicle=$('report-vehicle');if(reportVehicle){const prev=reportVehicle.value;reportVehicle.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));reportVehicle.value=[...reportVehicle.options].some(o=>o.value===prev)?prev:'';}
  entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
- const bulk=$('bulkVehicle'),old=bulk.value;
- bulk.replaceChildren(new Option('Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- bulk.value=[...bulk.options].some(o=>o.value===old)?old:'';
  document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{const prev=sel.value;sel.replaceChildren(new Option('Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));sel.value=vehicles.some(v=>String(v.id)===prev)?prev:(vehicles.length===1?String(vehicles[0].id):'');});
  updateBulkCount();
 }
-function updateBulkCount(){const count=records.filter(r=>!r.vehicle_id).length; $('bulk-count').textContent=count+' Einträge ohne Fahrzeugzuordnung.';}
+function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+' Einträge ohne Fahrzeugzuordnung.';}
 // Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
  if(!vehicles.some(v=>String(v.id)===String(vehicleId)))throw Error('Fahrzeug nicht gefunden');
