@@ -1,9 +1,5 @@
 {
   "appId": "com.siora.phevtracker",
   "appName": "PHEV Tracker",
-  "webDir": "www",
-  "server": {
-    "url": "https://siora.github.io/phev-tracker/",
-    "cleartext": false
-  }
+  "webDir": "www"
 }
