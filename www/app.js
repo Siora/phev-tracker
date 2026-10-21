@@ -503,8 +503,7 @@ $('import').onclick=()=>{
   alert(added+' neu importiert, '+updated+' bestehende Einträge aktualisiert.');
   tab('home')
 };
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{
-});
+// Native bundle uses local assets; no service worker registration.
 $('trendMetric').addEventListener('change', render);
 tab('home');
 
