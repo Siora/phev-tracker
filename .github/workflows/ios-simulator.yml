@@ -1,0 +1,55 @@
+name: iOS simulator build (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  simulator:
+    if: github.ref == 'refs/heads/ios-app'
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - name: Check out iOS development branch
+        uses: actions/checkout@v4
+        with:
+          ref: ios-app
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check bundled assets
+        run: npm run ios:check
+
+      - name: Generate iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Compile unsigned iOS simulator app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Save simulator artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phev-tracker-ios-simulator
+          path: build/DerivedData/Build/Products/Debug-iphonesimulator/App.app/
+          retention-days: 7
