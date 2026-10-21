@@ -39,6 +39,7 @@ window.setVehiclePhoto=function(vehicleId,url){
  const key='phev-photo-'+vehicleId;
  if(clean)localStorage.setItem(key,clean);else localStorage.removeItem(key);
  window.currentPhotoVehicle=null;
+ window.scheduleCloudPreferences?.();
  render();
 };
 function vehicleName(v){return v.brand+' '+v.model+(v.plate?' · '+v.plate:'');}
@@ -276,9 +277,38 @@ function settingsSave(){
     base:$('base').value,rate:r
   };
   localStorage.setItem('phev-settings-1',JSON.stringify(settings));
+  window.scheduleCloudPreferences?.();
   render();
   alert('Gespeichert')
 }
+
+// Cloud preferences are applied only after a successful authenticated fetch.
+window.collectCloudPreferences=function(){
+ const photos={};
+ for(const vehicle of vehicles){const url=localStorage.getItem('phev-photo-'+vehicle.id);if(url)photos[String(vehicle.id)]=url;}
+ return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
+};
+window.applyCloudPreferences=function(prefs){
+ if(!prefs||typeof prefs!=='object')return;
+ if(prefs.photos&&typeof prefs.photos==='object'){
+  for(const vehicle of vehicles){
+   const id=String(vehicle.id),url=prefs.photos[id];
+   if(typeof url==='string'&&/^https:\/\/[^\s]+$/i.test(url))localStorage.setItem('phev-photo-'+id,url);
+  }
+ }
+ const factor=Number(prefs.fuel_energy_factor);
+ if(factor>=1&&factor<=20)localStorage.setItem(fuelEnergyKey,String(factor));
+ const comp=prefs.cost_comparison;
+ if(comp&&Number(comp.electric)>0&&Number(comp.fuel)>0)localStorage.setItem(costComparisonKey,JSON.stringify(comp));
+ if(['CHF','EUR'].includes(prefs.base)&&Number(prefs.rate)>0){
+  settings={base:prefs.base,rate:Number(prefs.rate)};
+  localStorage.setItem('phev-settings-1',JSON.stringify(settings));
+  $('base').value=settings.base;$('rate').value=settings.rate;
+ }
+ $('fuel-energy-factor').value=fuelEnergyFactor();
+ const values=getCostComparison();$('comparison-electric').value=values.electric;$('comparison-fuel').value=values.fuel;
+ render();
+};
 window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',charge_kind:x.charge_kind||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
 window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
 // CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
@@ -404,7 +434,7 @@ function fuelEnergyFactor(){const v=Number(localStorage.getItem(fuelEnergyKey));
 function saveFuelEnergyFactor(){
  const v=Number($('fuel-energy-factor').value);
  if(!Number.isFinite(v)||v<1||v>20){alert('Bitte einen Faktor zwischen 1 und 20 eingeben.');return;}
- localStorage.setItem(fuelEnergyKey,String(v));render();alert('Umrechnungsfaktor gespeichert.');
+ localStorage.setItem(fuelEnergyKey,String(v));window.scheduleCloudPreferences?.();render();alert('Umrechnungsfaktor gespeichert.');
 }
 function energyBalance(items){
  const km=items.map(r=>Number(r.km)).filter(v=>v>0);
@@ -477,6 +507,7 @@ function saveCostComparison(){
   alert('Bitte gültige Verbrauchswerte eingeben.');return;
  }
  localStorage.setItem(costComparisonKey,JSON.stringify({electric,fuel}));
+ window.scheduleCloudPreferences?.();
  render();
  alert('Vergleichswerte gespeichert.');
 }
