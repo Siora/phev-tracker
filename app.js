@@ -217,7 +217,7 @@ function render(){
   $('entries').replaceChildren();
   filtered.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(x=>{
     let div=document.createElement('div'),btn=document.createElement('button'),edit=document.createElement('button');div.className='item';div.textContent=recordDateTime(x)+(x.type==='charge'&&getChargeMode(x.id)?' · '+getChargeMode(x.id):'')+' · '+(x.type==='charge'?'⚡ ':'⛽ ')+x.amount+(x.type==='charge'?' kWh · ':' l · ')+fmt(x.cost,x.currency)+' · '+(x.place||'')+' · '+(vehicles.find(v=>String(v.id)===String(x.vehicle_id))?vehicleName(vehicles.find(v=>String(v.id)===String(x.vehicle_id))):'Ohne Fahrzeug');edit.textContent='Bearbeiten';edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+      let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
     };div.append(edit);btn.textContent='Löschen';btn.onclick=()=>{
       if(confirm('Eintrag löschen?')){
         records=records.filter(r=>r.id!==x.id);save()
@@ -287,18 +287,29 @@ for(const [type,id] of [['locations','managed-location-form'],['providers','mana
  form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert('Name oder Preis ungültig.');const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();storeChargingData(data);$('managed-charging-status').textContent='Gespeichert. Cloud-Synchronisierung wird gestartet.';});
 }
 function managedPlace(form){
+ if(form.elements.type?.value==='fuel')return String(form.elements.place?.value||'').trim();
  const data=chargingData(),loc=data.locations.find(x=>x.id===form.elements.managed_location?.value),provider=data.providers.find(x=>x.id===form.elements.managed_provider?.value);
  const note=String(form.elements.place?.value||'').trim();
  return [loc?.name||note,provider?.name?'Anbieter: '+provider.name:''].filter(Boolean).join(' · ');
 }
 function applyManagedPrice(form){
  const data=chargingData(),loc=data.locations.find(x=>x.id===form.elements.managed_location?.value),provider=data.providers.find(x=>x.id===form.elements.managed_provider?.value);
- if(loc){form.elements.place.value=loc.name;if(form.elements.charge_kind)form.elements.charge_kind.value=loc.kind||'';}
+ if(loc&&form.elements.charge_kind)form.elements.charge_kind.value=loc.kind||'';
  const price=provider?.price??loc?.price;
  if(price!==null&&price!==undefined){const unit=form.elements.unit_price;unit.value=String(price);unit.dispatchEvent(new Event('input',{bubbles:true}));}
 }
 document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{for(const field of ['managed_location','managed_provider'])form.elements[field]?.addEventListener('change',()=>applyManagedPrice(form));});
 renderChargingManagement();
+function updateEntryPlaceVisibility(){
+ const form=$('form'),fuel=form.elements.type.value==='fuel';
+ $('entry-place-label').hidden=!fuel;
+ for(const name of ['managed_location','managed_provider','charge_mode','charge_kind']){
+  const control=form.elements[name];
+  if(control)control.closest('label').hidden=fuel;
+ }
+}
+$('form').elements.type.addEventListener('change',updateEntryPlaceVisibility);
+updateEntryPlaceVisibility();
 
 installPriceCalculator($('form'));
 document.querySelectorAll('.quick-form').forEach(installPriceCalculator);
