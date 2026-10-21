@@ -124,7 +124,7 @@ if ($action === 'preferences' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  if (!$hasPreferences) fail(503,'Cloud-Einstellungen noch nicht aktiviert');
  $prefs=$body['preferences']??null;
  if (!is_array($prefs)) fail(400,'Ungültige Einstellungen');
- $keys=['photos','fuel_energy_factor','cost_comparison','base','rate'];
+ $keys=['photos','managed_charging','fuel_energy_factor','cost_comparison','base','rate'];
  foreach ($prefs as $key=>$value) if (!in_array($key,$keys,true)) fail(400,'Unbekannte Einstellung');
  if (isset($prefs['photos'])) {
   if (!is_array($prefs['photos']) || count($prefs['photos'])>100) fail(400,'Ungültige Fotos');
