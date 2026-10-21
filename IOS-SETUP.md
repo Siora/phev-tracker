@@ -1,23 +1,33 @@
 # PHEV Tracker – iOS development branch
 
-This branch is an **experimental Capacitor iOS wrapper**. Production web deployment remains on `main`.
+Experimental native iOS packaging via Capacitor. **Do not deploy this branch to GitHub Pages or PHP hosting.** Production PWA remains on `main`.
 
-## Requirements
+## Current status
 
-- Node.js on Windows for npm install and project preparation
-- macOS/Xcode build environment (local or cloud) for native iOS compilation
-- Apple Developer Program membership for TestFlight/App Store distribution
+- The app's HTML/CSS/JavaScript assets are copied into `www/`.
+- Capacitor loads local bundled assets (`webDir: "www"`), not a remote `server.url`.
+- The existing authenticated HTTPS PHP/MySQL API remains unchanged.
+- No iOS binary has been built or tested yet.
 
-## Prepare
+## Windows preparation (later)
+
+Install Node.js LTS, then in the cloned `ios-app` branch:
 
 ```bash
 npm install
+npx cap add ios
+npx cap sync ios
 ```
 
-The initial Capacitor configuration loads the existing HTTPS-hosted PWA via `server.url` as a development prototype. This is **not yet an App Store-ready implementation**: production should bundle local assets in `www`, remove `server.url`, review native navigation/auth/storage/camera behavior, and verify Apple's app review requirements.
+Creating and compiling the iOS project requires a macOS/Xcode environment (local or cloud). TestFlight/App Store distribution requires Apple Developer Program membership.
 
-The backend/database remain unchanged. Do not deploy this branch to GitHub Pages or the PHP server.
+## Before first iPhone build
 
-## Next
+- Test HTTPS API connectivity, login, token persistence and Cloud sync in WKWebView.
+- Check photo handling, file export/import, offline behavior and iOS permissions.
+- Review storage migration: localStorage inside the native app is **not automatically the same** as Safari/PWA localStorage. Cloud-synced records should be reloaded after login; do not assume unsynced local data migrates.
+- Prepare native icon, launch screen, signing and bundle identifier.
+- Verify that native packaging adds meaningful functionality and meets Apple's review requirements.
+- Pin and audit dependency versions, then generate and commit an npm lockfile.
 
-Prepare a local `www` distribution, integrate assets and dependencies, then generate the native iOS project in a macOS build environment and test before any App Store submission.
+Never reset the production database or delete existing entries.
