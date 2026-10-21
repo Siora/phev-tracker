@@ -379,7 +379,7 @@ $('form').onsubmit=e=>{
   $('provider').value='';
   $('vehicleFilter').value='';
   $('period').value='12';
-  tab('home')
+  // Remain on the entry form after saving.
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
 document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:managedPlace(f),vehicle_id:vid};if(record.amount<=0)return;record.time=f.elements.time.value;record.charge_mode=record.type==='charge'?f.elements.charge_mode.value:'';record.charge_kind=record.type==='charge'?f.elements.charge_kind.value:'';records.push(record);setRecordTime(record.id,record.time);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
@@ -425,8 +425,8 @@ window.applyCloudPreferences=function(prefs){
  const values=getCostComparison();$('comparison-electric').value=values.electric;$('comparison-fuel').value=values.fuel;
  render();
 };
-window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',charge_kind:x.charge_kind||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();tab('home');updateBulkCount();};
-window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();tab('home');};
+window.showCloudRecords=function(items){cloudView=true;records=items.map(x=>({...x,time:String(x.time||'').slice(0,5),charge_mode:x.charge_mode||'',charge_kind:x.charge_kind||'',amount:Number(x.amount),cost:Number(x.cost),km:x.km===null?null:Number(x.km)}));scheduleAutomaticBackup();render();updateBulkCount();};
+window.showLocalRecords=function(){cloudView=false;vehicles=[];records=JSON.parse(localStorage.getItem(key)||'[]');refreshVehicles();render();};
 // CSV-Export mit neutralisierten Tabellenformeln (Schutz vor CSV-Injection).
 function exportCSV(){
  const columns=['id','type','date','amount','cost','currency','km','place','vehicle_id'];
