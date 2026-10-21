@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102c49">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=50">
+<link rel="stylesheet" href="styles.css?v=51">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -34,7 +34,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 50</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 51</small>
 </div>
 </aside>
 <main class="main">
@@ -114,8 +114,8 @@
 </div>
 <small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
 <div class="dashboard-actions">
-<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Ladestrom<select name="charge_mode"><option value="">Nicht angegeben</option><option value="AC">AC – Wechselstrom</option><option value="DC">DC – Gleichstrom / Schnellladen</option></select></label><label>Ladeort<select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
-<article class="quick-card quick-fuel"><h2>⛽ Neue Tankung</h2><form class="quick-form" data-type="fuel"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Getankte Menge (Liter)<input name="amount" type="number" min=".001" step="any" required></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Tankstelle / Notizen<input name="place" placeholder="z. B. Autobahn"></label><button type="submit">⛽ Tankung speichern</button></form></article>
+<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Ladestrom<select name="charge_mode"><option value="">Nicht angegeben</option><option value="AC">AC – Wechselstrom</option><option value="DC">DC – Gleichstrom / Schnellladen</option></select></label><label>Ladeort<select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
+<article class="quick-card quick-fuel"><h2>⛽ Neue Tankung</h2><form class="quick-form" data-type="fuel"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Getankte Menge (Liter)<input name="amount" type="number" min=".001" step="any" required></label><label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Tankstelle / Notizen<input name="place" placeholder="z. B. Autobahn"></label><button type="submit">⛽ Tankung speichern</button></form></article>
 <article class="quick-card recent-card"><h2>Letzte Einträge</h2><div id="recent-entries"></div><button type="button" class="secondary-action" onclick="document.getElementById('entries').scrollIntoView({behavior:'smooth'})">Alle Einträge anzeigen ↓</button></article>
 <article class="quick-card fleet-card"><h2>🚘 Fahrzeugübersicht</h2><div id="fleet-overview"></div><button type="button" class="secondary-action" onclick="tab('vehicles')">+ Neues Fahrzeug anlegen</button></article>
 </div>
@@ -140,7 +140,7 @@
 <input name="date" type="date" required><label>Uhrzeit<input name="time" type="time"></label>
 <label>Menge (kWh / Liter)</label>
 <input name="amount" type="number" min=".001" step="any" required>
-<label>Gesamtkosten</label>
+<label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten</label>
 <input name="cost" type="number" min="0" step="any" required>
 <label>Währung</label>
 <select name="currency">
@@ -261,8 +261,8 @@
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
 <script src="charts.js" defer></script>
-<script src="cloud.js?v=50" defer></script>
-<script src="app.js?v=50" defer>
+<script src="cloud.js?v=51" defer></script>
+<script src="app.js?v=51" defer>
 </script>
 </main>
 </div>
