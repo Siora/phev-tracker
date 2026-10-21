@@ -1,6 +1,16 @@
 name: Deploy PWA to Hetzner
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app.js'
+      - 'cloud.js'
+      - 'charts.js'
+      - 'styles.css'
+      - 'sw.js'
+      - 'manifest.webmanifest'
   workflow_dispatch:
     inputs:
       upload:
@@ -65,7 +75,7 @@ jobs:
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check.batch "$SFTP_USER@$SFTP_HOST"
 
       - name: Upload only PWA files (never api/)
-        if: ${{ inputs.upload }}
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
         env:
           SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
           SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
