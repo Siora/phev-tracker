@@ -41,6 +41,10 @@ if (!html.includes('ios-native.css'))
 if (/\bserver\s*:\s*\{\s*url\s*:/.test(JSON.stringify(config)))
   problems.push('Do not load the production PWA as a remote native shell');
 
+const nativeCss = fs.readFileSync(path.join(root, 'www/ios-native.css'), 'utf8');
+for (const rule of ['safe-area-inset-top', 'safe-area-inset-bottom', 'prefers-reduced-motion', 'min-height: 44px']) {
+  if (!nativeCss.includes(rule)) problems.push('Missing native accessibility rule: ' + rule);
+}
 if (html.includes('manifest.webmanifest')) problems.push('iOS bundle should not reference the PWA manifest');
 if (problems.length) {
   console.error('iOS bundle checks failed:\n' + problems.map(x => '- ' + x).join('\n'));
