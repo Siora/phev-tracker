@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102c49">
+
+<title>PHEV Tracker</title>
+<link rel="stylesheet" href="styles.css">
+<style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
+</head>
+<body class="login-locked">
+<!-- Anwendungsrahmen: Navigation links, aktive Inhalte rechts -->
+<div class="app-shell">
+<!-- Hauptnavigation und Fahrzeugvorschau -->
+<aside class="sidebar">
+<div class="brand">
+<div class="brand-mark">⚡</div>
+<div>
+<strong>PHEV Tracker</strong>
+<small id="brandVehicle">Alle Fahrzeuge</small>
+</div>
+</div>
+<div class="sidebar-car"><img id="sidebarVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div></div>
+<button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" onclick="toggleMobileMenu()">☰ Menü öffnen</button>
+<nav id="primary-nav">
+<button onclick="tab('home')">Übersicht</button>
+<button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
+<button onclick="tab('csv')">↥ Import / Export</button>
+<button onclick="tab('vehicles')">🚘 Fahrzeuge</button><button onclick="tab('charging-management')">⚡ Ladeorte & Anbieter</button>
+<button onclick="tab('options')">⚙ Optionen & Backup</button>
+<button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
+</nav>
+<div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
+<small>Plug-in-Hybrid · CHF / EUR</small>
+<hr>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 56</small>
+</div>
+</aside>
+<main class="main">
+<header class="topbar">
+<div>
+<small>FAHRZEUG-DASHBOARD</small>
+<h1>Übersicht</h1>
+</div>
+<div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
+</header>
+<!-- Dashboard: Fahrzeug, Filter, Kennzahlen und Auswertungen -->
+<section id="home">
+<p id="login-required-notice" style="padding:14px;border:1px solid #d6a64d;border-radius:10px;margin:12px 0" hidden>🔒 Du bist nicht angemeldet. Bitte öffne „Konto“ und melde dich an, um deine Fahrzeuge und Cloud-Einträge zu laden.</p>
+<div class="hero">
+<div>
+<small>DEIN FAHRZEUG</small>
+<h2 id="heroVehicle">Alle Fahrzeuge</h2>
+<small id="heroVehicleDetails">Energie & Kosten</small>
+</div>
+<div class="car-art"><img id="heroVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div><a id="vehicleImageCredit" class="vehicle-photo-credit" href="#" target="_blank" rel="noopener noreferrer" hidden>Bildquelle: Wikipedia / Wikimedia Commons</a></div>
+</div>
+<h2 class="dashboard-label">Dashboard</h2>
+<label>Zeitraum</label>
+<select id="period" onchange="render()">
+<option value="month">Letzter Monat</option>
+<option value="3">Letzte 3 Monate</option>
+<option value="6">Letzte 6 Monate</option>
+<option value="12">Letztes Jahr</option>
+<option value="custom">Monat und Jahr auswählen</option>
+</select>
+<div id="customdates" class="grid hide">
+<div>
+<label>Monat</label>
+<select id="chosenMonth" onchange="render()">
+</select>
+</div>
+<div>
+<label>Jahr</label>
+<select id="chosenYear" onchange="render()">
+</select>
+</div>
+</div>
+<label>Fahrzeug</label><select id="vehicleFilter" onchange="render()"><option value="">Alle Fahrzeuge</option></select>
+<label>Ladeort / Tankstelle</label>
+<select id="provider" onchange="render()">
+<option value="">Alle Orte / Tankstellen</option>
+</select>
+<div id="vehicle-summary" aria-live="polite"></div>
+<h2>Verbrauch pro 100 km</h2><div class="grid" id="consumption-stats"></div><p id="consumption-note"></p>
+<article class="quick-card"><h2>⚡⛽ Kombinierte Energiebilanz</h2><div id="energy-balance" aria-live="polite"></div><p id="energy-balance-note"></p></article>
+<article class="quick-card"><h2>📈 Verbrauchsentwicklung (12 Monate)</h2><div id="consumption-trend" aria-live="polite"></div><small>Monatliche Näherungswerte aus erfassten Mengen und Kilometerstandsspanne. Monate ohne ausreichende Kilometerstände bleiben leer.</small></article>
+<article class="quick-card" id="cost-comparison">
+<h2>⚡ Strom vs. ⛽ Benzin</h2>
+<p id="cost-comparison-result" aria-live="polite">Für den Vergleich werden Lade- und Tankdaten benötigt.</p>
+<small>Modellrechnung mit deinen Durchschnittspreisen im gewählten Zeitraum. Kein gemessener Fahrverbrauch.</small>
+</article>
+<article class="quick-card"><h2>🔌 Ladearten</h2><div id="charging-types-report"></div><small>Die Ladeorte werden mit der Cloud synchronisiert.</small></article>
+<div class="grid" id="stats">
+</div>
+<div class="analytics-grid">
+  <article class="analytics-card analytics-wide">
+    <div class="chart-heading"><div><small>ENERGIE & KOSTEN</small><h2>Monatlicher Verlauf</h2></div><select id="trendMetric" aria-label="Diagrammkennzahl"><option value="energy">Geladene kWh</option><option value="cost">Kosten</option><option value="fuel">Benzinliter</option></select></div>
+    <div id="trendchart" class="interactive-chart" aria-label="Monatliches Balkendiagramm"></div>
+  </article>
+  <article class="analytics-card">
+    <div class="chart-heading"><div><small>KOSTENAUFTEILUNG</small><h2>Strom & Benzin</h2></div></div>
+    <div id="donutchart" class="interactive-chart"></div>
+  </article>
+  <article class="analytics-card">
+    <div class="chart-heading"><div><small>PREISENTWICKLUNG</small><h2>Ø Strompreis / kWh</h2></div></div>
+    <div id="pricechart" class="interactive-chart"></div>
+  </article>
+  <article class="analytics-card analytics-wide">
+    <div class="chart-heading"><div><small>LADEANBIETER</small><h2>Geladene Energie nach Anbieter</h2></div></div>
+    <div id="providerchart" class="interactive-chart"></div>
+  </article>
+</div>
+<small>Die Kosten pro 100 km werden nur berechnet, wenn mindestens zwei Kilometerstände vorliegen. Getrennte Antriebsverbräuche erfordern zusätzliche Fahrdaten.</small>
+<div class="dashboard-actions">
+<article class="quick-card quick-charge"><h2>⚡ Neue Ladung</h2><form class="quick-form" data-type="charge"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Geladene Energie (kWh)<input name="amount" type="number" min=".001" step="any" required></label><label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Gespeicherter Ladeort<select name="managed_location"><option value="">Keiner</option></select></label><label>Anbieter<select name="managed_provider"><option value="">Keiner</option></select></label><label>Ladestrom<select name="charge_mode"><option value="">Nicht angegeben</option><option value="AC">AC – Wechselstrom</option><option value="DC">DC – Gleichstrom / Schnellladen</option></select></label><label>Ladeort<select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select></label><label>Ladestation / Notizen<input name="place" placeholder="z. B. Zuhause"></label><button type="submit">⚡ Ladung speichern</button></form></article>
+<article class="quick-card quick-fuel"><h2>⛽ Neue Tankung</h2><form class="quick-form" data-type="fuel"><label>Fahrzeug<select name="vehicle_id" required></select></label><label>Datum<input name="date" type="date" required></label><label>Uhrzeit<input name="time" type="time"></label><label>Getankte Menge (Liter)<input name="amount" type="number" min=".001" step="any" required></label><label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten<input name="cost" type="number" min="0" step="any" required></label><label>Tankstelle / Notizen<input name="place" placeholder="z. B. Autobahn"></label><button type="submit">⛽ Tankung speichern</button></form></article>
+<article class="quick-card recent-card"><h2>Letzte Einträge</h2><div id="recent-entries"></div><button type="button" class="secondary-action" onclick="document.getElementById('entries').scrollIntoView({behavior:'smooth'})">Alle Einträge anzeigen ↓</button></article>
+<article class="quick-card fleet-card"><h2>🚘 Fahrzeugübersicht</h2><div id="fleet-overview"></div><button type="button" class="secondary-action" onclick="tab('vehicles')">+ Neues Fahrzeug anlegen</button></article>
+</div>
+<div class="dashboard-bottom"><article class="quick-card"><h2>↥ Schnellaktionen</h2><div class="action-buttons"><button onclick="tab('csv')">CSV Import</button><button onclick="backup()">Backup erstellen</button><button onclick="tab('options')">Einstellungen</button></div></article><article class="quick-card"><h2>Monatsvergleich</h2><div id="month-compare"></div></article></div>
+<h2>Alle Einträge</h2>
+<label for="entry-sort">Sortierung nach Datum und Uhrzeit</label>
+<select id="entry-sort" aria-label="Einträge nach Datum und Uhrzeit sortieren"><option value="desc">Neueste zuerst</option><option value="asc">Älteste zuerst</option></select>
+<div id="entries">
+</div>
+</section>
+<section id="charging-management" class="hide"><h2>Ladeorte & Anbieter</h2><p>Getrennte Verwaltung. Anbieterpreis hat Vorrang. Preise in Basiswährung.</p><div class="dashboard-actions"><article class="quick-card"><h3>Ladeorte</h3><form id="managed-location-form"><label>Name<input name="name" required maxlength="100"></label><label>Typ<select name="kind"><option value="">Nicht angegeben</option><option>Zuhause</option><option>Öffentlich</option><option>Arbeitsplatz</option><option>Kostenlos</option></select></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-locations-list"></div></article><article class="quick-card"><h3>Anbieter</h3><form id="managed-provider-form"><label>Name<input name="name" required maxlength="100"></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-providers-list"></div></article></div><p id="managed-charging-status" role="status"></p></section><!-- Ausführliches Formular für Lade- und Tankvorgänge -->
+<section id="add" class="hide">
+<h2>Neuer Eintrag</h2>
+<form id="form">
+<label>Art</label>
+<select name="type">
+<option value="charge">Stromladung</option>
+<option value="fuel">Benzintankung</option>
+</select>
+<label>Fahrzeug (Pflichtfeld)</label><select name="vehicle_id" id="entryVehicle" required><option value="">Bitte Fahrzeug auswählen</option></select>
+<label>Datum</label>
+<input name="date" type="date" required><label>Uhrzeit<input name="time" type="time"></label>
+<label>Menge (kWh / Liter)</label>
+<input name="amount" type="number" min=".001" step="any" required>
+<label>Preis pro kWh / Liter<input name="unit_price" type="number" min="0" step="any" inputmode="decimal" placeholder="Optional – automatisch berechnen"></label><label>Gesamtkosten</label>
+<input name="cost" type="number" min="0" step="any" required>
+<label>Währung</label>
+<select name="currency">
+<option>CHF</option>
+<option>EUR</option>
+</select>
+<label>Kilometerstand (optional)</label>
+<input name="km" type="number" min="0">
+<label>Gespeicherter Ladeort<select name="managed_location"><option value="">Keiner</option></select></label><label>Anbieter<select name="managed_provider"><option value="">Keiner</option></select></label><label>Ladestrom<select name="charge_mode"><option value="">Nicht angegeben</option><option value="AC">AC – Wechselstrom</option><option value="DC">DC – Gleichstrom / Schnellladen</option></select></label><label>Ladeort<select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select></label>
+<label id="entry-place-label">Tankstelle<input name="place" placeholder="Name der Tankstelle"></label>
+<button>Speichern</button>
+</form>
+</section>
+<!-- Fahrzeugverwaltung und Zuordnung vorhandener Einträge -->
+<section id="vehicles" class="hide">
+<h2>Meine Fahrzeuge</h2>
+<p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
+<div id="vehicle-list"></div>
+<h3>Bestehende Einträge zuordnen</h3>
+<p>Wähle ein Fahrzeug und übertrage alle bisher nicht zugeordneten Einträge. Bestehende Zuordnungen bleiben unverändert.</p>
+<label>Ziel-Fahrzeug<select id="bulkVehicle"><option value="">Fahrzeug auswählen</option></select></label>
+<p id="bulk-count"></p>
+<button type="button" id="bulk-assign">Nicht zugeordnete Einträge übernehmen</button>
+<p id="bulk-status" role="status"></p>
+<h3>Fahrzeug hinzufügen / bearbeiten</h3>
+<form id="vehicle-form">
+<label>Marke<input name="brand" maxlength="100" required></label>
+<label>Modell<input name="model" maxlength="100" required></label>
+<label>Baujahr<input name="model_year" type="number" min="1900" max="2200"></label>
+<label>Kennzeichen<input name="plate" maxlength="40"></label>
+<label>Antriebsart<input name="drivetrain" maxlength="60" placeholder="z. B. Plug-in-Hybrid"></label>
+<label>Batteriekapazität (kWh)<input name="battery_kwh" type="number" step="any" min="0"></label>
+<label>Tankvolumen (Liter)<input name="tank_liters" type="number" step="any" min="0"></label>
+<label>Notizen<textarea name="notes" maxlength="5000"></textarea></label>
+<button type="submit">Fahrzeug speichern</button>
+<button type="button" id="vehicle-cancel">Abbrechen</button>
+</form>
+</section>
+<!-- Gemeinsamer CSV-Import und -Export -->
+<section id="csv" class="hide">
+<h2>Monats- und Jahresberichte (PDF)</h2>
+<p>Berichte mit Energie, Tankmengen und Kosten pro Fahrzeug. Die PDF-Datei wird direkt auf deinem Gerät erzeugt.</p>
+<label>Jahr<input id="report-year" type="number" min="2020" max="2100" value="2026"></label>
+<label>Monat<select id="report-month"><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></label>
+<label>Fahrzeug<select id="report-vehicle"><option value="">Alle Fahrzeuge</option></select></label>
+<button type="button" onclick="exportPdfReport('month')">Monatsbericht als PDF</button>
+<button type="button" onclick="exportPdfReport('year')">Jahresbericht als PDF</button>
+<hr>
+<h2>CSV Import & Export</h2>
+<p>Alle Einträge als CSV-Datei exportieren.</p>
+<button type="button" onclick="exportCSV()">CSV-Export herunterladen</button>
+<hr>
+<h3>ChargeLog CSV importieren</h3>
+<p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
+<input id="file" type="file" accept=".csv,text/csv">
+<div id="preview">
+</div>
+<button id="import" class="hide">Einträge importieren</button>
+</section>
+<!-- Währungseinstellungen und lokale Datensicherung -->
+<section id="options" class="hide">
+<h2>Optionen & Backup</h2>
+<h3>Automatische lokale Sicherungen</h3>
+<p>Bei Änderungen und nach dem Laden deiner Cloud-Daten werden automatisch lokale Sicherungen angelegt. Die letzten fünf Sicherungen bleiben auf diesem iPhone gespeichert.</p>
+<p id="auto-backup-status" role="status">Noch keine automatische Sicherung erstellt.</p>
+<button type="button" onclick="downloadLatestAutoBackup()">Letzte automatische Sicherung herunterladen</button>
+<small>Wichtig: Lokale Sicherungen ersetzen kein extern gespeichertes Backup. Bitte die heruntergeladene Datei regelmäßig in der Dateien-App oder iCloud Drive sichern.</small>
+<h3>Energiebilanz</h3><label>Benzin-Energiegehalt (kWh pro Liter)<input id="fuel-energy-factor" type="number" min="1" max="20" step="0.1" value="8.8"></label><button type="button" onclick="saveFuelEnergyFactor()">Umrechnungsfaktor speichern</button><h3>Kostenvergleich pro 100 km</h3>
+<label>Angenommener Stromverbrauch (kWh/100 km)<input id="comparison-electric" type="number" min="0.1" step="0.1" value="20"></label>
+<label>Angenommener Benzinverbrauch (l/100 km)<input id="comparison-fuel" type="number" min="0.1" step="0.1" value="7"></label>
+<button type="button" onclick="saveCostComparison()">Vergleichswerte speichern</button>
+<label>Auswertungswährung</label>
+<select id="base">
+<option>CHF</option>
+<option>EUR</option>
+</select>
+<label>1 EUR = CHF (manuell)</label>
+<input id="rate" type="number" step="any" min=".01">
+<button onclick="settingsSave()">Speichern</button>
+<button onclick="backup()">JSON-Backup herunterladen</button>
+
+<label>JSON-Backup wiederherstellen</label>
+<input type="file" id="restore" accept=".json">
+<p>
+<small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
+</p>
+</section>
+<!-- Cloud-Konto, Synchronisierung und Administration -->
+<section id="cloud" class="hide">
+<h2>Mein Konto</h2>
+<p id="cloud-sync-indicator" role="status" aria-live="polite" style="font-weight:600">Nicht angemeldet</p>
+<p id="cloud-status" role="status">Nicht angemeldet.</p>
+<form id="cloud-login">
+<label>E-Mail<input name="email" type="email" autocomplete="username" required></label>
+<label>Passwort<input name="password" type="password" autocomplete="current-password" required></label>
+<button>Anmelden</button>
+</form>
+<div id="cloud-account" class="hide">
+<p id="cloud-identity"></p>
+<button id="cloud-check" type="button">Cloud-Einträge zählen</button>
+<button type="button" id="cloud-preferences-upload">Lokale Einstellungen und Fahrzeugfotos in die Cloud übernehmen</button>
+<p><small>Einmalige Übernahme nach der Datenbank-Erweiterung. Danach werden Änderungen an diesen Einstellungen automatisch synchronisiert.</small></p>
+<button id="cloud-upload" type="button">Lokale Einträge in die Cloud übertragen</button>
+<p id="cloud-upload-info"></p>
+<button id="cloud-logout" type="button">Abmelden</button>
+<p id="cloud-count"></p>
+<div id="cloud-admin" class="hide">
+<h2>Benutzer erstellen</h2>
+<form id="cloud-create">
+<label>E-Mail<input name="email" type="email" required></label>
+<label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
+<label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button>Benutzer erstellen</button>
+</form>
+<h2>Benutzer</h2><div id="cloud-users"></div>
+</div>
+</div>
+<p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
+</section>
+<script src="charts.js" defer></script>
+<script src="cloud.js" defer></script>
+<script src="app.js" defer>
+</script>
+</main>
+</div>
+</body>
+</html>
