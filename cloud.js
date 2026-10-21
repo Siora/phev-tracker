@@ -36,8 +36,9 @@ function updateSyncIndicator(){
 async function cloudCall(action,data){
  const response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
   method:data===undefined?'GET':'POST',
-  headers:{...(data===undefined?{}:{'Content-Type':'application/json'}),...(cloudToken?{'Authorization':'Bearer '+cloudToken}:{})},
+  headers:{...(data===undefined?{}:{'Content-Type':'application/json'}),...(/^[a-f0-9]{64}$/.test(cloudToken||'')?{'Authorization':'Bearer '+cloudToken}:{})},
   ...(data===undefined?{}:{body:JSON.stringify(data)}),
+  credentials:'same-origin',
   cache:'no-store'
  });
  const json=await response.json();
@@ -162,8 +163,8 @@ ce('cloud-login').onsubmit=async event=>{
  button.disabled=true;cs('Anmeldung läuft …');
  try{
   const result=await cloudCall('login',{email:form.elements.email.value,password:form.elements.password.value});
-  cloudToken=result.token;updateSyncIndicator();
-  localStorage.setItem(sessionKey,JSON.stringify({token:result.token,email:result.email,role:result.role}));
+  cloudToken='cookie';updateSyncIndicator();
+  localStorage.setItem(sessionKey,JSON.stringify({email:result.email,role:result.role}));
   showAccount(result.email,result.role);
   await loadCloudOverview();
   form.elements.password.value='';
@@ -223,48 +224,52 @@ ce('cloud-upload').onclick=async()=>{
 
 (async()=>{
  let saved=null;
+ try{saved=JSON.parse(localStorage.getItem(sessionKey)||'null');}catch{}
+ // A legacy bearer token remains supported until the next normal login.
+ cloudToken=/^[a-f0-9]{64}$/.test(saved?.token||'')?saved.token:'cookie';
  try{
-  saved=JSON.parse(localStorage.getItem(sessionKey)||'null');
-  if(!saved?.token){ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');return;}
-  cloudToken=saved.token;
-  showAccount(saved.email,saved.role);
-  // Restore last confirmed cloud data before attempting network requests.
+  const account=await cloudCall('session');
+  const email=account.email,role=account.role;
+  localStorage.setItem(sessionKey,JSON.stringify(cloudToken==='cookie'?{email,role}:{token:cloudToken,email,role}));
+  showAccount(email,role);
   try{
-   const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+saved.email)||'null');
+   const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+email)||'null');
    if(Array.isArray(cachedVehicles)){window.setVehicles(cachedVehicles);ce('vehicle-status').textContent=cachedVehicles.length+' gespeicherte Fahrzeuge (Cloud wird aktualisiert).';}
-   const cachedRecords=JSON.parse(localStorage.getItem('phev-cache-'+saved.email)||'null');
+   const cachedRecords=JSON.parse(localStorage.getItem('phev-cache-'+email)||'null');
    if(Array.isArray(cachedRecords))window.showCloudRecords(cachedRecords);
   }catch(cacheError){console.warn('Cloud cache could not be restored',cacheError);}
   await loadCloudOverview();
-  showAccount(saved.email,saved.role);
   cs('Sitzung wiederhergestellt.');
-  if(saved.role==='admin')await cloudUsers();
+  if(role==='admin')await cloudUsers();
  }catch(e){
   const message=String(e?.message||'');
   if(message==='Sitzung abgelaufen'||message==='Anmeldung erforderlich'){
    cloudToken=null;
-   localStorage.removeItem(sessionKey);
+   // Do not discard the account identity, queues or caches on expiry.
+   if(saved?.email)localStorage.setItem(sessionKey,JSON.stringify({email:saved.email,role:saved.role}));
    ce('cloud-account').classList.add('hide');
    ce('cloud-login').classList.remove('hide');
    ce('cloud-admin').classList.add('hide');
    updateSyncIndicator();
-   window.showLocalRecords();
    document.body.classList.add('login-locked');
-   cs('Die Serversitzung ist abgelaufen. Bitte erneut anmelden.');
+   cs('Bitte erneut anmelden. Gespeicherte Einträge bleiben erhalten.');
   }else{
-   // A temporary network/server error is not a logout: keep the token and pending changes.
-   let cached=[];
-   try{cached=JSON.parse(localStorage.getItem('phev-cache-'+saved?.email)||'[]');}catch{}
+   // Keep locally cached data and session identity when server is unreachable.
+   const email=saved?.email;
+   if(email){
+    try{
+     const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+email)||'null');
+     if(Array.isArray(cachedVehicles))window.setVehicles(cachedVehicles);
+     const cachedRecords=JSON.parse(localStorage.getItem('phev-cache-'+email)||'null');
+     if(Array.isArray(cachedRecords))window.showCloudRecords(cachedRecords);
+    }catch{}
+   }
    if(saved?.email&&saved?.role){showAccount(saved.email,saved.role);ce('cloud-admin').classList.add('hide');}
-   if(cached.length)window.showCloudRecords(cached);
-   ce('vehicle-status').textContent=ce('vehicle-status').textContent.includes('gespeicherte Fahrzeuge')?ce('vehicle-status').textContent+' Verbindung momentan nicht verfügbar.':'Fahrzeugdaten momentan nicht erreichbar. Bitte Verbindung prüfen.';
    cs('Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.');
-   syncError=message||'Verbindung unterbrochen';
-   updateSyncIndicator();
+   syncError=message||'Verbindung unterbrochen';updateSyncIndicator();
   }
  }
 })();
-
 
 window.scheduleCloudPreferences=function(){
  if(!cloudPreferencesReady||!cloudToken)return;
