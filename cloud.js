@@ -81,9 +81,20 @@ async function loadVehicles(){
   window.setVehicles(data.vehicles);
   ce('vehicle-status').textContent=data.vehicles.length+' Fahrzeuge in deinem Konto.';
   const list=ce('vehicle-list');list.replaceChildren();
+  const table=document.createElement('table');table.className='management-table vehicle-management-table';
+  const thead=document.createElement('thead'),heading=document.createElement('tr');
+  for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
+  thead.append(heading);table.append(thead);
+  const tbody=document.createElement('tbody');
+  if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='Noch keine Fahrzeuge angelegt.';tr.append(td);tbody.append(tr);}
   for(const v of data.vehicles){
-   const p=document.createElement('p'),edit=document.createElement('button'),del=document.createElement('button');
-   p.append(document.createTextNode(v.brand+' '+v.model+(v.plate?' · '+v.plate:'')+' '));
+   const row=document.createElement('tr');
+   for(const value of [[v.brand,v.model].filter(Boolean).join(' '),v.model_year||'–',v.plate||'–',v.drivetrain||'–',v.battery_kwh==null?'–':v.battery_kwh+' kWh',v.tank_liters==null?'–':v.tank_liters+' l']){
+    const cell=document.createElement('td');cell.textContent=value;row.append(cell);
+   }
+   const actions=document.createElement('td');actions.className='management-actions';
+   const edit=document.createElement('button'),del=document.createElement('button');
+   const photo=document.createElement('button');
    edit.textContent='Bearbeiten';edit.onclick=()=>{
     const f=ce('vehicle-form');f.dataset.id=v.id;
     for(const key of ['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'])f.elements[key].value=v[key]??'';
@@ -102,8 +113,10 @@ async function loadVehicles(){
     try{window.setVehiclePhoto(v.id,url);ce('vehicle-status').textContent=url.trim()?'Fahrzeugfoto gespeichert.':'Automatische Bildauswahl wieder aktiviert.';}
     catch(error){ce('vehicle-status').textContent=error.message;}
    };
-   p.append(edit,photo,del);list.append(p);
+
+   actions.append(edit,photo,del);row.append(actions);tbody.append(row);
   }
+  table.append(tbody);list.append(table);
  }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
 }
 ce('bulk-assign').onclick=async()=>{
