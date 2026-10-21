@@ -6,7 +6,8 @@
   "scripts": {
     "ios:add": "npx cap add ios",
     "ios:sync": "npx cap sync ios",
-    "ios:open": "npx cap open ios"
+    "ios:open": "npx cap open ios",
+    "ios:check": "node scripts/check-ios-bundle.cjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.0.0",
