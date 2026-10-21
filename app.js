@@ -264,7 +264,7 @@ function installPriceCalculator(form){
 const managedChargingKey='phev-managed-charging-v1';
 function chargingAccountKey(){try{return JSON.parse(localStorage.getItem('phev-session-v1')||'null')?.email||'local';}catch{return 'local';}}
 function chargingData(){try{const d=JSON.parse(localStorage.getItem(managedChargingKey+'-'+chargingAccountKey())||'null');return {locations:Array.isArray(d?.locations)?d.locations:[],providers:Array.isArray(d?.providers)?d.providers:[]};}catch{return {locations:[],providers:[]};}}
-function storeChargingData(d){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));window.scheduleCloudPreferences?.();renderChargingManagement();}
+function storeChargingData(d){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));window.syncManagedCharging?.(d);renderChargingManagement();}
 window.getManagedCharging=()=>chargingData();
 window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.providers)){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));renderChargingManagement();}};
 function renderChargingManagement(){
@@ -355,11 +355,11 @@ function settingsSave(){
 window.collectCloudPreferences=function(){
  const photos={};
  for(const vehicle of vehicles){const url=localStorage.getItem('phev-photo-'+vehicle.id);if(url)photos[String(vehicle.id)]=url;}
- return {photos,managed_charging:chargingData(),fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
+ return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
 };
 window.applyCloudPreferences=function(prefs){
  if(!prefs||typeof prefs!=='object')return;
- if(prefs.managed_charging)window.setManagedCharging(prefs.managed_charging);
+ 
  if(prefs.photos&&typeof prefs.photos==='object'){
   for(const vehicle of vehicles){
    const id=String(vehicle.id),url=prefs.photos[id];
