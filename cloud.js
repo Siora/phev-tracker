@@ -7,6 +7,9 @@
 
 const cloudApi='https://tracker.web-produktion.com/api/api.php';
 let cloudToken=null;
+let cloudPreferences=null;
+let cloudPreferencesReady=false;
+let preferencesTimer=null;
 const sessionKey='phev-session-v1';
 const ce=id=>document.getElementById(id);
 const cs=message=>ce('cloud-status').textContent=message;
@@ -21,7 +24,7 @@ async function cloudCall(action,data){
  if(!response.ok)throw Error(json.error||'Serverfehler');
  return json;
 }
-async function loadCloudOverview(){const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();loadVehicles();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+async function loadCloudOverview(){const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadVehicles();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
 async function loadVehicles(){
  try {
@@ -47,7 +50,7 @@ async function loadVehicles(){
     const previous=localStorage.getItem('phev-photo-'+v.id)||'';
     const url=prompt('HTTPS-Adresse eines Fahrzeugfotos eingeben. Leer lassen, um wieder das automatische Bild zu verwenden:',previous);
     if(url===null)return;
-    try{window.setVehiclePhoto(v.id,url);ce('vehicle-status').textContent=url.trim()?'Eigenes Fahrzeugfoto gespeichert (nur auf diesem Gerät).':'Automatische Bildauswahl wieder aktiviert.';}
+    try{window.setVehiclePhoto(v.id,url);ce('vehicle-status').textContent=url.trim()?'Fahrzeugfoto gespeichert.':'Automatische Bildauswahl wieder aktiviert.';}
     catch(error){ce('vehicle-status').textContent=error.message;}
    };
    p.append(edit,photo,del);list.append(p);
@@ -129,7 +132,7 @@ ce('cloud-check').onclick=async()=>{
 };
 ce('cloud-logout').onclick=async()=>{
  try{await cloudCall('logout',{});}catch(error){}
- cloudToken=null;
+ cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;
  document.body.classList.add('login-locked');
  localStorage.removeItem(sessionKey);
  window.showLocalRecords();
@@ -161,6 +164,34 @@ ce('cloud-upload').onclick=async()=>{
 };
 
 (async()=>{try{const saved=JSON.parse(localStorage.getItem(sessionKey)||'null');if(!saved?.token)return;cloudToken=saved.token;await loadCloudOverview();showAccount(saved.email,saved.role);cs('Sitzung wiederhergestellt.');if(saved.role==='admin')await cloudUsers();}catch(e){if(e.message==='Sitzung abgelaufen'||e.message==='Anmeldung erforderlich'){cloudToken=null;localStorage.removeItem(sessionKey);window.showLocalRecords();document.body.classList.add('login-locked');cs('Bitte erneut anmelden.');}else {const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const cached=JSON.parse(localStorage.getItem('phev-cache-'+email)||'[]');if(cached.length){window.showCloudRecords(cached);showAccount(saved.email,saved.role);document.body.classList.add('login-locked');loadVehicles();cs('Offline: gespeicherte Einträge verfügbar.');}else cs('Cloud momentan nicht erreichbar.');}}})();
+
+
+window.scheduleCloudPreferences=function(){
+ if(!cloudPreferencesReady||!cloudToken)return;
+ clearTimeout(preferencesTimer);
+ preferencesTimer=setTimeout(async()=>{
+  try{
+   const current=window.collectCloudPreferences();
+   const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
+   await cloudCall('preferences',{preferences:merged});
+   cloudPreferences=merged;
+   cs('Einstellungen in der Cloud gespeichert.');
+  }catch(e){cs('Einstellungen lokal gespeichert; Cloud-Sync fehlgeschlagen: '+e.message);}
+ },700);
+};
+ce('cloud-preferences-upload').onclick=async()=>{
+ if(!cloudToken)return cs('Bitte zuerst anmelden.');
+ if(!confirm('Lokale Einstellungen und Fahrzeugfoto-Links in dein Cloud-Konto übernehmen? Vorhandene Cloud-Einstellungen können dadurch ersetzt werden.'))return;
+ const button=ce('cloud-preferences-upload');button.disabled=true;
+ try{
+  const current=window.collectCloudPreferences();
+  const merged={...(cloudPreferences||{}),...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
+  await cloudCall('preferences',{preferences:merged});
+  cloudPreferences=merged;cloudPreferencesReady=true;
+  cs('Lokale Einstellungen erfolgreich in die Cloud übernommen.');
+ }catch(e){cs('Übernahme fehlgeschlagen: '+e.message);}
+ finally{button.disabled=false;}
+};
 
 let cloudSyncing=false;
 window.queueCloudChanges=function(items){const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const cacheKey='phev-cache-'+email,queueKey='phev-queue-'+email;const old=JSON.parse(localStorage.getItem(cacheKey)||'[]');const previous=new Map(old.map(r=>[r.id,r]));const next=new Map(items.map(r=>[r.id,r]));let queue=JSON.parse(localStorage.getItem(queueKey)||'[]');for(const r of items)if(JSON.stringify(previous.get(r.id))!==JSON.stringify(r))queue.push({action:'save',record:r});for(const r of old)if(!next.has(r.id))queue.push({action:'delete',id:r.id});localStorage.setItem(queueKey,JSON.stringify(queue));localStorage.setItem(cacheKey,JSON.stringify(items));syncCloudQueue();};
