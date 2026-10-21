@@ -55,13 +55,13 @@ function displayVehiclePhoto(result){
   if(result){img.src=result.src;img.alt=result.alt;img.onerror=()=>{img.hidden=true;fallback.hidden=false;};}
   else img.removeAttribute('src');
  }
- const credit=$('vehicleImageCredit');credit.hidden=!result;credit.href=result?.page||'#';
+ const credit=$('vehicleImageCredit');credit.hidden=!result||!!result.custom;credit.href=result?.custom?'#':(result?.page||'#');
 }
 async function updateVehiclePhoto(vehicle){
  const request=++photoRequest;
  if(!vehicle){displayVehiclePhoto(null);return;}
  const custom=localStorage.getItem('phev-photo-'+vehicle.id);
- if(custom){displayVehiclePhoto({src:custom,page:custom,alt:'Eigenes Fahrzeugfoto: '+vehicleName(vehicle)});return;}
+ if(custom){displayVehiclePhoto({src:custom,page:custom,custom:true,alt:'Eigenes Fahrzeugfoto: '+vehicleName(vehicle)});return;}
  const key=(vehicle.brand+' '+vehicle.model).trim().toLowerCase();
  if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
  displayVehiclePhoto(null);
