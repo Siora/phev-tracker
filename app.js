@@ -299,13 +299,23 @@ function renderChargingManagement(){
  const data=chargingData();
  for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
   const list=$(listId);if(!list)continue;list.replaceChildren();
+  const table=document.createElement('table');table.className='management-table';
+  const thead=document.createElement('thead'),heading=document.createElement('tr');
+  for(const title of (type==='locations'?['Ladeort','Typ','Preis / kWh','Aktionen']:['Anbieter','Preis / kWh','Aktionen'])){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
+  thead.append(heading);table.append(thead);
+  const tbody=document.createElement('tbody');
+  if(!data[type].length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=type==='locations'?4:3;td.textContent=type==='locations'?'Noch keine Ladeorte angelegt.':'Noch keine Anbieter angelegt.';tr.append(td);tbody.append(tr);}
   for(const item of data[type]){
-   const row=document.createElement('p'),edit=document.createElement('button'),del=document.createElement('button');
-   row.append(document.createTextNode(item.name+(item.kind?' · '+item.kind:'')+(item.price!==null?' · '+item.price+' '+settings.base+'/kWh':'')+' '));
-   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';};
+   const row=document.createElement('tr');
+   const values=type==='locations'?[item.name,item.kind||'–',item.price===null?'–':item.price+' '+settings.base]:[item.name,item.price===null?'–':item.price+' '+settings.base];
+   for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
+   const actions=document.createElement('td');actions.className='management-actions';
+   const edit=document.createElement('button'),del=document.createElement('button');
+   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';form.scrollIntoView({behavior:'smooth',block:'start'});};
    del.textContent='Löschen';del.type='button';del.onclick=()=>{if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;data[type]=data[type].filter(x=>x.id!==item.id);storeChargingData(data);};
-   row.append(edit,del);list.append(row);
+   actions.append(edit,del);row.append(actions);tbody.append(row);
   }
+  table.append(tbody);list.append(table);
   document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{const select=form.elements[field];if(!select)return;const previous=select.value;select.replaceChildren(new Option(type==='locations'?'Kein gespeicherter Ladeort':'Kein Anbieter',''),...data[type].map(x=>new Option(x.name,x.id)));select.value=data[type].some(x=>x.id===previous)?previous:'';});
  }
 }
