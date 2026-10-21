@@ -40,8 +40,10 @@ async function cloudCall(action,data){
   ...(data===undefined?{}:{body:JSON.stringify(data)}),
   cache:'no-store'
  });
- const json=await response.json();
- if(!response.ok)throw Error(json.error||'Serverfehler');
+ let json;
+ try{json=await response.json();}
+ catch{throw Error('Ungültige Serverantwort (HTTP '+response.status+').');}
+ if(!response.ok)throw Error(json.error||'Serverfehler (HTTP '+response.status+')');
  return json;
 }
 
