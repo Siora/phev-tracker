@@ -25,6 +25,22 @@ for (const file of ['app.js', 'cloud.js', 'charts.js']) {
   try { new vm.Script(fs.readFileSync(fullPath, 'utf8'), {filename:file}); }
   catch (error) { problems.push('Invalid JavaScript in ' + file + ': ' + error.message); }
 }
+// Catch native integration regressions without touching production or user data.
+const cloud = fs.readFileSync(path.join(root, 'www/cloud.js'), 'utf8');
+const api = fs.readFileSync(path.join(root, 'server/api.php'), 'utf8');
+if (!cloud.includes('https://tracker.web-produktion.com/api/api.php'))
+  problems.push('Cloud API endpoint unexpectedly changed');
+if (!api.includes("'capacitor://localhost'"))
+  problems.push('Development API must explicitly allow the native Capacitor origin');
+if (/navigator\.serviceWorker\.register\s*\(/.test(html + fs.readFileSync(path.join(root, 'www/app.js'), 'utf8')))
+  problems.push('Native bundle must not register a PWA service worker');
+if (!html.includes('viewport-fit=cover'))
+  problems.push('Native viewport must support iPhone safe areas');
+if (!html.includes('ios-native.css'))
+  problems.push('Native iOS safe-area stylesheet missing');
+if (/\bserver\s*:\s*\{\s*url\s*:/.test(JSON.stringify(config)))
+  problems.push('Do not load the production PWA as a remote native shell');
+
 if (html.includes('manifest.webmanifest')) problems.push('iOS bundle should not reference the PWA manifest');
 if (problems.length) {
   console.error('iOS bundle checks failed:\n' + problems.map(x => '- ' + x).join('\n'));
