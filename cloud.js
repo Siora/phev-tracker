@@ -118,21 +118,6 @@ async function loadVehicles(){
   table.append(tbody);list.append(table);
  }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
 }
-ce('bulk-assign').onclick=async()=>{
- const status=ce('bulk-status'),target=ce('bulkVehicle').value;
- if(!cloudToken)return status.textContent='Bitte zuerst anmelden.';
- if(!target)return status.textContent='Bitte ein Fahrzeug auswählen.';
- const count=Number(ce('bulk-count').textContent.match(/^\d+/)?.[0]||0);
- if(!count)return status.textContent='Alle Einträge sind bereits zugeordnet.';
- if(!confirm(count+' bisher nicht zugeordnete Einträge dem ausgewählten Fahrzeug zuweisen?'))return;
- const button=ce('bulk-assign');button.disabled=true;
- try{
-  const changed=window.assignUnassignedToVehicle(target);
-  status.textContent=changed+' Einträge zugeordnet. Die Cloud-Synchronisierung läuft; bitte die App geöffnet lassen, bis „Alle Änderungen synchronisiert“ erscheint.';
-  ce('vehicleFilter').value=target;ce('period').value='12';render();
- }catch(e){status.textContent=e.message;}
- finally{button.disabled=false;}
-};
 ce('vehicle-cancel').onclick=()=>{
  const f=ce('vehicle-form');f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
 };
