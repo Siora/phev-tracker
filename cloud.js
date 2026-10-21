@@ -140,13 +140,23 @@ ce('vehicle-form').onsubmit=async e=>{
 function showAccount(email,role){document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');}
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
- ce('cloud-users').replaceChildren();
- result.users.forEach(user=>{
-  const p=document.createElement('p');
-  p.textContent=user.email+' · '+user.role;
-  ce('cloud-users').append(p);
- });
+ const container=ce('cloud-users');container.replaceChildren();
+ const table=document.createElement('table');table.className='management-table';
+ const thead=document.createElement('thead'),heading=document.createElement('tr');
+ for(const label of ['E-Mail-Adresse','Rolle']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
+ thead.append(heading);table.append(thead);
+ const tbody=document.createElement('tbody');
+ if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=2;cell.textContent='Noch keine Benutzer vorhanden.';row.append(cell);tbody.append(row);}
+ for(const user of result.users){
+  const row=document.createElement('tr');
+  for(const value of [user.email,user.role==='admin'?'Administrator':'Benutzer']){
+   const cell=document.createElement('td');cell.textContent=value;row.append(cell);
+  }
+  tbody.append(row);
+ }
+ table.append(tbody);container.append(table);
 }
+
 ce('cloud-login').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button');
