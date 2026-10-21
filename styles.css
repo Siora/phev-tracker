@@ -734,3 +734,19 @@ button:hover{filter:brightness(1.06)}
 
 /* v56: hidden form fields must override generic label display styles */
 #form label[hidden] { display: none !important; }
+
+/* v57: responsive charge/refuel history table */
+.entry-table-section{margin-top:2rem;padding-top:1.25rem;border-top:1px solid #dbe4ef}
+.entry-table-section h2{margin-top:0}
+.entry-table-section #entry-sort{max-width:260px;margin-bottom:1rem}
+.entry-table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #dbe4ef;border-radius:14px;background:#fff}
+.entry-history-table{width:100%;min-width:720px;border-collapse:collapse;text-align:left;font-size:.93rem}
+.entry-history-table th{background:#f1f5fa;color:#213958;font-weight:700;white-space:nowrap}
+.entry-history-table th,.entry-history-table td{padding:12px 14px;border-bottom:1px solid #e5ebf2;vertical-align:middle}
+.entry-history-table tbody tr:nth-child(even){background:#f8fafc}
+.entry-history-table tbody tr:hover{background:#edf5ff}
+.entry-history-table tbody tr:last-child td{border-bottom:0}
+.entry-history-table td:nth-child(1),.entry-history-table td:nth-child(4),.entry-history-table td:nth-child(5){white-space:nowrap;font-variant-numeric:tabular-nums}
+.entry-table-actions{white-space:nowrap}
+.entry-table-actions button{margin:2px 4px 2px 0;padding:8px 10px;font-size:.86rem}
+@media(max-width:700px){.entry-history-table{font-size:.88rem}.entry-history-table th,.entry-history-table td{padding:10px 12px}}
