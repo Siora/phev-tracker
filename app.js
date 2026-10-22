@@ -1163,6 +1163,79 @@ function exportPdfReport(mode){
   pdf.heading('Monatsübersicht');
   pdf.table(['Monat','Ladungen','Tankungen','Kosten '+settings.base],buckets.map((k,i)=>{const rows=data.filter(r=>r.date.slice(5,7)===k);return [k,String(rows.filter(r=>r.type==='charge').length),String(rows.filter(r=>r.type==='fuel').length),(sum(rows,conv)+extraExpenses.filter(x=>x.date.slice(5,7)===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0)).toFixed(2)];}),[70,125,125,165]);
  }
+ /**
+  * Erweiterter Jahresbericht (v92).
+  *
+  * Die Jahresstatistik nutzt dieselben bereits nach Jahr und Fahrzeug
+  * gefilterten Datensätze wie der bisherige Bericht. Zusatzkosten stammen
+  * ausschliesslich aus den bestätigten SQL-Fahrzeugausgaben. Die Summen
+  * werden in die eingestellte Basiswährung umgerechnet.
+  *
+  * Kilometerstände dürfen niemals über mehrere Fahrzeuge hinweg als
+  * gemeinsame Spanne interpretiert werden: pro Fahrzeug wird separat
+  * gerechnet. Ohne mindestens zwei gültige Stände bleibt der Wert offen.
+  */
+ if(mode==='year'){
+  const months=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const money=value=>Number(value).toFixed(2);
+  const expenseValue=x=>expenseCurrency(Number(x.amount),x.currency);
+  const monthly=buckets.map((key,index)=>{
+   const monthRecords=data.filter(r=>String(r.date||'').slice(5,7)===key);
+   const monthExpenses=extraExpenses.filter(x=>String(x.date||'').slice(5,7)===key);
+   const chargeRows=monthRecords.filter(r=>r.type==='charge');
+   const fuelRows=monthRecords.filter(r=>r.type==='fuel');
+   const electricity=sum(chargeRows,conv),petrol=sum(fuelRows,conv);
+   const other=sum(monthExpenses,expenseValue);
+   return {name:months[index],electricity,petrol,other,total:electricity+petrol+other,
+    kwh:sum(chargeRows,r=>Number(r.amount||0)),liters:sum(fuelRows,r=>Number(r.amount||0))};
+  });
+  pdf.heading('Jahresvergleich: Strom, Benzin und Zusatzkosten');
+  pdf.table(['Monat','Strom','Benzin','Weitere','Gesamt'],
+   monthly.map(m=>[m.name,money(m.electricity),money(m.petrol),money(m.other),money(m.total)]),
+   [65,105,105,105,115]);
+  pdf.note('Alle Beträge in '+settings.base+'. Monatswerte entsprechen den erfassten Daten.');
+  pdf.heading('Energieverbrauch pro Monat');
+  pdf.table(['Monat','Strom kWh','Benzin Liter','Gesamt '+settings.base],
+   monthly.map(m=>[m.name,m.kwh.toFixed(1),m.liters.toFixed(1),money(m.total)]),
+   [80,130,130,155]);
+  const categories=new Map();
+  for(const expense of extraExpenses){
+   const name=String(expense.category||'Sonstiges');
+   categories.set(name,(categories.get(name)||0)+expenseValue(expense));
+  }
+  pdf.heading('Weitere Ausgaben nach Kategorie');
+  const categoryRows=[...categories].sort((a,b)=>b[1]-a[1]);
+  pdf.table(['Kategorie','Betrag '+settings.base,'Anteil an Zusatzkosten'],
+   categoryRows.map(([name,amount])=>[name,money(amount),extras>0?(amount/extras*100).toFixed(1)+' %':'–']),
+   [210,135,150]);
+  if(categoryRows.length)pdf.bars(categoryRows.map(([name])=>name.slice(0,7)),categoryRows.map(([,amount])=>amount));
+  const selectedVehicles=vehicleId?vehicles.filter(v=>String(v.id)===vehicleId):vehicles;
+  const comparisons=selectedVehicles.map(v=>{
+   const id=String(v.id);
+   const rows=data.filter(r=>String(r.vehicle_id)===id);
+   const additions=extraExpenses.filter(x=>String(x.vehicle_id)===id);
+   const cost=sum(rows,conv)+sum(additions,expenseValue);
+   const readings=rows.map(r=>Number(r.km)).filter(k=>Number.isFinite(k)&&k>0);
+   const span=readings.length>=2?Math.max(...readings)-Math.min(...readings):0;
+   return {name:vehicleName(v),cost,span,perKm:span>0?cost/span:null,
+    kwh:sum(rows.filter(r=>r.type==='charge'),r=>Number(r.amount||0)),
+    liters:sum(rows.filter(r=>r.type==='fuel'),r=>Number(r.amount||0))};
+  });
+  pdf.heading('Fahrzeugvergleich im Jahr');
+  pdf.table(['Fahrzeug','Kosten','km-Spanne','Kosten/km'],
+   comparisons.map(v=>[v.name,money(v.cost),v.span>0?v.span.toFixed(0):'–',v.perKm===null?'–':money(v.perKm)]),
+   [195,105,90,105]);
+  pdf.table(['Fahrzeug','Strom kWh','Benzin Liter'],
+   comparisons.map(v=>[v.name,v.kwh.toFixed(1),v.liters.toFixed(1)]),
+   [245,125,125]);
+  pdf.note('Kosten/km und km-Spanne sind Naeherungen je Fahrzeug aus den vorhandenen Kilometerstaenden. Bei fehlenden oder identischen Staenden kein Wert. Keine Abschreibung oder nicht erfasste Kosten.');
+  pdf.heading('Jahresfazit');
+  const activeMonths=monthly.filter(m=>m.total>0);
+  const highest=activeMonths.slice().sort((a,b)=>b.total-a.total)[0];
+  pdf.note('Erfasste Gesamtkosten: '+money(combined)+' '+settings.base+'; Strom: '+money(sum(charges,conv))+'; Benzin: '+money(sum(fuel,conv))+'; Zusatzkosten: '+money(extras)+'.');
+  pdf.note('Aktive Kostenmonate: '+activeMonths.length+' von 12.'+(highest?' Kostenintensivster Monat: '+highest.name+' ('+money(highest.total)+' '+settings.base+').':''));
+  pdf.note('Der Bericht beruecksichtigt nur erfasste Vorgänge und Ausgaben. Wechselkurse entsprechen den aktuellen App-Einstellungen.');
+ }
  pdf.heading('Einzelne Einträge');
  const sorted=data.slice().sort((x,y)=>recordDateTime(x).localeCompare(recordDateTime(y)));
  pdf.table(['Datum / Zeit','Art','Menge','Ort','Kosten '+settings.base],sorted.map(r=>[recordDateTime(r),r.type==='charge'?'Strom':'Benzin',Number(r.amount||0).toFixed(2)+(r.type==='charge'?' kWh':' l'),r.place||'–',conv(r).toFixed(2)]),[105,65,90,145,90]);
