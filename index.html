@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=91">
+<link rel="stylesheet" href="styles.css?v=92">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -173,8 +173,8 @@
 </section>
 <!-- Gemeinsamer CSV-Import und -Export -->
 <section id="csv" class="hide">
-<h2>Monats- und Jahresberichte (PDF)</h2>
-<p>Monats- und Jahresberichte mit Energie, Tankmengen, Strom- und Benzinkosten sowie zusätzlichen Fahrzeugausgaben (Versicherung, Service usw.). Die PDF-Datei wird direkt auf deinem Gerät erzeugt.</p>
+<h2>Monatsberichte und erweiterte Jahresberichte (PDF)</h2>
+<p>Monatsberichte sowie mehrseitige Jahresberichte mit Monatsvergleich, Energiebilanz, Wartungs- und Fahrzeugkosten nach Kategorien, Fahrzeugvergleich und Kosten pro Kilometer. Alle Daten werden lokal als PDF auf deinem Gerät verarbeitet.</p>
 <label>Jahr<input id="report-year" type="number" min="2020" max="2100" value="2026"></label>
 <label>Monat<select id="report-month"><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></label>
 <label>Fahrzeug<select id="report-vehicle"><option value="">Alle Fahrzeuge</option></select></label>
@@ -251,15 +251,15 @@
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
-<script src="jspdf.umd.min.js?v=91" defer></script>
+<script src="jspdf.umd.min.js?v=92" defer></script>
 <script src="charts.js" defer></script>
-<script src="pagination.js?v=91" defer></script>
-<script src="pdf-report.js?v=91" defer></script>
-<script src="csv-import-utils.js?v=91" defer></script>
-<script src="auto-backup.js?v=91" defer></script>
-<script src="vehicle-costs.js?v=91" defer></script>
-<script src="cloud.js?v=91" defer></script>
-<script src="app.js?v=91" defer>
+<script src="pagination.js?v=92" defer></script>
+<script src="pdf-report.js?v=92" defer></script>
+<script src="csv-import-utils.js?v=92" defer></script>
+<script src="auto-backup.js?v=92" defer></script>
+<script src="vehicle-costs.js?v=92" defer></script>
+<script src="cloud.js?v=92" defer></script>
+<script src="app.js?v=92" defer>
 </script>
 </main>
 </div>

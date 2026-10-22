@@ -114,3 +114,20 @@ test('Seitennavigation erscheint erst ab mehr als einer Seite', () => {
   assert.match(pagination, /bottom\.nav\.hidden=!hasMultiplePages/);
   assert.match(styles, /\.table-pagination\[hidden\]\{display:none!important\}/);
 });
+
+test('Erweiterter Jahresbericht enthält Monatsspalten, Energiebilanz, Kostenkategorien und Fahrzeugvergleich', () => {
+ const app=read('app.js');
+ const index=read('index.html');
+ const start=app.indexOf("if(mode==='year'){",app.indexOf('function exportPdfReport(mode)'));
+ assert.ok(start>0,'Jahresbericht fehlt');
+ const section=app.slice(start,app.indexOf("pdf.heading('Einzelne Einträge')",start));
+ for(const label of ['Jahresvergleich: Strom, Benzin und Zusatzkosten','Energieverbrauch pro Monat',
+  'Weitere Ausgaben nach Kategorie','Fahrzeugvergleich im Jahr','Jahresfazit']){
+  assert.ok(section.includes(label),'Fehlende Berichtsrubrik: '+label);
+ }
+ assert.ok(section.includes('vehicleExpenses')===false,'SQL-Daten wurden bereits vorher gefiltert');
+ assert.ok(section.includes('expenseValue'),'Währungsumrechnung für Zusatzkosten fehlt');
+ assert.ok(section.includes("String(x.vehicle_id)===id"),'Fahrzeugvergleich filtert nicht je Fahrzeug');
+ assert.ok(app.includes('const vehicleGroups=new Map()'),'Kilometerstände müssen je Fahrzeug getrennt sein');
+ assert.ok(index.includes('erweiterte Jahresberichte'));
+});
