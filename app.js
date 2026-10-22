@@ -304,6 +304,21 @@ function renderMonthComparison(filtered){
  * Die HTML-Struktur bleibt exakt wie in v88. Dieser Helfer berechnet keine
  * Werte und verändert weder Einträge noch Filter oder Cloud-Zustand.
  */
+/**
+ * Aktualisiert die vier Dashboard-Diagramme in der bisherigen Reihenfolge.
+ *
+ * Übergibt ausschließlich bereits gefilterte Daten an die vorhandenen
+ * AnalyticsCharts-Funktionen. Die Diagrammberechnung selbst bleibt unangetastet,
+ * insbesondere die kritischen Verbrauchs- und Fahrzeugübersichten.
+ */
+function renderDashboardCharts(filtered,charges){
+  const metric = $('trendMetric').value;
+  AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
+  AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
+  AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
+  AnalyticsCharts.providers($('providerchart'), charges);
+}
+
 function renderDashboardStatTiles(tiles){
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
 }
@@ -400,11 +415,7 @@ function render(){
     distance, currency:settings.base
   });
   renderDashboardStatTiles(tiles);
-  const metric = $('trendMetric').value;
-  AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
-  AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
-  AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
-  AnalyticsCharts.providers($('providerchart'), charges);
+  renderDashboardCharts(filtered,charges);
   renderDashboardTimeline(filtered);
   renderDashboardFleetOverview();
   renderMonthComparison(filtered);
