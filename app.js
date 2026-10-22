@@ -238,6 +238,35 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * Änderungen an Datensätzen erfolgen ausschließlich über die vorhandenen
  * Benutzeraktionen und ihre bestehenden Speicher-/Bestätigungswege.
  */
+/**
+ * Überträgt einen vorhandenen Lade- oder Tankvorgang ins Bearbeitungsformular.
+ *
+ * Die Reihenfolge ist bewusst identisch mit v88: erst Art/Ortsanzeige,
+ * anschließend Werte, Preisberechnung, Zusatzangaben und Formularnavigation.
+ * Es wird hier weder gespeichert noch ein Cloud-Aufruf ausgeführt.
+ */
+function beginEntryEdit(x){
+  const f=$('form');
+  f.elements.type.value=x.type;
+  updateEntryPlaceVisibility();
+  f.elements.date.value=x.date;
+  f.elements.time.value=recordTime(x.id);
+  f.elements.amount.value=x.amount;
+  f.elements.cost.value=x.cost;
+  setUnitPriceFromTotal(f);
+  f.elements.currency.value=x.currency;
+  f.elements.km.value=x.km||'';
+  f.elements.place.value=x.place||'';
+  f.elements.managed_location.value='';
+  f.elements.managed_provider.value='';
+  f.elements.charge_kind.value=getChargingType(x.id);
+  f.elements.charge_mode.value=getChargeMode(x.id);
+  f.elements.vehicle_id.value=x.vehicle_id||'';
+  f.dataset.editId=x.id;
+  f.querySelector('button').textContent='Änderungen speichern';
+  tab('add');
+}
+
 function renderEntryHistory(){
   // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
   const entries=$('entries');
@@ -269,9 +298,7 @@ function renderEntryHistory(){
   for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
   const actions=document.createElement('td');actions.className='entry-table-actions';
   const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-  edit.onclick=()=>{
-  let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-  };
+  edit.onclick=()=>beginEntryEdit(x);
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
   remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
   actions.append(edit,remove);tr.append(actions);return tr;
