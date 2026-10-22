@@ -38,6 +38,7 @@ async function openFixture(browser){
     const payload={
       session:{email:'audit@example.invalid',role:'admin'},
       vehicles:{vehicles},
+      'vehicle-expenses':{expenses:[]},
       data:{records,preferences:null,preferences_available:false},
       'charging-catalog':{locations,providers},
       'admin-users':{users}
