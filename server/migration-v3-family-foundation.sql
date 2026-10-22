@@ -30,9 +30,8 @@ CREATE TABLE family_vehicle_shares (
  PRIMARY KEY (family_id,vehicle_id),
  KEY idx_family_vehicle_owner (owner_user_id,vehicle_id),
  CONSTRAINT fk_family_vehicle_family FOREIGN KEY (family_id) REFERENCES family_groups(id) ON DELETE CASCADE,
- CONSTRAINT fk_family_vehicle_owner FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
+ CONSTRAINT fk_family_vehicle_owner FOREIGN KEY (owner_user_id,vehicle_id) REFERENCES vehicles(user_id,id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Sicherheitsregel für kommende API: vehicle_id muss zur owner_user_id gehören.
--- Die Zuordnung muss vor INSERT/UPDATE transaktional gegen vehicles geprüft werden.
+-- Zusammengesetzter Fremdschlüssel garantiert, dass die Freigabe zum Fahrzeugeigentümer gehört.
 -- Diese Migration ändert ausdrücklich KEINE vorhandenen API-Berechtigungen.
