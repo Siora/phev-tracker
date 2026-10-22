@@ -65,6 +65,13 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.equal(await page.locator('#vehicleFilter option').count(),8);
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
+    // Vorhandene Lade-/Tankdaten werden ohne neue Pflichtfelder getrennt ausgewertet.
+    const consumptionLabels=await page.locator('#consumption-stats .tile small').allTextContents();
+    assert.ok(consumptionLabels.includes('⚡ Stromkosten / 100 km'));
+    assert.ok(consumptionLabels.includes('⛽ Benzinkosten / 100 km'));
+    assert.ok(consumptionLabels.includes('💰 Energiekosten / 100 km'));
+    assert.match(await page.locator('#consumption-note').textContent(),/Näherungswerte/);
+
     // Beide Navigationsleisten müssen existieren und dieselbe Seite steuern.
     for(const selector of ['#entries','#vehicle-list','#cloud-users','#managed-locations-list','#managed-providers-list']){
       assert.equal(await page.locator(selector+' > nav.table-pagination').count(),2,selector+': oben und unten');
