@@ -165,7 +165,7 @@ Die Datei `tests/refactoring.test.cjs` enthält reine Node.js-Tests ohne Netzwer
 
 ### Versions- und Cache-Pflege
 
-Die sichtbare Versionsnummer in `index.html`, die Asset-Parameter `?v=NNN` in `index.html` und `sw.js` sowie der Cache-Name `phev-tracker-vNNN` müssen **gleichzeitig** aktualisiert werden. Beispiel: Version 2.3 → `203`. Der Regressionstest in `tests/refactoring.test.cjs` überprüft diese Konsistenz; seine Versionsanzeige-Erwartung muss ebenfalls angepasst werden. Dies ist derzeit ein manueller Release-Schritt und ein Kandidat für eine spätere zentrale Versionsverwaltung.
+Die zentrale Release-Definition steht in `release.json` (`version` und `cacheCode`). Die sichtbare Versionsnummer in `index.html`, die Asset-Parameter `?v=NNN` in `index.html` und `sw.js` sowie der Cache-Name `phev-tracker-vNNN` müssen **gleichzeitig** aktualisiert werden. Beispiel: Version 2.3 → `203`. Der Regressionstest in `tests/refactoring.test.cjs` leitet die erwarteten Werte aus `release.json` ab und überprüft alle versionierten Assets. Die Version wird dadurch zentral geprüft; die HTML- und Service-Worker-Angaben werden aktuell noch manuell gepflegt.
 
 ### Historische Refactoring-Dokumente
 
