@@ -17,7 +17,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const app = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
-const start = app.indexOf("  const recent=$('recent-entries');");
+const start = app.indexOf('  renderDashboardTimeline(filtered);', app.indexOf('function render(){'));
 const end = app.indexOf('  // Full record history lives', start);
 assert.ok(start >= 0 && end > start, 'Dashboard-Timeline/Fahrzeugübersicht nicht gefunden');
 const source = app.slice(start, end);
@@ -69,6 +69,10 @@ function harness() {
   };
   // Monatsvergleich in derselben VM laden, damit der Dashboard-Ausschnitt
   // nach der Auslagerung weiterhin mit der echten Funktion ausgeführt wird.
+  const timelineStart = app.indexOf('function renderDashboardTimeline(');
+  const timelineEnd = app.indexOf('\nfunction renderMonthComparison(', timelineStart);
+  assert.ok(timelineStart >= 0 && timelineEnd > timelineStart);
+  vm.runInNewContext(app.slice(timelineStart, timelineEnd), sandbox);
   const monthStart = app.indexOf('function renderMonthComparison(');
   const monthEnd = app.indexOf('\nfunction buildDashboardStatTiles(', monthStart);
   assert.ok(monthStart >= 0 && monthEnd > monthStart);

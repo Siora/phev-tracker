@@ -49,11 +49,17 @@ test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht',
     'AnalyticsCharts.donut(',
     'AnalyticsCharts.price(',
     'AnalyticsCharts.providers(',
-    "$('recent-entries')",
+    'renderDashboardTimeline(filtered);',
     "$('fleet-overview')",
     "$('entries')",
     'window.paginateTable(entries,table,tbody,ordered,20,'
   ]);
+});
+
+test('Timeline-Helfer zeichnet weiterhin den vorgesehenen DOM-Container', () => {
+  const helper = section(app, 'function renderDashboardTimeline(filtered){', '\nfunction renderMonthComparison(');
+  assert.ok(helper.includes("$('recent-entries')"));
+  assert.ok(helper.includes('filtered.slice().sort(compareRecordDateTime).slice(0,8)'));
 });
 
 test('Cloud-Datenübernahme und Preferences stoßen weiterhin Rendering an', () => {

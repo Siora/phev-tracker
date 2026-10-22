@@ -195,6 +195,38 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * Die Monatsaggregation, Sortierung (neuester Monat zuerst), Skalierung und
  * Leermeldung entsprechen der bisherigen v88-Implementierung.
  */
+/**
+ * Zeichnet die letzten acht Lade- und Tankvorgänge im Dashboard.
+ *
+ * Erwartet die bereits nach Zeitraum, Fahrzeug und Ort gefilterten Einträge.
+ * Sortierung, Anzeigeformat, Ladeart, Fahrzeugname und Leermeldung entsprechen
+ * der v88-Ansicht. Die übergebene Liste wird nicht sortiert oder verändert.
+ *
+ * Keine Cloud-Zugriffe und keine Änderungen an der Fahrzeugübersicht.
+ */
+function renderDashboardTimeline(filtered){
+  const recent=$('recent-entries');recent.replaceChildren();
+  filtered.slice().sort(compareRecordDateTime).slice(0,8).forEach(r=>{
+    const isCharge=r.type==='charge';
+    const item=document.createElement('article');item.className='timeline-event '+(isCharge?'timeline-charge':'timeline-fuel');
+    const marker=document.createElement('span');marker.className='timeline-marker';marker.textContent=isCharge?'⚡':'⛽';marker.setAttribute('aria-hidden','true');
+    const content=document.createElement('div');content.className='timeline-content';
+    const head=document.createElement('div');head.className='timeline-head';
+    const title=document.createElement('strong');title.textContent=isCharge?'Ladung':'Tankung';
+    const date=document.createElement('time');date.textContent=recordDateTime(r).replace(' ',' · ');
+    head.append(title,date);
+    const details=document.createElement('div');details.className='timeline-details';
+    const amount=Number(r.amount)||0;
+    details.textContent=amount.toLocaleString('de-CH',{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
+    const notes=document.createElement('small');notes.className='timeline-notes';
+    const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
+    notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');
+    content.append(head,details);if(notes.textContent)content.append(notes);
+    item.append(marker,content);recent.append(item);
+    });
+  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
+}
+
 function renderMonthComparison(filtered){
   const compare=$('month-compare');
   compare.replaceChildren();
@@ -322,27 +354,7 @@ function render(){
   AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
   AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
   AnalyticsCharts.providers($('providerchart'), charges);
-  const recent=$('recent-entries');recent.replaceChildren();
-  filtered.slice().sort(compareRecordDateTime).slice(0,8).forEach(r=>{
-    const isCharge=r.type==='charge';
-    const item=document.createElement('article');item.className='timeline-event '+(isCharge?'timeline-charge':'timeline-fuel');
-    const marker=document.createElement('span');marker.className='timeline-marker';marker.textContent=isCharge?'⚡':'⛽';marker.setAttribute('aria-hidden','true');
-    const content=document.createElement('div');content.className='timeline-content';
-    const head=document.createElement('div');head.className='timeline-head';
-    const title=document.createElement('strong');title.textContent=isCharge?'Ladung':'Tankung';
-    const date=document.createElement('time');date.textContent=recordDateTime(r).replace(' ',' · ');
-    head.append(title,date);
-    const details=document.createElement('div');details.className='timeline-details';
-    const amount=Number(r.amount)||0;
-    details.textContent=amount.toLocaleString('de-CH',{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
-    const notes=document.createElement('small');notes.className='timeline-notes';
-    const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
-    notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');
-    content.append(head,details);if(notes.textContent)content.append(notes);
-    item.append(marker,content);recent.append(item);
-  });
-  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
-
+  renderDashboardTimeline(filtered);
   const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
   renderMonthComparison(filtered);
   // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
