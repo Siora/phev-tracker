@@ -973,10 +973,11 @@ $('expense-form').addEventListener('reset',e=>{delete e.currentTarget.dataset.ed
 window.collectCloudPreferences=function(){
  const photos={};
  for(const vehicle of vehicles){const url=localStorage.getItem('phev-photo-'+vehicle.id);if(url)photos[String(vehicle.id)]=url;}
- return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate};
+ return {photos,fuel_energy_factor:fuelEnergyFactor(),cost_comparison:getCostComparison(),base:settings.base,rate:settings.rate,dashboard_layout:window.getDashboardLayoutPreferences?.()};
 };
 window.applyCloudPreferences=function(prefs){
  if(!prefs||typeof prefs!=='object')return;
+ window.applyDashboardLayoutPreferences?.(prefs.dashboard_layout);
  
  if(prefs.photos&&typeof prefs.photos==='object'){
   for(const vehicle of vehicles){
@@ -1370,6 +1371,66 @@ function exportPdfReport(mode){
  const url=URL.createObjectURL(new Blob([pdf.finish()],{type:'application/pdf'}));
  const link=document.createElement('a');link.href=url;link.download='phev-'+(mode==='month'?'monat-':'jahr-')+period+'.pdf';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
+
+
+/**
+ * Individuelle Dashboard-Anordnung (2.3).
+ *
+ * Die bestehenden Kacheln und ihre Diagramme bleiben im DOM. Es werden nur
+ * ihre Sichtbarkeit und Reihenfolge geändert; Berechnungen, Cloud-Daten und
+ * Formulare bleiben unberührt. localStorage ist gerätebezogen und wird nicht
+ * als benutzerübergreifende Cloud-Einstellung ausgegeben.
+ */
+function initializeDashboardLayout(){
+ const root=$('dashboard-layout-controls'),reset=$('dashboard-layout-reset');
+ if(!root||!reset)return;
+ const key='phev-dashboard-layout-v1';
+ const widgets=[...document.querySelectorAll('#home [data-dashboard-widget]')];
+ const defaults=widgets.map(w=>w.dataset.dashboardWidget);
+ const read=()=>{
+  try{
+   const saved=JSON.parse(localStorage.getItem(key)||'null');
+   if(!saved||!Array.isArray(saved.order)||!Array.isArray(saved.hidden))return {order:defaults,hidden:[]};
+   return {order:[...new Set([...saved.order.filter(id=>defaults.includes(id)),...defaults])],hidden:saved.hidden.filter(id=>defaults.includes(id))};
+  }catch{return {order:defaults,hidden:[]};}
+ };
+ let state=read();
+ const persist=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{/* Private Browsing: aktuelle Auswahl bleibt erhalten. */}};
+ const apply=()=>{
+  for(const id of state.order){
+   const widget=widgets.find(w=>w.dataset.dashboardWidget===id);
+   if(!widget)continue;
+   widget.hidden=state.hidden.includes(id);
+   // Nur innerhalb des ursprünglichen Kachelbereichs verschieben.
+   const siblings=widgets.filter(w=>w.parentElement===widget.parentElement);
+   if(siblings.length>1)widget.parentElement.append(widget);
+  }
+ };
+ const controls=()=>{
+  root.replaceChildren();
+  for(const [index,id] of state.order.entries()){
+   const row=document.createElement('div');row.className='dashboard-layout-row';
+   const label=document.createElement('label');
+   const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=!state.hidden.includes(id);
+   toggle.onchange=()=>{state.hidden=toggle.checked?state.hidden.filter(x=>x!==id):[...state.hidden,id];persist();apply();};
+   label.append(toggle,document.createTextNode(' '+id));
+   const up=document.createElement('button');up.type='button';up.textContent='↑';up.setAttribute('aria-label',id+' nach oben');up.disabled=index===0;
+   const down=document.createElement('button');down.type='button';down.textContent='↓';down.setAttribute('aria-label',id+' nach unten');down.disabled=index===state.order.length-1;
+   const move=offset=>{const target=index+offset;[state.order[index],state.order[target]]=[state.order[target],state.order[index]];persist();apply();controls();};
+   up.onclick=()=>move(-1);down.onclick=()=>move(1);
+   row.append(label,up,down);root.append(row);
+  }
+ };
+ window.getDashboardLayoutPreferences=()=>({order:[...state.order],hidden:[...state.hidden]});
+ window.applyDashboardLayoutPreferences=value=>{
+  if(!value||!Array.isArray(value.order)||!Array.isArray(value.hidden))return;
+  state={order:[...new Set([...value.order.filter(id=>defaults.includes(id)),...defaults])],hidden:value.hidden.filter(id=>defaults.includes(id))};
+  persist();apply();controls();
+ };
+ reset.onclick=()=>{state={order:[...defaults],hidden:[]};persist();apply();controls();};
+ apply();controls();
+}
+initializeDashboardLayout();
 
 /* PDF-Layout: siehe pdf-report.js; Berechnung verbleibt in exportPdfReport(). */
 

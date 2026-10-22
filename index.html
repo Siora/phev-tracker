@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=202">
+<link rel="stylesheet" href="styles.css?v=203">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -35,7 +35,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.2</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.3</small>
 </div>
 </aside>
 <main class="main">
@@ -69,6 +69,7 @@
 <div class="car-art"><img id="heroVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div><a id="vehicleImageCredit" class="vehicle-photo-credit" href="#" target="_blank" rel="noopener noreferrer" hidden>Bildquelle: Wikipedia / Wikimedia Commons</a></div>
 </div>
 <h2 class="dashboard-label">Dashboard</h2>
+<details class="quick-card" id="dashboard-layout-settings"><summary>⚙ Dashboard anpassen</summary><p><small>Kacheln ein- oder ausblenden und ihre Reihenfolge ändern. Die Auswahl wird auf diesem Gerät gespeichert.</small></p><div id="dashboard-layout-controls"></div><button type="button" id="dashboard-layout-reset">Standardansicht wiederherstellen</button></details>
 <label>Zeitraum</label>
 <select id="period" onchange="render()">
 <option value="month">Letzter Monat</option>
@@ -96,26 +97,26 @@
 </select>
 <div id="vehicle-summary" aria-live="polite"></div>
 <h2>Verbrauch und Energiekosten pro 100 km</h2><div class="grid" id="consumption-stats"></div><p id="consumption-note"></p>
-<article class="quick-card consumption-insights"><h2>🧠 Intelligente Verbrauchsanalyse</h2><p class="insights-intro">Trends, Durchschnittspreise und auffällige Ladevorgänge im ausgewählten Zeitraum.</p><div id="consumption-insights" aria-live="polite"></div></article>
-<article class="quick-card"><h2>⚡⛽ Kombinierte Energiebilanz</h2><div id="energy-balance" aria-live="polite"></div><p id="energy-balance-note"></p></article>
-<article class="quick-card"><h2>📈 Verbrauchsentwicklung (12 Monate)</h2><div id="consumption-trend" aria-live="polite"></div><small>Monatliche Näherungswerte aus erfassten Mengen und Kilometerstandsspanne. Monate ohne ausreichende Kilometerstände bleiben leer.</small></article>
-<article class="quick-card"><h2>🔌 Ladearten</h2><div id="charging-types-report"></div><small>Die Ladeorte werden mit der Cloud synchronisiert.</small></article>
+<article data-dashboard-widget="Verbrauchsanalyse" class="quick-card consumption-insights"><h2>🧠 Intelligente Verbrauchsanalyse</h2><p class="insights-intro">Trends, Durchschnittspreise und auffällige Ladevorgänge im ausgewählten Zeitraum.</p><div id="consumption-insights" aria-live="polite"></div></article>
+<article data-dashboard-widget="Energiebilanz" class="quick-card"><h2>⚡⛽ Kombinierte Energiebilanz</h2><div id="energy-balance" aria-live="polite"></div><p id="energy-balance-note"></p></article>
+<article data-dashboard-widget="Verbrauchsentwicklung" class="quick-card"><h2>📈 Verbrauchsentwicklung (12 Monate)</h2><div id="consumption-trend" aria-live="polite"></div><small>Monatliche Näherungswerte aus erfassten Mengen und Kilometerstandsspanne. Monate ohne ausreichende Kilometerstände bleiben leer.</small></article>
+<article data-dashboard-widget="Ladearten" class="quick-card"><h2>🔌 Ladearten</h2><div id="charging-types-report"></div><small>Die Ladeorte werden mit der Cloud synchronisiert.</small></article>
 <div class="grid" id="stats">
 </div>
 <div class="analytics-grid">
-  <article class="analytics-card analytics-wide">
+  <article data-dashboard-widget="Monatlicher Verlauf" class="analytics-card analytics-wide">
     <div class="chart-heading"><div><small>ENERGIE & KOSTEN</small><h2>Monatlicher Verlauf</h2></div><select id="trendMetric" aria-label="Diagrammkennzahl"><option value="energy">Geladene kWh</option><option value="cost">Kosten</option><option value="fuel">Benzinliter</option></select></div>
     <div id="trendchart" class="interactive-chart" aria-label="Monatliches Balkendiagramm"></div>
   </article>
-  <article class="analytics-card">
+  <article data-dashboard-widget="Strom & Benzin" class="analytics-card">
     <div class="chart-heading"><div><small>KOSTENAUFTEILUNG</small><h2>Strom & Benzin</h2></div></div>
     <div id="donutchart" class="interactive-chart"></div>
   </article>
-  <article class="analytics-card">
+  <article data-dashboard-widget="Strompreis" class="analytics-card">
     <div class="chart-heading"><div><small>PREISENTWICKLUNG</small><h2>Ø Strompreis / kWh</h2></div></div>
     <div id="pricechart" class="interactive-chart"></div>
   </article>
-  <article class="analytics-card analytics-wide">
+  <article data-dashboard-widget="Anbieter" class="analytics-card analytics-wide">
     <div class="chart-heading"><div><small>LADEANBIETER</small><h2>Geladene Energie nach Anbieter</h2></div></div>
     <div id="providerchart" class="interactive-chart"></div>
   </article>
@@ -263,16 +264,16 @@
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
-<script src="jspdf.umd.min.js?v=202" defer></script>
+<script src="jspdf.umd.min.js?v=203" defer></script>
 <script src="charts.js" defer></script>
-<script src="pagination.js?v=202" defer></script>
-<script src="pdf-report.js?v=202" defer></script>
-<script src="csv-import-utils.js?v=202" defer></script>
-<script src="auto-backup.js?v=202" defer></script>
-<script src="vehicle-costs.js?v=202" defer></script>
-<script src="cloud.js?v=202" defer></script>
-<script src="intelligent-analytics.js?v=202" defer></script>
-<script src="app.js?v=202" defer>
+<script src="pagination.js?v=203" defer></script>
+<script src="pdf-report.js?v=203" defer></script>
+<script src="csv-import-utils.js?v=203" defer></script>
+<script src="auto-backup.js?v=203" defer></script>
+<script src="vehicle-costs.js?v=203" defer></script>
+<script src="cloud.js?v=203" defer></script>
+<script src="intelligent-analytics.js?v=203" defer></script>
+<script src="app.js?v=203" defer>
 </script>
 </main>
 </div>
