@@ -1,0 +1,53 @@
+/**
+ * PHEV Tracker – Fahrzeugkosten-Berechnung (v88)
+ *
+ * Dieses Modul ist absichtlich zustandslos: keine DOM-Zugriffe, kein localStorage,
+ * keine Cloud-Anfragen und keine Änderung der übergebenen Datensätze.
+ *
+ * Die Darstellung, Fahrzeugauswahl und das bestätigte Speichern bleiben in app.js.
+ * Dadurch hängt der Dashboard-Start nicht von einer neuen Initialisierungsroutine ab.
+ */
+window.PhevTco = Object.freeze({
+  /**
+   * Rechnet einen Ausgabenbetrag in die eingestellte Basiswährung um.
+   * Der Wechselkurs wird exakt wie in der bisherigen App verwendet.
+   * @param {number} amount Originalbetrag.
+   * @param {string} currency Ursprungswährung (CHF oder EUR).
+   * @param {{base:string,rate:number}} settings Währungseinstellungen.
+   * @returns {number} Betrag in Basiswährung.
+   */
+  convert(amount, currency, settings) {
+    return currency === settings.base
+      ? amount
+      : settings.base === 'CHF' ? amount * settings.rate : amount / settings.rate;
+  },
+
+  /**
+   * Summiert Zusatzkosten und Fahrtkosten eines Fahrzeugs.
+   * Ohne Fahrzeugfilter werden alle Datensätze berücksichtigt.
+   * Die Kilometerstandsspanne ist eine Näherung und keine Fahrtenmessung.
+   * @param {Array} expenses Zusätzliche Fahrzeugausgaben.
+   * @param {Array} records Lade- und Tankdatensätze.
+   * @param {string} vehicleId Fahrzeug-ID oder leer für alle Fahrzeuge.
+   * @param {{base:string,rate:number}} settings Währungseinstellungen.
+   * @param {(record:object)=>number} convertRecord Vorhandene App-Kostenumrechnung.
+   */
+  summarize(expenses, records, vehicleId, settings, convertRecord) {
+    const selectedExpenses = expenses
+      .filter(item => !vehicleId || String(item.vehicle_id) === String(vehicleId))
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date));
+    const extra = selectedExpenses.reduce(
+      (sum, item) => sum + this.convert(Number(item.amount), item.currency, settings), 0
+    );
+    const matchingRecords = records.filter(
+      item => !vehicleId || String(item.vehicle_id) === String(vehicleId)
+    );
+    const running = matchingRecords.reduce((sum, item) => sum + convertRecord(item), 0);
+    const mileages = matchingRecords.map(item => Number(item.km))
+      .filter(value => Number.isFinite(value) && value > 0);
+    const distance = mileages.length > 1
+      ? Math.max(...mileages) - Math.min(...mileages) : 0;
+    return {expenses: selectedExpenses, extra, running, distance, total: extra + running};
+  }
+});
