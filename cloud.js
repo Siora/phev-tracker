@@ -233,6 +233,24 @@ ce('cloud-change-password').onsubmit=async event=>{
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
+// Sicherheitsbestätigung und erneute Authentifizierung vor irreversibler Löschung.
+ce('cloud-delete-account').onsubmit=async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+ if(form.elements.confirmation.value!=='KONTO LÖSCHEN'){cs('Bitte KONTO LÖSCHEN eingeben.');return;}
+ if(!window.confirm('Konto und zugehörige Cloud-Daten unwiderruflich löschen?'))return;
+ button.disabled=true;
+ try{
+  await cloudCall('account-delete',{password:form.elements.password.value,confirmation:form.elements.confirmation.value});
+  form.reset();cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';
+  localStorage.removeItem(sessionKey);updateSyncIndicator();
+  document.body.classList.add('login-locked');
+  ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');
+  ce('cloud-count').textContent='';window.showLocalRecords();
+  cs('Konto gelöscht. Lokale Daten auf diesem Gerät wurden nicht gelöscht.');
+ }catch(error){cs(error.message);}
+ finally{button.disabled=false;}
+};
 ce('cloud-create').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button');
