@@ -245,6 +245,20 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * anschließend Werte, Preisberechnung, Zusatzangaben und Formularnavigation.
  * Es wird hier weder gespeichert noch ein Cloud-Aufruf ausgeführt.
  */
+/**
+ * Löscht einen Eintrag ausschließlich nach Bestätigung des Benutzers.
+ *
+ * Entspricht dem bisherigen v88-Verhalten: Abbruch verändert keine Daten;
+ * Bestätigung entfernt alle Einträge mit der angegebenen ID und ruft genau
+ * einmal den bestehenden Speicherweg auf. Kein direktes Cloud-API.
+ */
+function deleteEntryWithConfirmation(id){
+  if(confirm('Eintrag löschen?')){
+    records=records.filter(r=>r.id!==id);
+    save();
+  }
+}
+
 function beginEntryEdit(x){
   const f=$('form');
   f.elements.type.value=x.type;
@@ -300,7 +314,7 @@ function renderEntryHistory(){
   const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
   edit.onclick=()=>beginEntryEdit(x);
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
-  remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
+  remove.onclick=()=>deleteEntryWithConfirmation(x.id);
   actions.append(edit,remove);tr.append(actions);return tr;
   };
   table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
