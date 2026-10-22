@@ -1,0 +1,32 @@
+name: PHEV Tracker – Regressionstests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '*.js'
+      - 'tests/**'
+      - '.github/workflows/test-frontend.yml'
+      - '.github/workflows/deploy-pwa-hetzner.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Module, Syntax und Deployment prüfen
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+      - name: Node.js bereitstellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Offline-Regressionstests ausführen
+        run: node --test tests/smoke.test.cjs
