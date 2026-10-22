@@ -1,5 +1,5 @@
 /*
- * PHEV Tracker – Service Worker (v86)
+ * PHEV Tracker – Service Worker (v87)
  *
  * Aufgabe:
  * - Statische PWA-Dateien für Offline-Nutzung zwischenspeichern.
@@ -12,7 +12,7 @@
  * Cache-Version und Versionsparameter in index.html gemeinsam erhöhen.
  */
 
-const CACHE = 'phev-tracker-v86';
+const CACHE = 'phev-tracker-v87';
 
 // Diese Dateien müssen beim Installieren erreichbar sein. Die PDF-Bibliothek
 // wird vom eigenen Hetzner-Server ausgeliefert, nicht von einem fremden CDN.
@@ -20,16 +20,15 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './styles.css?v=86',
-  './app.js?v=86',
+  './styles.css?v=87',
+  './app.js?v=87',
   './charts.js',
-  './pagination.js?v=86',
-  './pdf-report.js?v=86',
-  './csv-import-utils.js?v=86',
-  './auto-backup.js?v=86',
-  './consumption-analysis.js?v=86',
-  './cloud.js?v=86',
-  './jspdf.umd.min.js?v=86'
+  './pagination.js?v=87',
+  './pdf-report.js?v=87',
+  './csv-import-utils.js?v=87',
+  './auto-backup.js?v=87',
+  './cloud.js?v=87',
+  './jspdf.umd.min.js?v=87'
 ];
 
 self.addEventListener('install', event => {
