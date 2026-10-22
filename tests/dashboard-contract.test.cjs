@@ -68,7 +68,7 @@ test('Flottenübersicht bleibt separat an ihren DOM-Container gebunden', () => {
 });
 
 test('Diagramm-Helfer ruft alle vier Diagramme in v88-Reihenfolge auf', () => {
-  const charts = section(app, 'function renderDashboardCharts(filtered,charges){', '\\nfunction renderDashboardStatTiles(');
+  const charts = section(app, 'function renderDashboardCharts(filtered,charges){', '\nfunction renderDashboardStatTiles(');
   inOrder(charts, [
     "const metric = $('trendMetric').value;",
     'AnalyticsCharts.trend(',
