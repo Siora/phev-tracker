@@ -802,6 +802,7 @@ function exportPdfReport(mode){
  const data=records.filter(r=>String(r.date||'').startsWith(period)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
  const chosen=vehicles.find(v=>String(v.id)===vehicleId);
  const title=mode==='month'?'Monatsbericht '+month+'.'+year:'Jahresbericht '+year;
+ if(!window.jspdf?.jsPDF){alert('Die PDF-Bibliothek ist noch nicht geladen. Bitte Internetverbindung prüfen und die Seite neu öffnen.');return;}
  const pdf=new PhevPdfReport(title,chosen?vehicleName(chosen):'Alle Fahrzeuge',settings.base);
  const charges=data.filter(r=>r.type==='charge'),fuel=data.filter(r=>r.type==='fuel');
  const sum=(arr,fn)=>arr.reduce((n,r)=>n+fn(r),0);
