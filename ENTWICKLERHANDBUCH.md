@@ -134,3 +134,11 @@ Nach v86 meldete ein iPhone-Test leere Diagramme, Timeline und Fahrzeugübersich
 ## 11. Vorsichtige TCO-Auslagerung v88
 
 Nach dem bestätigten Dashboard-Rollback in v87 wurden in v88 **nur die reinen TCO-Rechenoperationen** nach `vehicle-costs.js` ausgelagert. `renderVehicleExpenses`, `applyVehicleExpenses`, `window.setVehicleExpenses`, die Formular-Ereignisse und die Cloud-Preferences verbleiben in `app.js`. Das Modul besitzt keine Start-Initialisierung und verändert weder Speicher noch Datensätze. Es wird vor `app.js` geladen und in Deployment sowie Offline-Cache aufgenommen. Ein isolierter Test mit zwei Fahrzeugen prüfte die Filterung, EUR→CHF-Umrechnung, laufende Kosten und Kilometerstandsspanne. JavaScript-Syntaxprüfung bestanden; realer iPhone-/Deployment-Test weiterhin erforderlich.
+
+## 12. Automatische Sicherheitsprüfungen (nach v88, ohne App-Release)
+
+Das Repository enthält jetzt `tests/smoke.test.cjs` und den GitHub-Actions-Workflow `.github/workflows/test-frontend.yml`. Bei Änderungen am Frontend, den Tests oder den Workflow-Dateien laufen isolierte Node.js-Tests. Die Tests verändern **keine** produktiven Daten und laden **nichts** auf Hetzner hoch.
+
+Abgedeckt werden: JavaScript-Syntax der lokal eingebundenen Module, Existenz der Dateien, Reihenfolge der Skriptabhängigkeiten, Vollständigkeit des Service-Worker-Caches, Frontend-Uploadliste ohne `api/`, TCO-Beispielrechnung sowie CSV-Parsing und Datumsnormalisierung. Ein fehlgeschlagener Test wird als fehlgeschlagener GitHub-Check sichtbar. Die bestehende Hetzner-Deployment-Aktion ist davon aktuell **nicht technisch blockiert**; die Testresultate sollten vor weiteren Releases kontrolliert werden.
+
+**Grenzen:** Diese Tests ersetzen keinen echten iPhone-/Safari-Test. Insbesondere DOM-Rendering, Login, Cloud-Synchronisierung und PDF-Ausgabe müssen nach Änderungen weiterhin manuell geprüft werden. Die Testdateien selbst lösen keinen produktiven Upload aus und erfordern keinen Versionssprung von v88.
