@@ -1,0 +1,43 @@
+name: PHEV Tracker – Browser-Integration (isolierte Testdaten)
+
+on:
+  pull_request:
+    branches: [main, audit/v88-initialization-dependencies]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    name: Chromium – Dashboard, Einträge, Benutzer, Fahrzeuge und Ladeorte
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+      - name: Node.js bereitstellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Chromium-Testlauf vorbereiten
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Lokales jsPDF-Asset bereitstellen (kein Produktivzugriff)
+        run: |
+          npm pack jspdf@2.5.2 --pack-destination /tmp
+          tar -xzf /tmp/jspdf-2.5.2.tgz -C /tmp package/dist/jspdf.umd.min.js
+          cp /tmp/package/dist/jspdf.umd.min.js ./jspdf.umd.min.js
+      - name: Statischen Testserver starten
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/phev-browser-server.log 2>&1 &
+          echo $! > /tmp/phev-browser-server.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/phev-browser-server.log
+          exit 1
+      - name: Browser-Integration ohne echte Cloud-Zugriffe testen
+        run: node --test tests/browser-integration.test.cjs
