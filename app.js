@@ -298,6 +298,16 @@ function renderMonthComparison(filtered){
   if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
 }
 
+/**
+ * Schreibt die vorbereiteten Dashboard-Kennzahlen in den bestehenden Container.
+ *
+ * Die HTML-Struktur bleibt exakt wie in v88. Dieser Helfer berechnet keine
+ * Werte und verändert weder Einträge noch Filter oder Cloud-Zustand.
+ */
+function renderDashboardStatTiles(tiles){
+  $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
+}
+
 function buildDashboardStatTiles({
   averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
   distance, currency
@@ -389,7 +399,7 @@ function render(){
     averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
     distance, currency:settings.base
   });
-  $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
+  renderDashboardStatTiles(tiles);
   const metric = $('trendMetric').value;
   AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
   AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
