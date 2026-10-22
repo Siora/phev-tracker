@@ -45,10 +45,7 @@ test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht',
     'renderConsumptionTrend();',
     'renderCostComparison(charges,fuel);',
     'renderChargingTypes(charges);',
-    'AnalyticsCharts.trend(',
-    'AnalyticsCharts.donut(',
-    'AnalyticsCharts.price(',
-    'AnalyticsCharts.providers(',
+    'renderDashboardCharts(filtered,charges);',
     'renderDashboardTimeline(filtered);',
     'renderDashboardFleetOverview();',
     "$('entries')",
@@ -68,6 +65,17 @@ test('Flottenübersicht bleibt separat an ihren DOM-Container gebunden', () => {
   assert.ok(fleet.includes('vehicles.forEach('));
   assert.ok(fleet.includes('render();'));
   assert.ok(fleet.includes('Bitte ein Fahrzeug anlegen.'));
+});
+
+test('Diagramm-Helfer ruft alle vier Diagramme in v88-Reihenfolge auf', () => {
+  const charts = section(app, 'function renderDashboardCharts(filtered,charges){', '\\nfunction renderDashboardStatTiles(');
+  inOrder(charts, [
+    "const metric = $('trendMetric').value;",
+    'AnalyticsCharts.trend(',
+    'AnalyticsCharts.donut(',
+    'AnalyticsCharts.price(',
+    'AnalyticsCharts.providers('
+  ]);
 });
 
 test('Cloud-Datenübernahme und Preferences stoßen weiterhin Rendering an', () => {
