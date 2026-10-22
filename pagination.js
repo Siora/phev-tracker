@@ -19,18 +19,59 @@ const listPageState=new Map();
 window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
  const pages=Math.max(1,Math.ceil(items.length/pageSize));
  let page=Math.min(Math.max(1,listPageState.get(key)||1),pages);
- const controls=document.createElement('nav');controls.className='table-pagination';controls.setAttribute('aria-label','Seitennavigation');
- const previous=document.createElement('button'),next=document.createElement('button'),info=document.createElement('span');
- previous.type=next.type='button';previous.textContent='‹ Zurück';next.textContent='Weiter ›';info.setAttribute('aria-live','polite');
- const show=()=>{
-  listPageState.set(key,page);tbody.replaceChildren();
-  if(!items.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=table.querySelectorAll('thead th').length;cell.textContent='Keine Einträge vorhanden.';row.append(cell);tbody.append(row);}
-  else items.slice((page-1)*pageSize,page*pageSize).forEach(item=>tbody.append(makeRow(item)));
-  previous.disabled=page===1;next.disabled=page===pages;
-  const first=items.length?(page-1)*pageSize+1:0,last=Math.min(items.length,page*pageSize);
-  info.textContent=first+'–'+last+' von '+items.length+' · Seite '+page+' / '+pages;
+ /**
+  * Beide Navigationsleisten verwenden denselben Seitenzustand.
+  * Die obere Leiste wird unmittelbar vor der Tabelle eingefügt, die untere
+  * danach. Ein Klick aktualisiert beide Anzeigen und denselben tbody.
+  */
+ const createControls=(position)=>{
+  const nav=document.createElement('nav');
+  nav.className='table-pagination';
+  nav.setAttribute('aria-label','Seitennavigation '+position);
+  const previous=document.createElement('button');
+  const next=document.createElement('button');
+  const info=document.createElement('span');
+  previous.type=next.type='button';
+  previous.textContent='‹ Zurück';
+  next.textContent='Weiter ›';
+  info.setAttribute('aria-live','polite');
+  previous.onclick=()=>changePage(-1);
+  next.onclick=()=>changePage(1);
+  nav.append(previous,info,next);
+  return {nav,previous,next,info};
  };
- previous.onclick=()=>{if(page>1){page--;show();}};
- next.onclick=()=>{if(page<pages){page++;show();}};
- controls.append(previous,info,next);container.append(table,controls);show();
+ const top=createControls('oben');
+ const bottom=createControls('unten');
+
+ /** Aktualisiert den gemeinsamen Seitenzustand und rendert beide Leisten. */
+ const show=()=>{
+  listPageState.set(key,page);
+  tbody.replaceChildren();
+  if(!items.length){
+   const row=document.createElement('tr');
+   const cell=document.createElement('td');
+   cell.colSpan=table.querySelectorAll('thead th').length;
+   cell.textContent='Keine Einträge vorhanden.';
+   row.append(cell);
+   tbody.append(row);
+  }else{
+   items.slice((page-1)*pageSize,page*pageSize).forEach(item=>tbody.append(makeRow(item)));
+  }
+  const first=items.length?(page-1)*pageSize+1:0;
+  const last=Math.min(items.length,page*pageSize);
+  const label=first+'–'+last+' von '+items.length+' · Seite '+page+' / '+pages;
+  for(const controls of [top,bottom]){
+   controls.previous.disabled=page===1;
+   controls.next.disabled=page===pages;
+   controls.info.textContent=label;
+  }
+ };
+
+ /** Blättert unabhängig vom angeklickten Navigationsbereich. */
+ const changePage=(delta)=>{
+  const target=Math.min(pages,Math.max(1,page+delta));
+  if(target!==page){page=target;show();}
+ };
+ container.append(top.nav,table,bottom.nav);
+ show();
 };
