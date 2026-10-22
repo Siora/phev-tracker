@@ -131,3 +131,15 @@ test('Erweiterter Jahresbericht enthält Monatsspalten, Energiebilanz, Kostenkat
  assert.ok(app.includes('const vehicleGroups=new Map()'),'Kilometerstände müssen je Fahrzeug getrennt sein');
  assert.ok(index.includes('erweiterte Jahresberichte'));
 });
+
+test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe und Offline-Modul', () => {
+ const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
+ assert.match(html,/tab\('intelligence'\)/);
+ assert.match(html,/<section id="intelligence"/);
+ assert.match(html,/intelligent-analytics\.js\?v=93/);
+ assert.match(sw,/intelligent-analytics\.js\?v=93/);
+ assert.match(app,/window\.renderIntelligence=renderIntelligence/);
+ assert.match(app,/td\.textContent=value/);
+ assert.match(analytics,/window\.PhevIntelligence/);
+ assert.match(analytics,/months=Array\.from\(\{length:12\}/);
+});
