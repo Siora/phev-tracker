@@ -32,6 +32,39 @@ window.PhevTco = Object.freeze({
    * @param {{base:string,rate:number}} settings Währungseinstellungen.
    * @param {(record:object)=>number} convertRecord Vorhandene App-Kostenumrechnung.
    */
+  /**
+   * Liefert eine transparente Kostenverteilung je Kategorie.
+   *
+   * Nur Kosten des ausgewählten Fahrzeugs werden berücksichtigt. Strom und
+   * Kraftstoff stammen aus den bestehenden Lade-/Tankvorgängen; sonstige
+   * Kategorien aus den zusätzlichen Fahrzeugausgaben. Es werden keine
+   * Schätzwerte ergänzt und keine Datensätze verändert.
+   *
+   * @returns {Array<{category:string,amount:number}>} Kategorien mit Betrag
+   *   in der gewählten Basiswährung, absteigend nach Kosten sortiert.
+   */
+  breakdown(expenses, records, vehicleId, settings, convertRecord) {
+    const totals = new Map();
+    const add = (category, amount) => {
+      if (!Number.isFinite(amount)) return;
+      totals.set(category, (totals.get(category) || 0) + amount);
+    };
+    for (const expense of expenses) {
+      if (vehicleId && String(expense.vehicle_id) !== String(vehicleId)) continue;
+      const amount = Number(expense.amount);
+      if (Number.isFinite(amount) && amount > 0) {
+        add(expense.category || 'Sonstiges', this.convert(amount, expense.currency, settings));
+      }
+    }
+    for (const record of records) {
+      if (vehicleId && String(record.vehicle_id) !== String(vehicleId)) continue;
+      if (record.type !== 'charge' && record.type !== 'fuel') continue;
+      add(record.type === 'charge' ? 'Strom' : 'Benzin', convertRecord(record));
+    }
+    return [...totals].map(([category, amount]) => ({category, amount}))
+      .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category));
+  },
+
   summarize(expenses, records, vehicleId, settings, convertRecord) {
     const selectedExpenses = expenses
       .filter(item => !vehicleId || String(item.vehicle_id) === String(vehicleId))
