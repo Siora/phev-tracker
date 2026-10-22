@@ -136,8 +136,8 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
- assert.match(html,/intelligent-analytics\.js\?v=94/);
- assert.match(sw,/intelligent-analytics\.js\?v=94/);
+ assert.match(html,/intelligent-analytics\.js\?v=200/);
+ assert.match(sw,/intelligent-analytics\.js\?v=200/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
@@ -151,4 +151,18 @@ test('v94: mobile analysis table has sticky month column and all chart bars fit'
  assert.match(css,/\.intelligence-table th:first-child\{position:sticky/);
  assert.match(css,/\.intelligence-chart\{width:100%;height:240px;overflow-x:hidden/);
  assert.match(app,/intelligence-month-active/);
+});
+
+test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwerte', () => {
+ const app=read('app.js'),html=read('index.html');
+ assert.match(app,/const navigationStorageKey='phev-active-page-v1'/);
+ assert.match(app,/sessionStorage\.setItem\(navigationStorageKey,page\)/);
+ assert.match(app,/navigationPages\.includes\(page\)\?page:'home'/);
+ assert.match(app,/tab\(restoredPage\(\)\)/);
+ assert.match(html,/onclick="tab\('cloud'\)">Konto/);
+});
+test('Angezeigte Version 2.0 verwendet konsistent den internen Cache-Code 200', () => {
+ assert.match(html, /Version 2\.0/);
+ assert.match(html, /app\.js\?v=200/);
+ assert.match(sw, /phev-tracker-v200/);
 });
