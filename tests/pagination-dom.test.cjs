@@ -46,9 +46,13 @@ function harness() {
     const calls = [];
     const makeRow = item => {calls.push(item); const row = element('tr'); row.item = item; return row;};
     paginate(container, table, tbody, items, size, key, makeRow);
-    const nav = container.children[1];
-    const [previous, info, next] = nav.children;
-    return {container, table, tbody, previous, info, next, calls};
+    // Struktur: obere Navigation, Tabelle, untere Navigation.
+    assert.equal(container.children.length, 3);
+    const top = container.children[0];
+    const bottom = container.children[2];
+    assert.equal(container.children[1], table);
+    const [previous, info, next] = bottom.children;
+    return {container, table, tbody, top, bottom, previous, info, next, calls};
   }
   return {mount};
 }
@@ -106,4 +110,23 @@ test('Getrennte Tabellen haben unabhängige Seitenstände', () => {
   const users = mount(items, 20, 'users');
   assert.equal(users.info.textContent, '1–20 von 26 · Seite 1 / 2');
   assert.equal(mount(items, 20, 'entries').info.textContent, '21–26 von 26 · Seite 2 / 2');
+});
+
+test('Obere und untere Seitennavigation bleiben synchron', () => {
+  const {mount} = harness();
+  const items = Array.from({length: 25}, (_, id) => ({id}));
+  const view = mount(items, 20, 'dual-controls');
+  const [topPrevious, topInfo, topNext] = view.top.children;
+  assert.equal(topInfo.textContent, view.info.textContent);
+  assert.equal(topPrevious.disabled, true);
+  topNext.onclick();
+  assert.equal(view.tbody.children.length, 5);
+  assert.equal(view.tbody.children[0].item.id, 20);
+  assert.equal(topInfo.textContent, '21–25 von 25 · Seite 2 / 2');
+  assert.equal(view.info.textContent, topInfo.textContent);
+  assert.equal(topNext.disabled, true);
+  view.previous.onclick();
+  assert.equal(view.tbody.children.length, 20);
+  assert.equal(topInfo.textContent, '1–20 von 25 · Seite 1 / 2');
+  assert.equal(view.info.textContent, topInfo.textContent);
 });
