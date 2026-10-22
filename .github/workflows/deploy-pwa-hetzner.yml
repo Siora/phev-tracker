@@ -90,37 +90,6 @@ jobs:
           printf 'cd "%s"\npwd\nls -la\n' "$SFTP_DIR" > /tmp/check.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check.batch "$SFTP_USER@$SFTP_HOST"
 
-      - name: Prepare local jsPDF asset
-        if: ${{ github.event_name == 'push' || inputs.upload == true }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Use the npm package as the primary source; avoid a single CDN dependency.
-          npm pack jspdf@2.5.2 --pack-destination /tmp
-          tar -xzf /tmp/jspdf-2.5.2.tgz -C /tmp package/dist/jspdf.umd.min.js
-          cp /tmp/package/dist/jspdf.umd.min.js ./jspdf.umd.min.js
-          test "$(wc -c < jspdf.umd.min.js)" -gt 100000
-
-      - name: Upload only PWA files (never api/)
-        if: ${{ github.event_name == 'push' || inputs.upload == true }}
-        env:
-          SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
-          SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
-          SFTP_DIR: ${{ vars.HETZNER_PWA_DIR }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
-            test -f "$file"
-          done
-          {
-            printf 'cd "%s"\n' "$SFTP_DIR"
-            for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
-              printf 'put "%s"\n' "$file"
-            done
-          } > /tmp/upload.batch
-          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload.batch "$SFTP_USER@$SFTP_HOST"
-
       # Die produktiven Cookie-/Foto-/iOS-Funktionen wurden mit dem vom
       # Benutzer bereitgestellten Serverstand abgeglichen.
       - name: Upload PHP API with rollback
@@ -152,3 +121,35 @@ jobs:
             exit 1
           fi
           echo "PHP API deployed and unauthenticated health check passed."
+
+      - name: Prepare local jsPDF asset
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Use the npm package as the primary source; avoid a single CDN dependency.
+          npm pack jspdf@2.5.2 --pack-destination /tmp
+          tar -xzf /tmp/jspdf-2.5.2.tgz -C /tmp package/dist/jspdf.umd.min.js
+          cp /tmp/package/dist/jspdf.umd.min.js ./jspdf.umd.min.js
+          test "$(wc -c < jspdf.umd.min.js)" -gt 100000
+
+      - name: Upload only PWA files (never api/)
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
+        env:
+          SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
+          SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
+          SFTP_DIR: ${{ vars.HETZNER_PWA_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+            test -f "$file"
+          done
+          {
+            printf 'cd "%s"\n' "$SFTP_DIR"
+            for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+              printf 'put "%s"\n' "$file"
+            done
+          } > /tmp/upload.batch
+          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload.batch "$SFTP_USER@$SFTP_HOST"
+
