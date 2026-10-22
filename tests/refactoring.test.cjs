@@ -162,7 +162,7 @@ test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwer
  assert.match(html,/onclick="tab\('cloud'\)">Konto/);
 });
 test('Angezeigte Version 2.1 verwendet konsistent den internen Cache-Code 201', () => {
- assert.match(html, /Version 2\.0/);
+ assert.match(html, /Version 2\.1/);
  assert.match(html, /app\.js\?v=201/);
  assert.match(sw, /phev-tracker-v201/);
 });
