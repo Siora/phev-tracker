@@ -84,7 +84,7 @@ window.syncManagedCharging=async function(next){
  * Änderungen. Wichtig: die Offline-Warteschlange hat Vorrang vor einem
  * möglicherweise älteren Serverstand und wird anschließend synchronisiert.
  */
-async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();const expenseData=await cloudCall('vehicle-expenses');window.setVehicleExpenses(expenseData.expenses||[]);cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
 /**
  * Lädt Fahrzeuge aus dem Konto und aktualisiert die Verwaltungstabelle.
@@ -316,16 +316,22 @@ ce('cloud-upload').onclick=async()=>{
  * Serverbestätigung erfolgt VOR dem Ersetzen der lokalen Liste, damit ein
  * fehlgeschlagener Request keine fälschliche Erfolgsmeldung erzeugt.
  */
-window.saveVehicleExpenses=async function(items){
- if(!cloudToken||!cloudPreferencesReady)throw Error('Bitte anmelden und Cloud-Daten vollständig laden.');
- if(!Array.isArray(items)||items.some(x=>!x||!x.vehicle_id||!x.date||!Number.isFinite(Number(x.amount))||Number(x.amount)<=0))throw Error('Ungültige Ausgabendaten.');
- // Commit remotely first. Keep the existing list untouched if the request fails.
- const current=window.collectCloudPreferences();
- const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})},vehicle_expenses:items};
- await cloudCall('preferences',{preferences:merged});
- cloudPreferences=merged;
- window.setVehicleExpenses(items);
- cs('Fahrzeugkosten in der Cloud gespeichert.');
+/**
+ * Einzelne Ausgaben werden ausschliesslich in der SQL-Tabelle gespeichert.
+ * Der Server bestätigt den Schreibvorgang, bevor der lokale Zustand wechselt.
+ * Es wird keine komplette Liste mehr in prefs_json überschrieben.
+ */
+window.saveVehicleExpense=async function(item){
+ if(!cloudToken)throw Error('Bitte anmelden.');
+ const result=await cloudCall('vehicle-expense-save',{expense:item});
+ const current=window.getVehicleExpenses();
+ window.setVehicleExpenses([...current.filter(x=>x.id!==item.id),item]);
+ return result;
+};
+window.deleteVehicleExpense=async function(id){
+ if(!cloudToken)throw Error('Bitte anmelden.');
+ await cloudCall('vehicle-expense-delete',{id});
+ window.setVehicleExpenses(window.getVehicleExpenses().filter(x=>x.id!==id));
 };
 window.scheduleCloudPreferences=function(){
  if(!cloudPreferencesReady||!cloudToken)return;
