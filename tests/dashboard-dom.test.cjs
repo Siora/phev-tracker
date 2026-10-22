@@ -17,7 +17,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const app = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
-const start = app.indexOf("  const recent=$('recent-entries');");
+const start = app.indexOf('  renderDashboardTimeline(filtered);', app.indexOf('function render(){'));
 const end = app.indexOf('  // Full record history lives', start);
 assert.ok(start >= 0 && end > start, 'Dashboard-Timeline/Fahrzeugübersicht nicht gefunden');
 const source = app.slice(start, end);
