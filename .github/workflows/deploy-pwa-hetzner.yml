@@ -74,6 +74,17 @@ jobs:
           printf 'cd "%s"\npwd\nls -la\n' "$SFTP_DIR" > /tmp/check.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check.batch "$SFTP_USER@$SFTP_HOST"
 
+      - name: Prepare local jsPDF asset
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 90 \
+            "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" \
+            -o jspdf.umd.min.js
+          test "$(wc -c < jspdf.umd.min.js)" -gt 100000
+          grep -q 'jsPDF' jspdf.umd.min.js
+
       - name: Upload only PWA files (never api/)
         if: ${{ github.event_name == 'push' || inputs.upload == true }}
         env:
@@ -83,12 +94,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest; do
+          for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
             test -f "$file"
           done
           {
             printf 'cd "%s"\n' "$SFTP_DIR"
-            for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest; do
+            for file in index.html app.js cloud.js charts.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
               printf 'put "%s"\n' "$file"
             done
           } > /tmp/upload.batch
