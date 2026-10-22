@@ -26,3 +26,13 @@ Die SQL-Dateien unter `server/` dokumentieren Basisschema und nachfolgende Migra
 ## Offene Sicherheitsaufgaben
 
 Vor einer breiteren öffentlichen Nutzung Rate-Limiting, Wiederherstellung von Konten, Backup-/Restore-Prozess und Berechtigungsprüfungen erneut bewerten. Diese Hinweise sind keine Bestätigung, dass alle Maßnahmen bereits implementiert wurden.
+
+## Version 3.0: Passwort-Wiederherstellung (Deployment erforderlich)
+
+1. Datenbank und Backend-Dateien sichern.
+2. Migration `server/migration-v3-password-resets.sql` **einmalig** ausführen.
+3. Im produktiven `server/config.php` den Schlüssel `reset_mail_from` auf eine gültige Absenderadresse setzen. Einen funktionierenden, sicher konfigurierten Mailtransport des PHP-Servers sicherstellen (PHP `mail()`); ohne diesen funktioniert der Reset nicht.
+4. `server/api.php` kontrolliert auf den Hetzner-Server deployen. Die Frontend-Bereitstellung allein aktualisiert die API **nicht**.
+5. Mit einem Testkonto prüfen: unbekannte E-Mail gibt dieselbe Erfolgsmeldung, Link läuft nach 30 Minuten ab, Token ist nur einmal nutzbar, alte Sitzungen werden widerrufen, erneute Anforderung innerhalb von 10 Minuten sendet keinen weiteren Link.
+
+**Sicherheit:** Reset-Token werden nur gehasht gespeichert. Der Link transportiert den Token als URL-Fragment, das der Browser sofort aus der Adresszeile entfernt. Für eine öffentliche Freigabe zusätzlich IP-basiertes Rate-Limiting am Webserver/API-Gateway aktivieren und E-Mail-Zustellbarkeit überwachen.
