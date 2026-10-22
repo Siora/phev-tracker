@@ -15,8 +15,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const html = read('index.html');
 const sw = read('sw.js');
 const workflow = read('.github/workflows/deploy-pwa-hetzner.yml');
-const scripts = [...html.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)].map(match => match[1].split('?')[0]);
-const version = html.match(/<script src="app\\.js\\?v=(\\d+)"/)?.[1];
+const scripts = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(match => match[1].split('?')[0]);
+const version = html.match(/<script src="app\.js\?v=(\d+)"/)?.[1];
 
 test('alle eingebundenen lokalen Skripte liegen im Repository (jsPDF wird beim Deploy erzeugt)', () => {
   for (const script of scripts.filter(name => name !== 'jspdf.umd.min.js')) {
@@ -43,10 +43,10 @@ test('Versionen im HTML und Offline-Cache sind identisch', () => {
 });
 
 test('Deployment lädt alle Skripte hoch und berührt api/ nicht', () => {
-  const upload = workflow.match(/- name: Upload only PWA files[\\s\\S]*$/)?.[0] || '';
+  const upload = workflow.match(/- name: Upload only PWA files[\s\S]*$/)?.[0] || '';
   assert.ok(upload, 'Upload-Schritt fehlt');
   for (const name of scripts) assert.ok(upload.includes(name), name + ' fehlt beim SFTP-Upload');
-  assert.ok(!/\\b(?:put|rm|rmdir|delete)\\s+[^\\n]*api\\//i.test(upload), 'API-Verzeichnis darf nicht verändert werden');
+  assert.ok(!/\b(?:put|rm|rmdir|delete)\s+[^\n]*api\//i.test(upload), 'API-Verzeichnis darf nicht verändert werden');
   assert.ok(!upload.includes('rm -rf'), 'Kein rekursives Löschen');
 });
 
