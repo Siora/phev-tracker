@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 84 · Branch `main`
+Stand: Version 85 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -10,6 +10,8 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | --- | --- |
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
 | `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
+| `csv-import-utils.js` | CSV-Zeilenparser und Datumsnormalisierung für den Import |
+| `auto-backup.js` | Kontobezogene, rotierende lokale Sicherungen ohne Cloud-Eingriff |
 | `pdf-report.js` | jsPDF-basierte Layout-Klasse `PhevPdfReport` |
 | `app.js` | Einträge, Fahrzeugauswahl, Dashboard, Filter, Ladeorte/Anbieter, Kosten, CSV-/PDF-Export, lokale Backups |
 | `cloud.js` | Anmeldung, Cloud-API, Fahrzeugverwaltung, Benutzerverwaltung, Synchronisationswarteschlange und Kontoeinstellungen |
@@ -114,3 +116,7 @@ Die Seitennummer wird während der geöffneten Sitzung je Liste gespeichert und 
 **Erste abgeschlossene Etappe:** Die Tabellen-Pagination und das PDF-Layout wurden unverändert aus `app.js` in eigenständige Dateien verschoben. `app.js` enthält weiterhin die Berechnung der Berichte und die Eintragsverwaltung. Die Reihenfolge der `defer`-Skripte in `index.html` ist relevant: jsPDF → Diagramme → Pagination → PDF-Layout → Cloud → App. Der Hetzner-Workflow und der Service-Worker-Cache berücksichtigen beide neuen Dateien.
 
 **Nächste mögliche Etappen:** Diagramm-/Auswertungslogik, Import-/Exportfunktionen und Fahrzeugkostenverwaltung weiter isolieren. Vor jedem Schritt Syntax-, Lade- und Funktionstests durchführen. Die Datenhaltung und das API-Protokoll bleiben unangetastet.
+
+## 8. Refactoring-Etappe v85
+
+CSV-Parser (`csvRows`, `date`) und automatische lokale Backup-Funktionen wurden aus `app.js` in `csv-import-utils.js` bzw. `auto-backup.js` ausgelagert. Die Importoberfläche, Bestätigungen und Eintragsänderungen bleiben in `app.js`. Der abschließende Aufruf von `updateAutomaticBackupStatus()` bleibt dort ebenfalls stehen, damit alle App-Zustandsvariablen vorher initialisiert sind. Beide neuen Skripte werden **vor** `app.js` geladen und in Service Worker und Hetzner-Workflow mit ausgeliefert. Keine Änderung der Datenformate oder Cloud-API.
