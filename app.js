@@ -811,8 +811,11 @@ function exportPdfReport(mode){
  const combined=total+extras;
  const kmValues=data.map(x=>Number(x.km)).filter(x=>Number.isFinite(x)&&x>0);
  const kmSpan=kmValues.length>1?Math.max(...kmValues)-Math.min(...kmValues):0;
- pdf.heading('Übersicht');
- pdf.metrics([['Gesamtkosten',combined.toFixed(2)+' '+settings.base],['Strom',energy.toFixed(1)+' kWh'],['Benzin',liters.toFixed(1)+' l'],['Vorgänge',String(data.length)]]);
+ const providers=new Map();
+ for(const row of charges){const name=String(row.place||'Unbekannt');const p=providers.get(name)||{name,energy:0,cost:0,count:0};p.energy+=Number(row.amount||0);p.cost+=conv(row);p.count++;providers.set(name,p);}
+ const ranked=[...providers.values()].sort((a,b)=>b.energy-a.energy);
+ const best=charges.filter(x=>Number(x.amount)>0).slice().sort((a,b)=>conv(a)/Number(a.amount)-conv(b)/Number(b.amount))[0];
+ pdf.coverOverview({period:mode==='month'?month+'.'+year:String(year),total:combined,energy,liters,chargeCost:sum(charges,conv),fuelCost:sum(fuel,conv),extras,kmSpan,charges,providers:ranked,best});
  pdf.heading('Fahrzeugkosten im Berichtszeitraum');
  pdf.metrics([['Strom und Benzin',total.toFixed(2)+' '+settings.base],['Weitere Ausgaben',extras.toFixed(2)+' '+settings.base],['Kosten gesamt',combined.toFixed(2)+' '+settings.base],['Kosten / km',kmSpan>0?(combined/kmSpan).toFixed(2)+' '+settings.base:'–']]);
  pdf.note('Kosten/km: Näherung aus Kilometerstandsspanne. Keine Abschreibung oder nicht erfassten Kosten enthalten.');
@@ -852,6 +855,56 @@ class PhevPdfReport{
  color(rgb){this.cmd(rgb.join(' ')+' rg');}
  rect(x,y,w,h,rgb){this.color(rgb);this.cmd(x+' '+y+' '+w+' '+h+' re f');}
  text(x,y,v,size=10,rgb=[0.13,0.2,0.3],bold=false){this.color(rgb);this.cmd('BT /'+(bold?'F2':'F1')+' '+size+' Tf 1 0 0 1 '+x+' '+y+' Tm ('+this.esc(v)+') Tj ET');}
+ coverOverview(o){
+  const blue=[0.08,0.42,0.78],dark=[0.08,0.13,0.21],muted=[0.48,0.52,0.57],line=[0.85,0.88,0.92];
+  this.rect(0,0,595,842,[1,1,1]);
+  this.rect(40,779,5,32,blue);this.text(55,793,'PHEV Tracker',23,dark,true);
+  this.text(56,780,'FAHRZEUGREPORT',9,blue,true);
+  this.text(40,754,'Zeitraum: '+o.period,10,muted);
+  this.text(310,754,'Fahrzeug: '+this.vehicle,10,muted);
+  this.rect(40,740,515,1,line);
+  const tile=(x,y,label,value,accent=false)=>{
+   this.rect(x,y,247,66,accent?[0.93,0.96,1]:[0.96,0.97,0.98]);
+   if(accent)this.rect(x,y,3,66,blue);
+   this.text(x+13,y+44,label.toUpperCase(),8,muted,true);
+   this.text(x+13,y+17,value,18,accent?blue:dark,true);
+  };
+  tile(40,651,'Gesamtkosten',o.total.toFixed(2)+' '+this.currency,true);
+  tile(308,651,'Geladene Energie',o.energy.toFixed(2)+' kWh');
+  tile(40,574,'Strompreis / kWh',o.energy>0?(o.chargeCost/o.energy).toFixed(2)+' '+this.currency:'–');
+  tile(308,574,'Kosten / 100 km',o.kmSpan>0?(o.total*100/o.kmSpan).toFixed(2)+' '+this.currency:'–');
+  const ring=(cx,cy,values,label,unit)=>{
+   const palette=[[0.08,0.53,0.9],[0.52,0.56,0.62],[0.62,0.79,0.26],[0.96,0.63,0.25]];
+   const sum=values.reduce((a,v)=>a+v,0);
+   let start=-Math.PI/2;
+   values.forEach((v,i)=>{if(v<=0||sum<=0)return;const end=start+Math.PI*2*v/sum,n=Math.max(2,Math.ceil(55*v/sum));for(let k=0;k<n;k++){const t=start+(end-start)*k/n,t2=start+(end-start)*(k+1)/n;const ro=44,ri=27;
+    const pts=[[cx+ri*Math.cos(t),cy+ri*Math.sin(t)],[cx+ro*Math.cos(t),cy+ro*Math.sin(t)],[cx+ro*Math.cos(t2),cy+ro*Math.sin(t2)],[cx+ri*Math.cos(t2),cy+ri*Math.sin(t2)]];
+    this.color(palette[i%4]);this.cmd(pts.map((p,j)=>p[0].toFixed(2)+' '+p[1].toFixed(2)+(j?' l':' m')).join(' ')+' h f');
+   }start=end;});
+   this.text(cx-24,cy-3,sum.toFixed(0),15,dark,true);this.text(cx-17,cy-17,unit,9,muted);
+   this.text(cx-61,cy+72,label,9,muted,true);
+  };
+  this.rect(40,351,247,200,[0.985,0.989,0.996]);this.rect(308,351,247,200,[0.985,0.989,0.996]);
+  ring(163,449,o.providers.map(p=>p.energy),'NACH ANBIETER','kWh');
+  ring(431,449,[o.chargeCost,o.fuelCost,o.extras],'KOSTENMIX',this.currency);
+  this.text(53,365,o.providers.length+' Ladeorte / Anbieter',9,muted);
+  this.text(320,365,'Strom / Benzin / weitere Kosten',9,muted);
+  this.rect(40,107,247,226,[0.965,0.974,0.992]);this.rect(40,107,4,226,blue);
+  this.rect(308,107,247,226,[0.965,0.974,0.992]);
+  this.text(54,310,'FINANZIELLE AUFSCHLUESSELUNG',10,blue,true);
+  const lines=[['Strom',o.chargeCost],['Benzin',o.fuelCost],['Weitere Ausgaben',o.extras],['Gesamt',o.total]];
+  lines.forEach((a,i)=>{const y=278-i*35;this.text(54,y,a[0],10,dark,i===3);this.text(175,y,a[1].toFixed(2)+' '+this.currency,10,i===3?blue:dark,i===3);if(i<3)this.rect(54,y-12,219,0.5,line);});
+  this.text(322,310,'ZEITRAUMUEBERSICHT',10,blue,true);
+  this.text(322,278,'AKTIVITAET',8,muted,true);
+  this.text(322,261,o.charges.length+' Ladungen · '+o.providers.length+' Anbieter',11,dark,true);
+  this.text(322,233,'HAUPTANBIETER',8,muted,true);
+  this.text(322,216,o.providers[0]?.name||'Keine Angaben',10,dark,true);
+  this.text(322,188,'BESTER STROMPREIS',8,muted,true);
+  this.text(322,171,o.best?(conv(o.best)/Number(o.best.amount)).toFixed(2)+' '+this.currency+'/kWh':'–',11,dark,true);
+  this.text(322,143,'Alle Werte aus erfassten Eintraegen',8,muted);
+  this.text(289,40,'1',9,muted);
+  this.newPage();
+ }
  newPage(){this.ops=[];this.pages.push(this.ops);this.y=745;this.rect(0,786,595,56,[0.06,0.17,0.28]);this.text(40,807,'PHEV TRACKER  /  '+this.title,17,[1,1,1],true);this.text(40,766,this.vehicle+'   |   '+new Date().toLocaleDateString('de-CH'),9);this.rect(40,42,515,1,[0.85,0.88,0.91]);this.text(40,27,'PHEV Tracker  -  Persönlicher Fahrzeugbericht',8,[0.45,0.49,0.55]);}
  space(h){if(this.y-h<70)this.newPage();}
  heading(v){this.space(42);this.y-=23;this.text(40,this.y,v,14,[0.07,0.22,0.36],true);this.y-=18;}
