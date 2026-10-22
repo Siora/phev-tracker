@@ -70,6 +70,7 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
       assert.equal(await page.locator(selector+' > nav.table-pagination').count(),2,selector+': oben und unten');
     }
     await page.evaluate(()=>tab('add'));
+    await page.evaluate(()=>tab('add')); // Die Eintragstabelle liegt auf dem Eingabe-Tab.
     const entryNav=page.locator('#entries > nav.table-pagination');
     await entryNav.first().locator('button').last().click();
     assert.equal(await page.locator('#entries tbody tr').count(),5,'Einträge: zweite Seite mit 5 Zeilen');
