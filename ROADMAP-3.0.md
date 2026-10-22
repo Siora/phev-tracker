@@ -17,9 +17,9 @@ Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme si
 - [x] SMTP-Hostname mail.your-server.de in der privaten Serverkonfiguration hinterlegt (Betreiberbestätigung)
 - [x] Passwort-Reset-Migration ausgeführt (Betreiberbestätigung)
 - [x] Passwort-Reset mit E-Mail erfolgreich getestet (Betreiberbestätigung)
-- [ ] Aktuelle PHP-API nach PR #47 auf Hetzner bereitstellen und Version prüfen
+- [x] Aktuelle PHP-API nach PR #47 auf Hetzner bereitgestellt (Betreiberbestätigung; keine unabhängige Versionsprüfung)
 - [ ] Passwortänderung mit einem Testkonto prüfen
-- [ ] Kontolöschung inklusive Fahrzeugbildern mit einem separaten Testkonto prüfen
+- [x] Kontolöschung mit einem separaten Testkonto erfolgreich getestet (Betreiberbestätigung; serverseitige Bilddatei-Löschung nicht unabhängig geprüft)
 - [ ] Passwort-Reset-Ansicht nach Frontend-Deployment erneut prüfen
 - [ ] iPhone-/Safari-Test für Login, Dashboard, Offline-Cache und Cloud-Synchronisierung
 - [ ] Nach erfolgreicher Abnahme Release- und Service-Worker-Cache-Version konsistent aktualisieren
