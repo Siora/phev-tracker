@@ -67,12 +67,12 @@ function harness() {
     window: {scrollTo: () => {scrollCalls++;}},
     Map, Math, Number, String
   };
-  const run = filtered => {
+  // Nach der Auslagerung gehört der Monatsvergleich nicht mehr zum isolierten\n  // Timeline-/Flottenabschnitt. Er wird separat in month-comparison-dom getestet.\n  const timelineAndFleet = source.replace(/^  renderMonthComparison\\(filtered\\);\\s*$/m, '');\n  const run = filtered => {
     sandbox.filtered = filtered;
     // Jeder Renderdurchlauf erhält seinen eigenen lexikalischen Funktionsscope.
     // Dadurch können die const-Deklarationen aus render() erneut laufen,
     // genau wie bei wiederholten Funktionsaufrufen im Browser.
-    vm.runInNewContext('(() => {\n' + source + '\n})()', sandbox, {filename:'app.js:dashboard-section'});
+    vm.runInNewContext('(() => {\n' + timelineAndFleet + '\n})()', sandbox, {filename:'app.js:dashboard-section'});
   };
   return {
     run,
