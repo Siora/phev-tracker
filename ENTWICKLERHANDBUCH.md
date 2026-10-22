@@ -142,3 +142,16 @@ Das Repository enthält jetzt `tests/smoke.test.cjs` und den GitHub-Actions-Work
 Abgedeckt werden: JavaScript-Syntax der lokal eingebundenen Module, Existenz der Dateien, Reihenfolge der Skriptabhängigkeiten, Vollständigkeit des Service-Worker-Caches, Frontend-Uploadliste ohne `api/`, TCO-Beispielrechnung sowie CSV-Parsing und Datumsnormalisierung. Ein fehlgeschlagener Test wird als fehlgeschlagener GitHub-Check sichtbar. Die bestehende Hetzner-Deployment-Aktion ist davon aktuell **nicht technisch blockiert**; die Testresultate sollten vor weiteren Releases kontrolliert werden.
 
 **Grenzen:** Diese Tests ersetzen keinen echten iPhone-/Safari-Test. Insbesondere DOM-Rendering, Login, Cloud-Synchronisierung und PDF-Ausgabe müssen nach Änderungen weiterhin manuell geprüft werden. Die Testdateien selbst lösen keinen produktiven Upload aus und erfordern keinen Versionssprung von v88.
+
+## 12. Automatisierte Refactoring-Schutztests (ab v88, ohne Versionswechsel)
+
+Die Datei `tests/refactoring.test.cjs` enthält reine Node.js-Tests ohne Netzwerk, Cloud-Zugriff oder lokale Benutzerdaten. Sie kontrolliert:
+
+1. Existenz und JavaScript-Syntax aller direkt eingebundenen Frontend-Module (jsPDF wird beim Deployment aus npm erzeugt).
+2. Lade-Reihenfolge der Module vor `app.js` sowie den bewussten Rollback von `consumption-analysis.js`.
+3. Versionsgleichheit zwischen `index.html` und `sw.js` sowie die Offline-Cache-Liste.
+4. Vollständige SFTP-Dateiliste und Schutz des `api/`-Verzeichnisses.
+5. Reine TCO-Berechnung mit zwei Fahrzeugen und unveränderten Eingabedaten.
+6. Existenz der Cloud-Warteschlange und der Preferences-Schnittstellen.
+
+**Ausführung:** `node --test tests/refactoring.test.cjs` im Repository-Stammverzeichnis. GitHub Actions führt diese Tests nun **vor** dem SFTP-Upload aus; bei Fehlschlag darf kein Upload stattfinden. Es handelt sich um statische und isolierte Regressionstests, **nicht** um einen vollständigen Browser-/iPhone-Test. Da keine ausgelieferten App-Dateien geändert wurden, bleibt die sichtbare Version 88 erhalten.
