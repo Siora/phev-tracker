@@ -6,5 +6,6 @@ return [
  'user' => 'YOUR_DATABASE_USER',
  'password' => 'YOUR_DATABASE_PASSWORD',
  'allowed_origin' => 'https://tracker.web-produktion.com',
+ 'reset_mail_from' => 'no-reply@example.com', // Erst nach Einrichtung des E-Mail-Versands produktiv setzen.
  'registration_enabled' => false, // Set true temporarily to create accounts, then disable.
 ];
