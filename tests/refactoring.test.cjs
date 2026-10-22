@@ -161,10 +161,18 @@ test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwer
  assert.match(app,/tab\(restoredPage\(\)\)/);
  assert.match(html,/onclick="tab\('cloud'\)">Konto/);
 });
-test('Angezeigte Version 2.3 verwendet konsistent den internen Cache-Code 203', () => {
- assert.match(html, /Version 2\.3/);
- assert.match(html, /app\.js\?v=203/);
- assert.match(sw, /phev-tracker-v203/);
+test('Version und PWA-Cache werden aus der zentralen Release-Konfiguration geprüft', () => {
+ const release=JSON.parse(read('release.json'));
+ assert.match(release.version,/^\\d+\\.\\d+$/);
+ assert.equal(release.cacheCode,Number(release.version.replace('.','')) * (release.version.split('.')[1].length===1?10:1));
+ assert.ok(html.includes('Version '+release.version),'Sichtbare Version muss release.json entsprechen');
+ assert.ok(sw.includes('phev-tracker-v'+release.cacheCode),'Service-Worker-Cache muss release.json entsprechen');
+ const versions=[...html.matchAll(/(?:src|href)="[^"]+\\?v=(\\d+)"/g)].map(m=>m[1]);
+ assert.ok(versions.length>0,'HTML muss versionierte Assets enthalten');
+ assert.ok(versions.every(v=>v===String(release.cacheCode)),'HTML-Assets verwenden einheitlichen Cache-Code');
+ const cached=[...sw.matchAll(/\\.\\/[\\w.-]+\\?v=(\\d+)/g)].map(m=>m[1]);
+ assert.ok(cached.length>0,'Service Worker muss versionierte Assets enthalten');
+ assert.ok(cached.every(v=>v===String(release.cacheCode)),'Offline-Assets verwenden einheitlichen Cache-Code');
 });
 
 test('Kostenprognose vermeidet Schätzung bei zu wenig Daten und rechnet volle Monate hoch',()=>{
