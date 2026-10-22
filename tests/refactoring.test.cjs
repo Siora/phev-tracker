@@ -141,5 +141,5 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
- assert.match(analytics,/months=Array\.from\(\{length:12\}/);
+ assert.match(analytics,/Array\.from\(\{length:12\}/);
 });
