@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 85 · Branch `main`
+Stand: Version 86 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -10,6 +10,7 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | --- | --- |
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
 | `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
+| `consumption-analysis.js` | Verbrauchstrends, Energieäquivalenz, Kostenvergleich und Ladearten |
 | `csv-import-utils.js` | CSV-Zeilenparser und Datumsnormalisierung für den Import |
 | `auto-backup.js` | Kontobezogene, rotierende lokale Sicherungen ohne Cloud-Eingriff |
 | `pdf-report.js` | jsPDF-basierte Layout-Klasse `PhevPdfReport` |
@@ -120,3 +121,7 @@ Die Seitennummer wird während der geöffneten Sitzung je Liste gespeichert und 
 ## 8. Refactoring-Etappe v85
 
 CSV-Parser (`csvRows`, `date`) und automatische lokale Backup-Funktionen wurden aus `app.js` in `csv-import-utils.js` bzw. `auto-backup.js` ausgelagert. Die Importoberfläche, Bestätigungen und Eintragsänderungen bleiben in `app.js`. Der abschließende Aufruf von `updateAutomaticBackupStatus()` bleibt dort ebenfalls stehen, damit alle App-Zustandsvariablen vorher initialisiert sind. Beide neuen Skripte werden **vor** `app.js` geladen und in Service Worker und Hetzner-Workflow mit ausgeliefert. Keine Änderung der Datenformate oder Cloud-API.
+
+## 9. Refactoring-Etappe v86
+
+Die Verbrauchs- und Energiebilanzfunktionen (`fuelEnergyFactor`, `energyBalance`, `consumptionTrendRows`, `renderConsumptionTrend`, `renderEnergyBalance`, `getCostComparison`, `renderCostComparison` und Ladearten-Helfer) wurden aus `app.js` nach `consumption-analysis.js` verschoben. Die Funktionen verwenden weiterhin dieselben globalen App-Zustände und LocalStorage-Schlüssel; der Datenfluss und die Cloud-API bleiben unverändert. Das Modul wird vor `app.js` geladen und im Offline-Cache sowie Hetzner-Deployment berücksichtigt. Fahrzeugausgaben und TCO verbleiben vorerst in `app.js` und sollten als eigenständige nächste Etappe mit UI-Regressionstests ausgelagert werden.
