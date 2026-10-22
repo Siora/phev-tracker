@@ -888,8 +888,10 @@ class PhevPdfReport{
   this.rect(40,351,247,200,[0.985,0.989,0.996]);this.rect(308,351,247,200,[0.985,0.989,0.996]);
   ring(163,449,o.providers.map(p=>p.energy),'NACH ANBIETER','kWh');
   ring(431,449,[o.chargeCost,o.fuelCost,o.extras],'KOSTENMIX',this.currency);
-  this.text(53,365,o.providers.length+' Ladeorte / Anbieter',9,muted);
-  this.text(320,365,'Strom / Benzin / weitere Kosten',9,muted);
+  const legendColors=[[0.08,0.53,0.9],[0.52,0.56,0.62],[0.62,0.79,0.26],[0.96,0.63,0.25]];
+  o.providers.slice(0,3).forEach((p,i)=>{const y=409-i*17;this.rect(53,y-3,7,7,legendColors[i]);this.text(65,y-1,p.name.slice(0,22)+' '+(o.energy?Math.round(p.energy/o.energy*100):0)+'%',8,muted);});
+  if(o.providers.length>3)this.text(65,353,'+'+(o.providers.length-3)+' weitere Anbieter',8,muted);
+  [['Strom',o.chargeCost],['Benzin',o.fuelCost],['Sonstige',o.extras]].forEach((p,i)=>{const y=409-i*17;this.rect(320,y-3,7,7,legendColors[i]);this.text(332,y-1,p[0]+': '+p[1].toFixed(2)+' '+this.currency,8,muted);});
   this.rect(40,107,247,226,[0.965,0.974,0.992]);this.rect(40,107,4,226,blue);
   this.rect(308,107,247,226,[0.965,0.974,0.992]);
   this.text(54,310,'FINANZIELLE AUFSCHLUESSELUNG',10,blue,true);
