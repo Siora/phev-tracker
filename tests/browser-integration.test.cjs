@@ -65,6 +65,7 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.equal(await page.locator('#vehicleFilter option').count(),8);
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
+    await page.evaluate(()=>tab('add'));
     await page.locator('#entries tbody tr button').first().click();
     assert.equal(await page.locator('#form').getAttribute('data-edit-id')!==null,true);
     assert.equal(await page.locator('#form button').first().textContent(),'Änderungen speichern');
