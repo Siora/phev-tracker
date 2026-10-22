@@ -6,6 +6,7 @@ on:
     paths:
       - 'index.html'
       - 'app.js'
+      - 'intelligent-analytics.js'
       - 'pagination.js'
       - 'pdf-report.js'
       - 'csv-import-utils.js'
@@ -142,12 +143,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+          for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
             test -f "$file"
           done
           {
             printf 'cd "%s"\n' "$SFTP_DIR"
-            for file in index.html app.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+            for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
               printf 'put "%s"\n' "$file"
             done
           } > /tmp/upload.batch

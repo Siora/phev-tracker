@@ -141,10 +141,63 @@ const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.p
 const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
 // Wechsel zwischen den Bereichen der Single-Page-Anwendung.
+
+/**
+ * Analyseseite: Daten werden beim Öffnen und nach Änderungen frisch berechnet.
+ * Die Auswertung nutzt ausschliesslich vorhandene Cloud-/Lokal-Datensätze.
+ * DOM-Inhalte werden über textContent erstellt (kein ungeprüftes HTML).
+ */
+function renderIntelligence(){
+ const panel=$('intelligence');
+ if(!panel||panel.classList.contains('hide')||!window.PhevIntelligence)return;
+ const yearSelect=$('intelligence-year'),vehicleSelect=$('intelligence-vehicle');
+ const currentYear=new Date().getFullYear();
+ const years=[...new Set([currentYear,...records.map(r=>Number(String(r.date||'').slice(0,4))),...vehicleExpenses.map(r=>Number(String(r.date||'').slice(0,4)))])].filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
+ const selectedYear=yearSelect.value||String(currentYear);
+ yearSelect.replaceChildren(...years.map(y=>new Option(String(y),String(y))));
+ yearSelect.value=years.includes(Number(selectedYear))?selectedYear:String(currentYear);
+ const selectedVehicle=vehicleSelect.value;
+ vehicleSelect.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ vehicleSelect.value=selectedVehicle;
+ const result=window.PhevIntelligence.analyze(records,vehicleExpenses,vehicleSelect.value,Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency));
+ const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
+ summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
+ const money=v=>Number(v).toFixed(2)+' '+settings.base;
+ for(const [label,value] of [['Gesamtkosten',money(result.total)],['Stromkosten',money(result.energyCost)],['Benzinkosten',money(result.fuelCost)],['Weitere Ausgaben',money(result.otherCost)],['Geladene Energie',result.kwh.toFixed(1)+' kWh'],['Benzinmenge',result.liters.toFixed(1)+' l']]){
+  const card=document.createElement('article');card.className='quick-card';
+  const title=document.createElement('strong');title.textContent=label;
+  const number=document.createElement('p');number.textContent=value;
+  card.append(title,number);summary.append(card);
+ }
+ const max=Math.max(1,...result.months.map(m=>m.total));
+ for(const month of result.months){
+  const bar=document.createElement('div');bar.className='intelligence-bar';
+  const track=document.createElement('div');track.className='intelligence-track';
+  const fill=document.createElement('div');fill.className='intelligence-fill';
+  fill.style.height=(month.total/max*100)+'%';
+  track.title=month.month+': '+money(month.total);
+  const label=document.createElement('small');label.textContent=month.month;
+  bar.append(track,label);track.append(fill);chart.append(bar);
+  const tr=document.createElement('tr');
+  for(const value of [month.month,money(month.charge),money(month.fuel),money(month.extra),money(month.total)]){
+   const td=document.createElement('td');td.textContent=value;tr.append(td);
+  }
+  body.append(tr);
+ }
+ for(const insight of result.messages){
+  const card=document.createElement('article');card.className='insight-item';
+  const heading=document.createElement('strong');heading.textContent=insight.title;
+  const detail=document.createElement('p');detail.textContent=insight.detail;
+  card.append(heading,detail);insights.append(card);
+ }
+}
+window.renderIntelligence=renderIntelligence;
+
 function tab(t){
-  ['home','add','csv','vehicles','charging-management','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','add','csv','vehicles','charging-management','options','cloud'][i]===t));
+  ['home','intelligence','add','csv','vehicles','charging-management','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','intelligence','add','csv','vehicles','charging-management','options','cloud'][i]===t));
   render();
+  renderIntelligence();
   window.scrollTo(0,0)
 }
 /**
@@ -484,6 +537,7 @@ function buildDashboardStatTiles({
  */
 function render(){
   updateLoginNotice();
+  renderIntelligence();
   const now=new Date(),period=$('period').value;
   let y=now.getFullYear(),m=now.getMonth();
   $('customdates').classList.toggle('hide',period!=='custom');
@@ -742,7 +796,7 @@ function settingsSave(){
 /* Operating costs are stored per account in existing cloud preferences, without database migrations. */
 let vehicleExpenses=[];
 function expenseCurrency(amount,currency){return window.PhevTco.convert(amount,currency,settings);}
-function applyVehicleExpenses(value){if(!Array.isArray(value))return;vehicleExpenses=value.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);renderVehicleExpenses();}
+function applyVehicleExpenses(value){if(!Array.isArray(value))return;vehicleExpenses=value.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);renderVehicleExpenses();renderIntelligence();}
 window.setVehicleExpenses=applyVehicleExpenses;
 window.getVehicleExpenses=()=>[...vehicleExpenses];
 /**
