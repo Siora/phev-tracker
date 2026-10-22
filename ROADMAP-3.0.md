@@ -2,6 +2,17 @@
 
 Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme sind unterschiedliche Schritte.
 
+## Verbindlicher Funktionsumfang für Version 3.0
+
+Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Kontoverwaltung allein schließt Version 3.0 nicht ab.
+
+- [ ] **3.0 – Familienverwaltung:** Mitglieder einladen und verwalten, Fahrzeuge mit expliziten Rollen/Berechtigungen teilen, Ausgaben einzelnen Fahrern zuordnen. Vor Umsetzung: Eigentümerschaft, Zugriff auf Historie, Austritt und Löschung sicher modellieren.
+- [ ] **3.0 – Erweiterte Auswertungen:** Langfristige Kostenentwicklung, Vergleiche zwischen Fahrzeugen und individuell einstellbare Wirtschaftlichkeitsanalysen mit nachvollziehbaren Annahmen.
+- [ ] **3.0 – Belegerkennung:** Fotos von Tank- und Laderechnungen erfassen, relevante Werte auslesen, Vorschau und manuelle Korrektur vor dem Speichern. Datenschutz und Aufbewahrung klären.
+- [ ] **3.0 – Automatische Fahrzeugdaten:** Kilometerstand und Ladezustand über geeignete Hersteller- oder Drittanbieter-Schnittstellen einlesen, nur sofern für das Fahrzeug unterstützt. Manuelle Eingabe bleibt möglich; Zugangsdaten und Tokens geschützt speichern.
+
+**Vorgeschlagene Reihenfolge:** Familienverwaltung → Auswertungen → Belegerkennung → Fahrzeugschnittstellen. Technische Machbarkeit und Anbieterabhängigkeiten vor der letzten Etappe klären. Ein Release 3.0 ist erst nach Umsetzung und Abnahme aller vier Bereiche vorgesehen; nicht unterstützte Hersteller müssen ausdrücklich als Einschränkung dokumentiert werden.
+
 ## In GitHub integriert
 
 - [x] Passwortänderung mit erneuter Authentifizierung und Sitzungswiderruf (PR #41)
@@ -27,7 +38,6 @@ Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme si
 ## Weitere Aufgaben
 
 - [ ] Automatisierte Backend-Tests für Kontolöschung, Bildbereinigung und Reset ergänzen
-- [ ] Vorherige Funktionswünsche für Version 3.0 mit der Produktplanung abgleichen; nicht dokumentierte Wünsche gelten nicht automatisch als erledigt
 - [ ] Technische Dokumentation und Betriebsanweisungen aktuell halten
 
 ## Sicherheit und Deployment
