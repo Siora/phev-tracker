@@ -576,6 +576,31 @@ window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.
  * Je Liste werden fünf Datensätze angezeigt; Bearbeiten/Löschen referenziert
  * weiterhin das unveränderte Originalobjekt aus chargingData().
  */
+/**
+ * Füllt das Formular für einen bestehenden Ladeort oder Anbieter.
+ * Übernimmt unverändert die v88-Felder und scrollt zum Bearbeitungsformular.
+ */
+function beginManagedChargingEdit(type,item){
+  const form=$(type==='locations'?'managed-location-form':'managed-provider-form');
+  form.dataset.editId=item.id;
+  form.elements.name.value=item.name;
+  form.elements.price.value=item.price??'';
+  if(type==='locations')form.elements.kind.value=item.kind||'';
+  form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+  form.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/**
+ * Löscht einen verwalteten Ladeort/Anbieter erst nach Bestätigung.
+ * Bestehende Ladungen werden nicht verändert. Der vorhandene Speicherweg
+ * übernimmt anschließend die weitere Synchronisierung.
+ */
+function deleteManagedChargingItem(data,type,id){
+  if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;
+  data[type]=data[type].filter(x=>x.id!==id);
+  storeChargingData(data);
+}
+
 function renderChargingManagement(){
  const data=chargingData();
  for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
@@ -592,8 +617,8 @@ function renderChargingManagement(){
    for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
    const actions=document.createElement('td');actions.className='management-actions';
    const edit=document.createElement('button'),del=document.createElement('button');
-   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';form.scrollIntoView({behavior:'smooth',block:'start'});};
-   del.textContent='Löschen';del.type='button';del.onclick=()=>{if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;data[type]=data[type].filter(x=>x.id!==item.id);storeChargingData(data);};
+   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>beginManagedChargingEdit(type,item);
+   del.textContent='Löschen';del.type='button';del.onclick=()=>deleteManagedChargingItem(data,type,item.id);
    actions.append(edit,del);row.append(actions);return row;
   };
   table.append(tbody);window.paginateTable(list,table,tbody,data[type],5,'managed-'+type,makeManagedRow);
