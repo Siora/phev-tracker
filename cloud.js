@@ -203,7 +203,7 @@ const resetMatch=location.hash.match(/^#reset-token=([a-f0-9]{64})$/);
 if(resetMatch){
  pendingResetToken=resetMatch[1];
  history.replaceState(null,'',location.pathname+location.search);
- ce('cloud-login').classList.add('hide');ce('cloud-reset-confirm').classList.remove('hide');
+ ce('cloud-login').classList.add('hide');ce('cloud-reset-request').classList.add('hide');ce('cloud-reset-confirm').classList.remove('hide');
 }
 ce('cloud-forgot-password').onclick=()=>{
  ce('cloud-login').classList.add('hide');ce('cloud-reset-request').classList.remove('hide');
@@ -333,6 +333,16 @@ ce('cloud-upload').onclick=async()=>{
 };
 
 (async()=>{
+ // Bei einem Reset-Link keine Sitzung wiederherstellen: das Reset-Formular bleibt exklusiv.
+ if(pendingResetToken!==null){
+  ce('cloud-login').classList.add('hide');
+  ce('cloud-account').classList.add('hide');
+  ce('cloud-admin').classList.add('hide');
+  ce('cloud-reset-confirm').classList.remove('hide');
+  document.body.classList.add('login-locked');
+  cs('Bitte lege dein neues Passwort fest.');
+  return;
+ }
  let saved=null;
  try{saved=JSON.parse(localStorage.getItem(sessionKey)||'null');}catch{}
  // A legacy bearer token remains supported until the next normal login.
