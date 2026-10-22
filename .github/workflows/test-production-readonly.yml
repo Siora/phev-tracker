@@ -1,0 +1,23 @@
+name: PHEV Tracker – produktive Read-only-Prüfung
+
+on:
+  pull_request:
+    branches: [audit/v88-initialization-dependencies]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+      - name: Node.js 22 bereitstellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Öffentliche PWA und anonymen API-Zugriff prüfen (nur GET)
+        run: node --test tests/production-readonly.test.cjs
