@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=92">
+<link rel="stylesheet" href="styles.css?v=93">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -25,6 +25,7 @@
 <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" onclick="toggleMobileMenu()">☰ Menü öffnen</button>
 <nav id="primary-nav">
 <button onclick="tab('home')">Übersicht</button>
+<button onclick="tab('intelligence')">🧠 Analyse-Dashboard</button>
 <button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
 <button onclick="tab('csv')">↥ Import / Export</button>
 <button onclick="tab('vehicles')">🚘 Fahrzeuge</button><button onclick="tab('charging-management')">⚡ Ladeorte & Anbieter</button>
@@ -46,6 +47,16 @@
 <div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
 </header>
 <!-- Dashboard: Fahrzeug, Filter, Kennzahlen und Auswertungen -->
+<section id="intelligence" class="hide">
+<h2>🧠 Intelligentes Analyse-Dashboard</h2>
+<p>Regelbasierte Analyse deiner erfassten Daten, ohne externe KI.</p>
+<div class="grid"><label>Analysejahr<select id="intelligence-year" onchange="renderIntelligence()"></select></label><label>Fahrzeug<select id="intelligence-vehicle" onchange="renderIntelligence()"><option value="">Alle Fahrzeuge</option></select></label></div>
+<div id="intelligence-summary" class="grid" aria-live="polite"></div>
+<article class="quick-card"><h2>Monatliche Kostenentwicklung</h2><div id="intelligence-chart" class="intelligence-chart"></div></article>
+<article class="quick-card"><h2>Automatische Erkenntnisse</h2><div id="intelligence-insights" aria-live="polite"></div></article>
+<article class="quick-card"><h2>Monatsvergleich</h2><div class="table-scroll"><table><thead><tr><th>Monat</th><th>Strom</th><th>Benzin</th><th>Weitere</th><th>Gesamt</th></tr></thead><tbody id="intelligence-months"></tbody></table></div></article>
+<p><small>Nur erfasste Vorgänge. Monate ohne Einträge sind keine nachgewiesenen Nullkosten. Trends sind keine Prognosen.</small></p>
+</section>
 <section id="home">
 <p id="login-required-notice" style="padding:14px;border:1px solid #d6a64d;border-radius:10px;margin:12px 0" hidden>🔒 Du bist nicht angemeldet. Bitte öffne „Konto“ und melde dich an, um deine Fahrzeuge und Cloud-Einträge zu laden.</p>
 <div class="hero">
@@ -251,15 +262,16 @@
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
-<script src="jspdf.umd.min.js?v=92" defer></script>
+<script src="jspdf.umd.min.js?v=93" defer></script>
 <script src="charts.js" defer></script>
-<script src="pagination.js?v=92" defer></script>
-<script src="pdf-report.js?v=92" defer></script>
-<script src="csv-import-utils.js?v=92" defer></script>
-<script src="auto-backup.js?v=92" defer></script>
-<script src="vehicle-costs.js?v=92" defer></script>
-<script src="cloud.js?v=92" defer></script>
-<script src="app.js?v=92" defer>
+<script src="pagination.js?v=93" defer></script>
+<script src="pdf-report.js?v=93" defer></script>
+<script src="csv-import-utils.js?v=93" defer></script>
+<script src="auto-backup.js?v=93" defer></script>
+<script src="vehicle-costs.js?v=93" defer></script>
+<script src="cloud.js?v=93" defer></script>
+<script src="intelligent-analytics.js?v=93" defer></script>
+<script src="app.js?v=93" defer>
 </script>
 </main>
 </div>
