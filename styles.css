@@ -970,3 +970,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .expense-row span{overflow-wrap:anywhere}
 .expense-row button{width:auto!important;margin:0!important;flex-shrink:0;padding:9px 12px;background:#53313a;color:#ffe0e5}
 @media(max-width:700px){.expense-section{padding:15px}#expense-form{grid-template-columns:minmax(0,1fr)}.expense-row{align-items:flex-start}}
+
+
+/* V82 — pagination for management and history tables */
+.table-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 2px 5px;color:#b6d0dd;font-size:12px;font-variant-numeric:tabular-nums}
+.table-pagination button{width:auto!important;min-width:98px;margin:0!important;padding:10px 13px!important;border-radius:11px;background:#203c4f;color:#e7f8fc;border:1px solid #42667a;box-shadow:none}
+.table-pagination button:disabled{opacity:.4;cursor:default}
+.table-pagination span{text-align:center;flex:1;white-space:nowrap}
+@media(max-width:480px){.table-pagination{gap:7px}.table-pagination button{min-width:78px;padding:9px!important;font-size:12px}.table-pagination span{font-size:11px}}
