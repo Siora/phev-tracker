@@ -861,7 +861,27 @@ function renderVehicleExpenses(){
  const caption=document.createElement('p');caption.className='expense-total';caption.textContent='Gesamtkosten aller erfassten Zeiträume: '+fmt(extra+running,settings.base);
  const detail=document.createElement('small');detail.textContent='Strom & Benzin: '+fmt(running,settings.base)+' · Weitere Ausgaben: '+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+' / km (Näherung)':' · Für Kosten/km fehlen Kilometerstände.');
  summary.append(caption,detail);
-
+ /**
+  * Wartungserinnerungen verwenden vorhandene SQL-Ausgaben und deren
+  * nächste Fälligkeit. Sie erzeugen selbst keine zusätzlichen Kosten.
+  */
+ const reminders=$('expense-reminders');
+ if(reminders){
+  reminders.replaceChildren();
+  const due=window.PhevTco.reminders(vehicleExpenses,selected);
+  if(due.length){
+   const heading=document.createElement('h4');heading.textContent='Anstehende Wartungen (30 Tage)';
+   reminders.append(heading);
+   for(const item of due){
+    const row=document.createElement('p');row.className='insight-item';
+    const vehicle=vehicles.find(v=>String(v.id)===String(item.vehicle_id));
+    const label=vehicle?vehicleName(vehicle)+' · ':'';
+    row.textContent=label+item.category+' · '+item.next_service_date+' · '+(item.days<0?'Seit '+Math.abs(item.days)+' Tagen überfällig':item.days===0?'Heute fällig':'In '+item.days+' Tagen fällig');
+    reminders.append(row);
+   }
+  }
+ }
+ 
  /**
   * Die Kategorieübersicht verwendet dieselbe Fahrzeugauswahl und dieselbe
   * Währungsumrechnung wie die Gesamtsumme. Sie enthält alle erfassten
