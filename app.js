@@ -140,6 +140,24 @@ const n=x=>{
 const id=x=>[x.type,x.date,x.amount.toFixed(3),x.cost.toFixed(2),x.currency,(x.place||'').toLowerCase()].join('|');
 const fmt=(v,c)=>v.toFixed(2)+' '+c;
 const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*settings.rate:x.cost/settings.rate;
+/**
+ * Aktive Seite innerhalb des aktuellen Browser-Tabs behalten.
+ *
+ * sessionStorage übersteht einen Reload, wird aber normalerweise beim Schliessen
+ * des Tabs verworfen. Die Whitelist verhindert, dass veraltete oder fremde Werte
+ * zu einer leeren Ansicht führen. Auch die Konto-Seite verwendet diesen Weg.
+ */
+const navigationStorageKey='phev-active-page-v1';
+const navigationPages=['home','intelligence','add','csv','vehicles','charging-management','options','cloud'];
+function restoredPage(){
+ try{
+  const page=sessionStorage.getItem(navigationStorageKey);
+  return navigationPages.includes(page)?page:'home';
+ }catch{return 'home';}
+}
+function rememberPage(page){
+ try{sessionStorage.setItem(navigationStorageKey,page);}catch{/* Private Mode: Navigation bleibt nutzbar. */}
+}
 // Wechsel zwischen den Bereichen der Single-Page-Anwendung.
 
 /**
@@ -198,8 +216,10 @@ function renderIntelligence(){
 window.renderIntelligence=renderIntelligence;
 
 function tab(t){
-  ['home','intelligence','add','csv','vehicles','charging-management','options','cloud'].forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',['home','intelligence','add','csv','vehicles','charging-management','options','cloud'][i]===t));
+  if(!navigationPages.includes(t))t='home';
+  navigationPages.forEach(x=>$(x).classList.toggle('hide',x!==t));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',navigationPages[i]===t));
+  rememberPage(t);
   render();
   renderIntelligence();
   window.scrollTo(0,0)
@@ -1021,7 +1041,7 @@ $('import').onclick=()=>{
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{
 });
 $('trendMetric').addEventListener('change', render);
-tab('home');
+tab(restoredPage());
 
 
 /* Energiegehalt von Benzin: chemische Energie, keine nutzbare Radenergie. */
