@@ -7,7 +7,7 @@ return [
  'password' => 'YOUR_DATABASE_PASSWORD',
  'allowed_origin' => 'https://tracker.web-produktion.com',
  'reset_mail_from' => 'noreply@web-produktion.com',
- 'smtp_host' => 'mail.web-produktion.com',
+ 'smtp_host' => 'mail.your-server.de',
  'smtp_port' => 587, // STARTTLS; Port beim Anbieter verifizieren.
  'smtp_username' => 'noreply@web-produktion.com',
  'smtp_password' => 'SET_ONLY_ON_SERVER', // Niemals ins Repository übernehmen.
