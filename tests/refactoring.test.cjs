@@ -88,3 +88,20 @@ test('Cloud-Queue und bestätigte Speicherwege bleiben vorhanden', () => {
   assert.ok(app.includes('window.applyCloudPreferences'));
   assert.ok(app.includes('window.paginateTable'));
 });
+
+test('Fahrzeugausgaben: 10 Zeilen je Seite, Navigation oben und unten, Aktionen bleiben erhalten', () => {
+  const app = read('app.js');
+  const pagination = read('pagination.js');
+  const start = app.indexOf('function renderVehicleExpenses(){');
+  const end = app.indexOf("\n$('expense-form').elements.vehicle_id", start);
+  assert.ok(start >= 0 && end > start, 'Kostenübersicht fehlt');
+  const section = app.slice(start, end);
+  assert.match(section, /document\.createElement\('table'\)/);
+  assert.match(section, /document\.createElement\('thead'\)/);
+  assert.match(section, /document\.createElement\('tbody'\)/);
+  assert.match(section, /paginateTable\(list,table,tbody,sorted,10,'vehicle-expenses',makeExpenseRow\)/);
+  assert.match(section, /window\.deleteVehicleExpense\(x\.id\)/);
+  assert.match(section, /form\.dataset\.editId=x\.id/);
+  assert.ok(pagination.includes("createControls('oben')"));
+  assert.ok(pagination.includes("createControls('unten')"));
+});
