@@ -36,3 +36,7 @@ Vor einer breiteren öffentlichen Nutzung Rate-Limiting, Wiederherstellung von K
 5. Mit einem Testkonto prüfen: unbekannte E-Mail gibt dieselbe Erfolgsmeldung, Link läuft nach 30 Minuten ab, Token ist nur einmal nutzbar, alte Sitzungen werden widerrufen, erneute Anforderung innerhalb von 10 Minuten sendet keinen weiteren Link.
 
 **Sicherheit:** Reset-Token werden nur gehasht gespeichert. Der Link transportiert den Token als URL-Fragment, das der Browser sofort aus der Adresszeile entfernt. Für eine öffentliche Freigabe zusätzlich IP-basiertes Rate-Limiting am Webserver/API-Gateway aktivieren und E-Mail-Zustellbarkeit überwachen.
+
+## Version 3.0: Hetzner SMTP-Versand
+
+Konfigurationsvorlage: `reset_mail_from=noreply@web-produktion.com`, `smtp_host=mail.web-produktion.com`, `smtp_username=noreply@web-produktion.com`, `smtp_port=587` mit **STARTTLS**. Port und TLS-Unterstützung beim Provider verifizieren. Das echte `smtp_password` nur in der nicht versionierten produktiven `server/config.php` eintragen (Dateirechte einschränken). Der API-Server versendet Passwort-Reset-Mails über authentifiziertes SMTP, nicht mehr über PHP `mail()`. Vor Aktivierung mit einem Testkonto und gültigem Zertifikat testen; Migration `server/migration-v3-password-resets.sql` nicht vergessen.
