@@ -338,6 +338,20 @@ function renderEntryHistory(){
   const actions=document.createElement('td');actions.className='entry-table-actions';
   const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
   edit.onclick=()=>beginEntryEdit(x);
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+  edit.onclick=()=>{
+   form.dataset.editId=x.id;
+   form.elements.vehicle_id.value=String(x.vehicle_id);
+   form.elements.category.value=x.category;
+   form.elements.date.value=x.date;
+   form.elements.amount.value=x.amount;
+   form.elements.currency.value=x.currency;
+   form.elements.note.value=x.note||'';
+   form.elements.mileage_km.value=x.mileage_km??'';
+   form.elements.next_service_date.value=x.next_service_date||'';
+   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+   form.scrollIntoView({behavior:'smooth',block:'start'});
+  };
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
   remove.onclick=()=>deleteEntryWithConfirmation(x.id);
   actions.append(edit,remove);tr.append(actions);return tr;
@@ -790,7 +804,7 @@ function renderVehicleExpenses(){
   const info=document.createElement('span');info.textContent=x.date+' · '+x.category+' · '+fmt(Number(x.amount),x.currency)+(x.note?' · '+x.note:'');
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
   remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
-  row.append(info,remove);list.append(row);
+  row.append(info,edit,remove);list.append(row);
  }
  if(!expenses.length){const empty=document.createElement('p');empty.textContent='Noch keine zusätzlichen Fahrzeugausgaben erfasst.';list.append(empty);}
 }
@@ -799,12 +813,20 @@ $('expense-form').onsubmit=async e=>{
  e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]'),el=form.elements;
  if(!el.vehicle_id.value)return $('expense-status').textContent='Bitte ein Fahrzeug wählen.';
  const amount=Number(el.amount.value);if(!Number.isFinite(amount)||amount<=0)return;
- const item={id:(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random()),vehicle_id:el.vehicle_id.value,category:el.category.value,date:el.date.value,amount,currency:el.currency.value,note:el.note.value.trim()};
+ const item={
+  id:form.dataset.editId||(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random()),
+  vehicle_id:el.vehicle_id.value,category:el.category.value,date:el.date.value,
+  amount,currency:el.currency.value,note:el.note.value.trim(),
+  mileage_km:el.mileage_km.value===''?null:Number(el.mileage_km.value),
+  next_service_date:el.next_service_date.value||null
+ };
  button.disabled=true;$('expense-status').textContent='Ausgabe wird gespeichert …';
- try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();el.vehicle_id.value=v;$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
+ try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Ausgabe speichern';el.vehicle_id.value=v;$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
  catch(error){$('expense-status').textContent='Speichern fehlgeschlagen: '+error.message;}
  finally{button.disabled=false;}
 };
+
+$('expense-form').addEventListener('reset',e=>{delete e.currentTarget.dataset.editId;e.currentTarget.querySelector('button[type=submit]').textContent='Ausgabe speichern';});
 
 window.collectCloudPreferences=function(){
  const photos={};
