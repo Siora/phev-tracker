@@ -520,7 +520,13 @@ function render(){
     const energyKwh=charges.reduce((total,r)=>total+Number(r.amount||0),0);
     const fuelLiters=fuel.reduce((total,r)=>total+Number(r.amount||0),0);
     const values=distance>0
-      ? [['⚡ Geladen / 100 km',(energyKwh*100/distance).toFixed(2)+' kWh'],['⛽ Getankt / 100 km',(fuelLiters*100/distance).toFixed(2)+' l'],['💰 Kosten / 100 km',fmt(cost*100/distance,settings.base)]]
+      ? [
+          ['⚡ Geladen / 100 km',(energyKwh*100/distance).toFixed(2)+' kWh'],
+          ['⛽ Getankt / 100 km',(fuelLiters*100/distance).toFixed(2)+' l'],
+          ['⚡ Stromkosten / 100 km',fmt(electric*100/distance,settings.base)],
+          ['⛽ Benzinkosten / 100 km',fmt(petrol*100/distance,settings.base)],
+          ['💰 Energiekosten / 100 km',fmt(cost*100/distance,settings.base)]
+        ]
       : [];
     consumption.replaceChildren();
     for(const [label,value] of values){
@@ -530,7 +536,7 @@ function render(){
       tile.append(small,bold);consumption.append(tile);
     }
     $('consumption-note').textContent=distance>0
-      ? 'Basis: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand. Lade- und Tankmengen sind nur Näherungswerte.'
+      ? 'Näherungswerte: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.'
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
   renderConsumptionInsights(filtered,charges,fuel,distance);
