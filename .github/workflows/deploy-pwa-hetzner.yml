@@ -45,6 +45,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Release-Version und Offline-Cache abgleichen
+        run: node scripts/release-version.cjs --check
+
       - name: Run offline refactoring regression tests
         shell: bash
         run: node --test tests/refactoring.test.cjs
