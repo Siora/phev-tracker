@@ -33,6 +33,11 @@ function updateSyncIndicator(){
  }
  el.textContent=message;el.dataset.state=state;
 }
+/**
+ * Zentrale HTTP-Schnittstelle zur PHP-API.
+ * GET bei fehlendem data-Argument, sonst JSON-POST; Cookie-Sitzung bleibt aktiv.
+ * Fehler werden an den Aufrufer weitergegeben, statt lokale Daten zu löschen.
+ */
 async function cloudCall(action,data){
  const response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
   method:data===undefined?'GET':'POST',
@@ -74,8 +79,17 @@ window.syncManagedCharging=async function(next){
  finally{syncingPreferences=false;updateSyncIndicator();}
 };
 
+/**
+ * Lädt die Cloud-Gesamtansicht und berücksichtigt zuvor vorgemerkte lokale
+ * Änderungen. Wichtig: die Offline-Warteschlange hat Vorrang vor einem
+ * möglicherweise älteren Serverstand und wird anschließend synchronisiert.
+ */
 async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
 
+/**
+ * Lädt Fahrzeuge aus dem Konto und aktualisiert die Verwaltungstabelle.
+ * Die Pagination begrenzt nur sichtbare Zeilen; Fahrzeug-Caches bleiben erhalten.
+ */
 async function loadVehicles(){
  try {
   const data=await cloudCall('vehicles');
@@ -160,6 +174,10 @@ ce('vehicle-form').onsubmit=async e=>{
 };
 
 function showAccount(email,role){document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
+/**
+ * Lädt die Benutzerliste für Administratoren und zeigt 20 Benutzer je Seite.
+ * Die Benutzerobjekte werden ausschließlich dargestellt, nicht geändert.
+ */
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
  const container=ce('cloud-users');container.replaceChildren();
@@ -293,6 +311,11 @@ ce('cloud-upload').onclick=async()=>{
  }
 })();
 
+/**
+ * Speichert die vollständige Ausgabenliste in den Cloud-Preferences.
+ * Serverbestätigung erfolgt VOR dem Ersetzen der lokalen Liste, damit ein
+ * fehlgeschlagener Request keine fälschliche Erfolgsmeldung erzeugt.
+ */
 window.saveVehicleExpenses=async function(items){
  if(!cloudToken||!cloudPreferencesReady)throw Error('Bitte anmelden und Cloud-Daten vollständig laden.');
  if(!Array.isArray(items)||items.some(x=>!x||!x.vehicle_id||!x.date||!Number.isFinite(Number(x.amount))||Number(x.amount)<=0))throw Error('Ungültige Ausgabendaten.');
@@ -335,6 +358,11 @@ ce('cloud-preferences-upload').onclick=async()=>{
 
 let cloudSyncing=false;
 window.queueCloudChanges=function(items){const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const cacheKey='phev-cache-'+email,queueKey='phev-queue-'+email;const old=JSON.parse(localStorage.getItem(cacheKey)||'[]');const previous=new Map(old.map(r=>[r.id,r]));const next=new Map(items.map(r=>[r.id,r]));let queue=JSON.parse(localStorage.getItem(queueKey)||'[]');for(const r of items)if(JSON.stringify(previous.get(r.id))!==JSON.stringify(r))queue.push({action:'save',record:r});for(const r of old)if(!next.has(r.id))queue.push({action:'delete',id:r.id});localStorage.setItem(queueKey,JSON.stringify(queue));localStorage.setItem(cacheKey,JSON.stringify(items));syncError='';updateSyncIndicator();syncCloudQueue();};
+/**
+ * Arbeitet die kontobezogene Offline-Warteschlange sequenziell ab.
+ * Eine Operation wird erst nach erfolgreichem API-Request entfernt.
+ * Bei Fehlern bleiben alle noch nicht bestätigten Operationen erhalten.
+ */
 async function syncCloudQueue(){if(cloudSyncing||!cloudToken||!navigator.onLine)return;const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const key='phev-queue-'+email;cloudSyncing=true;updateSyncIndicator();try{let queue=JSON.parse(localStorage.getItem(key)||'[]');while(queue.length){const op=queue[0];await cloudCall(op.action,op.action==='save'?{record:op.record}:{id:op.id});const latest=JSON.parse(localStorage.getItem(key)||'[]');latest.shift();localStorage.setItem(key,JSON.stringify(latest));queue=latest;}syncError='';cs('Alle Änderungen synchronisiert.');}catch(e){syncError=e.message;cs('Änderungen lokal vorgemerkt: '+e.message);}finally{cloudSyncing=false;updateSyncIndicator();}}
 window.addEventListener('online',()=>{syncError='';updateSyncIndicator();syncCloudQueue();});
 window.addEventListener('offline',updateSyncIndicator);
