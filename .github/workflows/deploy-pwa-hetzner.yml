@@ -121,12 +121,10 @@ jobs:
           } > /tmp/upload.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload.batch "$SFTP_USER@$SFTP_HOST"
 
-      # Opt-in until the repository API has been compared with the live PHP
-      # installation. This prevents replacing an independently updated API.
-      # Enable repository variable HETZNER_API_DEPLOY_ENABLED=true only after
-      # verifying parity and the destination directory on Hetzner.
-      - name: Upload PHP API (explicitly enabled only)
-        if: ${{ (github.event_name == 'push' || inputs.upload == true) && vars.HETZNER_API_DEPLOY_ENABLED == 'true' }}
+      # Die produktiven Cookie-/Foto-/iOS-Funktionen wurden mit dem vom
+      # Benutzer bereitgestellten Serverstand abgeglichen.
+      - name: Upload PHP API with rollback
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
         env:
           SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
           SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
@@ -137,9 +135,20 @@ jobs:
           test "$SFTP_HOST" = "www35.your-server.de"
           test "$SFTP_DIR" = "public_html/phev-tracker"
           test -s server/api.php
-          # Remote API directory must already exist. Never upload config.php,
-          # secrets, migrations, or any other file in server/.
-          printf 'cd "%s/api"\npwd\nls -l api.php\n' "$SFTP_DIR" > /tmp/check-api.batch
+          # Save the current production API privately on the runner before
+          # replacing it. No backup or config file is written into webroot.
+          printf 'cd "%s/api"\nget "api.php" "/tmp/phev-api-previous.php"\n' "$SFTP_DIR" > /tmp/check-api.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check-api.batch "$SFTP_USER@$SFTP_HOST"
+          test -s /tmp/phev-api-previous.php
           printf 'cd "%s/api"\nput "server/api.php" "api.php"\n' "$SFTP_DIR" > /tmp/upload-api.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload-api.batch "$SFTP_USER@$SFTP_HOST"
+          # An unauthenticated request must receive 401. This also detects
+          # PHP fatal errors, missing config and unavailable database.
+          code="$(curl --silent --show-error --output /tmp/api-health.json --write-out '%{http_code}' 'https://tracker.web-produktion.com/api/api.php?action=session')"
+          if [ "$code" != "401" ]; then
+            echo "API health check failed (HTTP $code); restoring previous version."
+            printf 'cd "%s/api"\nput "/tmp/phev-api-previous.php" "api.php"\n' "$SFTP_DIR" > /tmp/restore-api.batch
+            sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/restore-api.batch "$SFTP_USER@$SFTP_HOST"
+            exit 1
+          fi
+          echo "PHP API deployed and unauthenticated health check passed."
