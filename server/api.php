@@ -54,6 +54,52 @@ function cookieRequestOriginAllowed(): bool {
  }
  return false;
 }
+/**
+ * Versendet eine Klartext-E-Mail über authentifiziertes SMTP mit STARTTLS.
+ * Vertrauliche Zugangsdaten stehen ausschließlich in server/config.php.
+ */
+function sendResetMail(array $config,string $recipient,string $subject,string $message): bool {
+ $host=(string)($config['smtp_host']??'');
+ $port=(int)($config['smtp_port']??587);
+ $username=(string)($config['smtp_username']??'');
+ $password=(string)($config['smtp_password']??'');
+ $sender=(string)($config['reset_mail_from']??'');
+ if (!$host || !$username || !$password || !filter_var($sender,FILTER_VALIDATE_EMAIL) || !filter_var($recipient,FILTER_VALIDATE_EMAIL) || $port<1 || $port>65535) return false;
+ $socket=@stream_socket_client('tcp://'.$host.':'.$port,$errno,$errstr,15,STREAM_CLIENT_CONNECT);
+ if (!$socket) return false;
+ stream_set_timeout($socket,15);
+ $read=function()use($socket): int {
+  $response='';
+  do {
+   $line=fgets($socket,2048);
+   if ($line===false) return 0;
+   $response.=$line;
+  } while (strlen($line)>=4 && $line[3]==='-');
+  return (int)substr($response,0,3);
+ };
+ $send=function(string $command)use($socket): void { fwrite($socket,$command."\r\n"); };
+ try {
+  if ($read()!==220) return false;
+  $send('EHLO tracker.web-produktion.com');if ($read()!==250)return false;
+  $send('STARTTLS');if ($read()!==220)return false;
+  if (!stream_socket_enable_crypto($socket,true,STREAM_CRYPTO_METHOD_TLS_CLIENT))return false;
+  $send('EHLO tracker.web-produktion.com');if ($read()!==250)return false;
+  $send('AUTH LOGIN');if ($read()!==334)return false;
+  $send(base64_encode($username));if ($read()!==334)return false;
+  $send(base64_encode($password));if ($read()!==235)return false;
+  $send('MAIL FROM:<'.$sender.'>');if ($read()!==250)return false;
+  $send('RCPT TO:<'.$recipient.'>');if (!in_array($read(),[250,251],true))return false;
+  $send('DATA');if ($read()!==354)return false;
+  $headers="From: PHEV Tracker <".$sender.">\r\nTo: <".$recipient.">\r\nSubject: ".$subject."\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
+  $payload=$headers."\r\n\r\n".$message;
+  $payload=str_replace(["\r\n","\r"],"\n",$payload);
+  $payload=preg_replace('/^\./m','..',$payload);
+  $send(str_replace("\n","\r\n",$payload)."\r\n.");
+  if ($read()!==250)return false;
+  $send('QUIT');return true;
+ } catch (Throwable $e) { error_log('SMTP transport error');return false; }
+ finally {fclose($socket);}
+}
 // 3.0: Öffentliche Passwort-Wiederherstellung ohne Konten-Offenlegung.
 // SMTP-/Mailtransport und Migration müssen vor Freischaltung eingerichtet sein.
 if ($action === 'password-reset-request') {
@@ -61,7 +107,7 @@ if ($action === 'password-reset-request') {
  $mail=email((string)($body['email']??''));
  if (!filter_var($mail,FILTER_VALIDATE_EMAIL)) fail(400,'Ungültige E-Mail-Adresse');
  $sender=(string)($config['reset_mail_from']??'');
- if (!filter_var($sender,FILTER_VALIDATE_EMAIL)) fail(503,'Passwort-Wiederherstellung ist noch nicht eingerichtet');
+ if (!filter_var($sender,FILTER_VALIDATE_EMAIL) || empty($config['smtp_username']) || empty($config['smtp_password'])) fail(503,'Passwort-Wiederherstellung ist noch nicht eingerichtet');
  $stmt=$db->prepare('SELECT id FROM users WHERE email=?');$stmt->execute([$mail]);$target=$stmt->fetchColumn();
  if ($target) {
   $stmt=$db->prepare('SELECT COUNT(*) FROM password_resets WHERE user_id=? AND created_at>DATE_SUB(UTC_TIMESTAMP(),INTERVAL 10 MINUTE)');
@@ -74,8 +120,7 @@ if ($action === 'password-reset-request') {
    $link='https://tracker.web-produktion.com/#reset-token='.$token;
    $subject='PHEV Tracker - Passwort zuruecksetzen';
    $message="Zum Zuruecksetzen des Passworts diesen Link innerhalb von 30 Minuten oeffnen:\n".$link."\nFalls du dies nicht angefordert hast, ignoriere diese E-Mail.\n";
-   $headers=['From: '.$sender,'Content-Type: text/plain; charset=UTF-8'];
-   if (!mail($mail,$subject,$message,implode("\r\n",$headers))) {
+   if (!sendResetMail($config,$mail,$subject,$message)) {
     $stmt=$db->prepare('DELETE FROM password_resets WHERE token_hash=?');$stmt->execute([$hash]);
     error_log('PHEV password reset email delivery failed');
    }
