@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 87 · Branch `main`
+Stand: Version 88 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -10,7 +10,8 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | --- | --- |
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
 | `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
-| `consumption-analysis.js` | Verbrauchstrends, Energieäquivalenz, Kostenvergleich und Ladearten |
+| `consumption-analysis.js` | Archivierter, derzeit **nicht eingebundener** Versuch der Analyse-Auslagerung aus v86 |
+| `vehicle-costs.js` | Reine TCO-Berechnung und Währungsumrechnung, ohne DOM oder Cloud-Nebenwirkungen |
 | `csv-import-utils.js` | CSV-Zeilenparser und Datumsnormalisierung für den Import |
 | `auto-backup.js` | Kontobezogene, rotierende lokale Sicherungen ohne Cloud-Eingriff |
 | `pdf-report.js` | jsPDF-basierte Layout-Klasse `PhevPdfReport` |
@@ -129,3 +130,7 @@ Die Verbrauchs- und Energiebilanzfunktionen (`fuelEnergyFactor`, `energyBalance`
 ## 10. Dashboard-Stabilisierung v87
 
 Nach v86 meldete ein iPhone-Test leere Diagramme, Timeline und Fahrzeugübersicht. Zur Risikobegrenzung wurde die v86-Auslagerung der Verbrauchsanalysen rückgängig gemacht: Die unveränderten Funktionen stehen wieder in `app.js`. `consumption-analysis.js` bleibt vorerst nur als ungenutzte Datei im Repository und wird **nicht** in HTML, Service Worker oder Hetzner-Upload eingebunden. Dies ist ein gezielter Rollback des letzten Refactorings, kein Löschen von Nutzerdaten. Vor einem erneuten Auslagern sind Browser-Konsole, Ladefehler und ein Dashboard-Regressionstest zu prüfen.
+
+## 11. Vorsichtige TCO-Auslagerung v88
+
+Nach dem bestätigten Dashboard-Rollback in v87 wurden in v88 **nur die reinen TCO-Rechenoperationen** nach `vehicle-costs.js` ausgelagert. `renderVehicleExpenses`, `applyVehicleExpenses`, `window.setVehicleExpenses`, die Formular-Ereignisse und die Cloud-Preferences verbleiben in `app.js`. Das Modul besitzt keine Start-Initialisierung und verändert weder Speicher noch Datensätze. Es wird vor `app.js` geladen und in Deployment sowie Offline-Cache aufgenommen. Ein isolierter Test mit zwei Fahrzeugen prüfte die Filterung, EUR→CHF-Umrechnung, laufende Kosten und Kilometerstandsspanne. JavaScript-Syntaxprüfung bestanden; realer iPhone-/Deployment-Test weiterhin erforderlich.
