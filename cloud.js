@@ -273,13 +273,16 @@ ce('cloud-delete-account').onsubmit=async event=>{
  if(!window.confirm('Konto und zugehörige Cloud-Daten unwiderruflich löschen?'))return;
  button.disabled=true;
  try{
+  const deletedEmail=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
   await cloudCall('account-delete',{password:form.elements.password.value,confirmation:form.elements.confirmation.value});
+  // Nur den kontobezogenen Offline-Cache entfernen; Daten anderer Konten bleiben erhalten.
+  if(deletedEmail){for(const prefix of ['phev-cache-','phev-queue-','phev-vehicles-cache-'])localStorage.removeItem(prefix+deletedEmail);}
   form.reset();cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';
   localStorage.removeItem(sessionKey);updateSyncIndicator();
   document.body.classList.add('login-locked');
   ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');
   ce('cloud-count').textContent='';window.showLocalRecords();
-  cs('Konto gelöscht. Lokale Daten auf diesem Gerät wurden nicht gelöscht.');
+  cs('Konto gelöscht. Kontobezogene Cloud-Caches auf diesem Gerät wurden entfernt; unabhängige lokale Daten bleiben erhalten.');
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
