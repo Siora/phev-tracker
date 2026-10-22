@@ -338,20 +338,6 @@ function renderEntryHistory(){
   const actions=document.createElement('td');actions.className='entry-table-actions';
   const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
   edit.onclick=()=>beginEntryEdit(x);
-  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-  edit.onclick=()=>{
-   form.dataset.editId=x.id;
-   form.elements.vehicle_id.value=String(x.vehicle_id);
-   form.elements.category.value=x.category;
-   form.elements.date.value=x.date;
-   form.elements.amount.value=x.amount;
-   form.elements.currency.value=x.currency;
-   form.elements.note.value=x.note||'';
-   form.elements.mileage_km.value=x.mileage_km??'';
-   form.elements.next_service_date.value=x.next_service_date||'';
-   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
-   form.scrollIntoView({behavior:'smooth',block:'start'});
-  };
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
   remove.onclick=()=>deleteEntryWithConfirmation(x.id);
   actions.append(edit,remove);tr.append(actions);return tr;
@@ -802,6 +788,20 @@ function renderVehicleExpenses(){
  for(const x of expenses){
   const row=document.createElement('div');row.className='expense-row';
   const info=document.createElement('span');info.textContent=x.date+' · '+x.category+' · '+fmt(Number(x.amount),x.currency)+(x.note?' · '+x.note:'');
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+  edit.onclick=()=>{
+   form.dataset.editId=x.id;
+   form.elements.vehicle_id.value=String(x.vehicle_id);
+   form.elements.category.value=x.category;
+   form.elements.date.value=x.date;
+   form.elements.amount.value=x.amount;
+   form.elements.currency.value=x.currency;
+   form.elements.note.value=x.note||'';
+   form.elements.mileage_km.value=x.mileage_km??'';
+   form.elements.next_service_date.value=x.next_service_date||'';
+   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+   form.scrollIntoView({behavior:'smooth',block:'start'});
+  };
   const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
   remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
   row.append(info,edit,remove);list.append(row);
