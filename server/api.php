@@ -235,6 +235,20 @@ if ($action === 'account-delete') {
  sessionCookie('',time()-3600);
  respond(200,['ok'=>true]);
 }
+// Mitgliedschaften: Lesezugriff nur für Mitglieder, Aufnahme nur durch Eigentümer.
+// Bereits registrierte Konten müssen vorab selbst zugestimmt haben; deshalb wird
+// hier bewusst KEIN direkter Hinzufügen-Endpunkt ohne Einladungsbestätigung angeboten.
+if ($action==='family-members') {
+ if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
+ if (!$db->query("SHOW TABLES LIKE 'family_members'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
+ $familyId=filter_var($_GET['family_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$familyId) fail(400,'Ungültige Familien-ID');
+ $stmt=$db->prepare('SELECT role FROM family_members WHERE family_id=? AND user_id=?');
+ $stmt->execute([$familyId,$uid]);
+ if (!$stmt->fetchColumn()) fail(404,'Familie nicht gefunden');
+ $stmt=$db->prepare('SELECT u.id,u.email,m.role,m.joined_at FROM family_members m JOIN users u ON u.id=m.user_id WHERE m.family_id=? ORDER BY m.joined_at,u.id');
+ $stmt->execute([$familyId]);respond(200,['members'=>$stmt->fetchAll()]);
+}
 // Familienfunktionen sind erst nach der separaten SQL-Migration verfügbar.
 if (in_array($action,['family-list','family-create'],true)) {
  if (!$db->query("SHOW TABLES LIKE 'family_groups'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
