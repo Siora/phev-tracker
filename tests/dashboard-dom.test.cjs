@@ -69,6 +69,10 @@ function harness() {
   };
   // Monatsvergleich in derselben VM laden, damit der Dashboard-Ausschnitt
   // nach der Auslagerung weiterhin mit der echten Funktion ausgeführt wird.
+  const timelineStart = app.indexOf('function renderDashboardTimeline(');
+  const timelineEnd = app.indexOf('\nfunction renderMonthComparison(', timelineStart);
+  assert.ok(timelineStart >= 0 && timelineEnd > timelineStart);
+  vm.runInNewContext(app.slice(timelineStart, timelineEnd), sandbox);
   const monthStart = app.indexOf('function renderMonthComparison(');
   const monthEnd = app.indexOf('\nfunction buildDashboardStatTiles(', monthStart);
   assert.ok(monthStart >= 0 && monthEnd > monthStart);
