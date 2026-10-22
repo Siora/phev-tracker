@@ -197,6 +197,38 @@ async function cloudUsers(){
  table.append(tbody);window.paginateTable(container,table,tbody,result.users,20,'users',makeUserRow);
 }
 
+// Der Reset-Token steht ausschließlich im URL-Fragment und wird sofort entfernt.
+let pendingResetToken=null;
+const resetMatch=location.hash.match(/^#reset-token=([a-f0-9]{64})$/);
+if(resetMatch){
+ pendingResetToken=resetMatch[1];
+ history.replaceState(null,'',location.pathname+location.search);
+ ce('cloud-login').classList.add('hide');ce('cloud-reset-confirm').classList.remove('hide');
+}
+ce('cloud-forgot-password').onclick=()=>{
+ ce('cloud-login').classList.add('hide');ce('cloud-reset-request').classList.remove('hide');
+};
+ce('cloud-reset-cancel').onclick=()=>{
+ ce('cloud-reset-request').classList.add('hide');ce('cloud-login').classList.remove('hide');
+};
+ce('cloud-reset-request').onsubmit=async event=>{
+ event.preventDefault();const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+ button.disabled=true;
+ try{const result=await cloudCall('password-reset-request',{email:form.elements.email.value});cs(result.message);form.reset();}
+ catch(error){cs(error.message);}
+ finally{button.disabled=false;}
+};
+ce('cloud-reset-confirm').onsubmit=async event=>{
+ event.preventDefault();const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+ if(form.elements.new_password.value!==form.elements.confirm_password.value){cs('Neue Passwörter stimmen nicht überein.');return;}
+ button.disabled=true;
+ try{
+  await cloudCall('password-reset-confirm',{token:pendingResetToken,new_password:form.elements.new_password.value});
+  pendingResetToken=null;form.reset();ce('cloud-reset-confirm').classList.add('hide');
+  ce('cloud-login').classList.remove('hide');cs('Passwort zurückgesetzt. Bitte erneut anmelden.');
+ }catch(error){cs(error.message);}
+ finally{button.disabled=false;}
+};
 ce('cloud-login').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button');
