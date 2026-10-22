@@ -176,6 +176,35 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  if(liters>0)add('Erfasste Benzinmenge',liters.toFixed(1)+' Liter','Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.');
 }
 
+/**
+ * Baut ausschließlich die zehn Kennzahlen-Kacheln für das Dashboard.
+ *
+ * Eingabe: bereits gefilterte Lade-/Tankvorgänge, aggregierte Kosten,
+ * Kilometerstandsspanne und formatierte Durchschnittspreise.
+ * Ausgabe: neues Array aus [Beschriftung, Anzeigewert] ohne DOM-Zugriff,
+ * Storage-Schreibzugriff oder Veränderung der übergebenen Einträge.
+ *
+ * Die Reihenfolge und Formeln entsprechen exakt der bisherigen v88-Logik.
+ * Eine Auslagerung der Verbrauchsdiagramme ist ausdrücklich nicht enthalten.
+ */
+function buildDashboardStatTiles({
+  averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
+  distance, currency
+}){
+  return [
+    ['⚡ Ø Preis pro kWh',averageElectric],
+    ['⛽ Ø Preis pro Liter',averageFuel],
+    ['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],
+    ['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],
+    ['💰 Gesamtkosten',fmt(cost,currency)],
+    ['🔌 Stromkosten',fmt(electric,currency)],
+    ['⛽ Benzinkosten',fmt(petrol,currency)],
+    ['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,currency):'–'],
+    ['Ladevorgänge',charges.length],
+    ['Tankungen',fuel.length]
+  ];
+}
+
 /* Tabellen-Pagination: siehe pagination.js. */
 /**
  * Rendert Dashboard, Tabellen und Auswertungen aus dem aktuellen Datenbestand.
@@ -254,7 +283,10 @@ function render(){
   const fueledLiters=fuel.reduce((sum,r)=>sum+Number(r.amount||0),0);
   const averageElectric=chargedKwh>0?fmt(electric/chargedKwh,settings.base)+' / kWh':'–';
   const averageFuel=fueledLiters>0?fmt(petrol/fueledLiters,settings.base)+' / Liter':'–';
-  let tiles=[['⚡ Ø Preis pro kWh',averageElectric],['⛽ Ø Preis pro Liter',averageFuel],['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
+  const tiles=buildDashboardStatTiles({
+    averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
+    distance, currency:settings.base
+  });
   $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
   const metric = $('trendMetric').value;
   AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
