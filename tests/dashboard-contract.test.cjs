@@ -63,7 +63,7 @@ test('Timeline-Helfer zeichnet weiterhin den vorgesehenen DOM-Container', () => 
 });
 
 test('Flottenübersicht bleibt separat an ihren DOM-Container gebunden', () => {
-  const fleet = section(app, 'function renderDashboardFleetOverview(){', '\\nfunction renderDashboardTimeline(');
+  const fleet = section(app, 'function renderDashboardFleetOverview(){', '\nfunction renderDashboardTimeline(');
   assert.ok(fleet.includes("$('fleet-overview')"));
   assert.ok(fleet.includes('vehicles.forEach('));
   assert.ok(fleet.includes('render();'));
