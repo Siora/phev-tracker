@@ -30,7 +30,7 @@ test('Modul-Reihenfolge: Helfer vor app.js; Cloud vor App', () => {
     assert.ok(scripts.indexOf(dependency) >= 0 && scripts.indexOf(dependency) < scripts.indexOf('app.js'), dependency);
   }
   assert.ok(scripts.indexOf('jspdf.umd.min.js') < scripts.indexOf('pdf-report.js'));
-  assert.ok(!scripts.includes('consumption-analysis.js'), 'Rollback v87 darf nicht unbeabsichtigt reaktiviert werden');
+  assert.ok(!scripts.includes('consumption-analysis.js'), 'Entferntes v87-Modul darf nicht unbeabsichtigt reaktiviert werden');
 });
 
 test('Versionen im HTML und Offline-Cache sind identisch', () => {
@@ -205,4 +205,11 @@ test('Dashboard-Layout kann Kacheln verbergen, verschieben und zurücksetzen',()
  assert.match(app,/localStorage\.setItem\(key,JSON\.stringify\(state\)\)/);
  assert.match(app,/widget\.hidden=state\.hidden\.includes\(id\)/);
  assert.match(css,/\[data-dashboard-widget\]\[hidden\]\{display:none!important\}/);
+});
+
+test('Entfernte Altmodule bleiben aus dem produktiven Lade- und Cachepfad',()=>{
+ const html=read('index.html'),worker=read('sw.js');
+ assert.doesNotMatch(html,/src="consumption-analysis\.js/);
+ assert.doesNotMatch(worker,/['"]\.\/consumption-analysis\.js/);
+ assert.match(read('app.js'),/function render\(/);
 });

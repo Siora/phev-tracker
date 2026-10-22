@@ -12,7 +12,6 @@ on:
       - 'csv-import-utils.js'
       - 'auto-backup.js'
       - 'vehicle-costs.js'
-      - 'consumption-analysis.js'
       - 'cloud.js'
       - 'charts.js'
       - 'styles.css'
