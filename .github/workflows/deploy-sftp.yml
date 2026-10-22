@@ -1,12 +1,7 @@
-name: Deploy PHP API via SFTP
+name: Legacy PHP API via SFTP (manual fallback only)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'server/api.php'
-      - '.github/workflows/deploy-sftp.yml'
 
 permissions:
   contents: read
