@@ -18,6 +18,7 @@ on:
       - 'sw.js'
       - 'manifest.webmanifest'
       - 'tests/refactoring.test.cjs'
+      - 'server/api.php'
   workflow_dispatch:
     inputs:
       upload:
@@ -47,6 +48,10 @@ jobs:
       - name: Run offline refactoring regression tests
         shell: bash
         run: node --test tests/refactoring.test.cjs
+
+      - name: Validate PHP API syntax
+        shell: bash
+        run: php -l server/api.php
 
       - name: Verify server identity
         shell: bash
@@ -85,6 +90,38 @@ jobs:
           printf 'cd "%s"\npwd\nls -la\n' "$SFTP_DIR" > /tmp/check.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check.batch "$SFTP_USER@$SFTP_HOST"
 
+      # Die produktiven Cookie-/Foto-/iOS-Funktionen wurden mit dem vom
+      # Benutzer bereitgestellten Serverstand abgeglichen.
+      - name: Upload PHP API with rollback
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
+        env:
+          SFTP_HOST: ${{ vars.HETZNER_SFTP_HOST }}
+          SFTP_USER: ${{ vars.HETZNER_SFTP_USER }}
+          SFTP_DIR: ${{ vars.HETZNER_PWA_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$SFTP_HOST" = "www35.your-server.de"
+          test "$SFTP_DIR" = "public_html/phev-tracker"
+          test -s server/api.php
+          # Save the current production API privately on the runner before
+          # replacing it. No backup or config file is written into webroot.
+          printf 'cd "%s/api"\nget "api.php" "/tmp/phev-api-previous.php"\n' "$SFTP_DIR" > /tmp/check-api.batch
+          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check-api.batch "$SFTP_USER@$SFTP_HOST"
+          test -s /tmp/phev-api-previous.php
+          printf 'cd "%s/api"\nput "server/api.php" "api.php"\n' "$SFTP_DIR" > /tmp/upload-api.batch
+          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload-api.batch "$SFTP_USER@$SFTP_HOST"
+          # An unauthenticated request must receive 401. This also detects
+          # PHP fatal errors, missing config and unavailable database.
+          code="$(curl --silent --show-error --output /tmp/api-health.json --write-out '%{http_code}' 'https://tracker.web-produktion.com/api/api.php?action=session')"
+          if [ "$code" != "401" ]; then
+            echo "API health check failed (HTTP $code); restoring previous version."
+            printf 'cd "%s/api"\nput "/tmp/phev-api-previous.php" "api.php"\n' "$SFTP_DIR" > /tmp/restore-api.batch
+            sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/restore-api.batch "$SFTP_USER@$SFTP_HOST"
+            exit 1
+          fi
+          echo "PHP API deployed and unauthenticated health check passed."
+
       - name: Prepare local jsPDF asset
         if: ${{ github.event_name == 'push' || inputs.upload == true }}
         shell: bash
@@ -115,3 +152,4 @@ jobs:
             done
           } > /tmp/upload.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload.batch "$SFTP_USER@$SFTP_HOST"
+

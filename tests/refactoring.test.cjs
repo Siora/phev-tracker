@@ -42,12 +42,15 @@ test('Versionen im HTML und Offline-Cache sind identisch', () => {
   }
 });
 
-test('Deployment lädt alle Skripte hoch und berührt api/ nicht', () => {
+test('Deployment lädt PWA-Skripte hoch und behandelt die API separat', () => {
   const upload = workflow.match(/- name: Upload only PWA files[\s\S]*$/)?.[0] || '';
   assert.ok(upload, 'Upload-Schritt fehlt');
   for (const name of scripts) assert.ok(upload.includes(name), name + ' fehlt beim SFTP-Upload');
   assert.ok(!/\b(?:put|rm|rmdir|delete)\s+[^\n]*api\//i.test(upload), 'API-Verzeichnis darf nicht verändert werden');
   assert.ok(!upload.includes('rm -rf'), 'Kein rekursives Löschen');
+  assert.ok(workflow.includes('php -l server/api.php'), 'PHP-Syntaxprüfung erforderlich');
+  assert.ok(workflow.includes('phev-api-previous.php'), 'API-Rollback erforderlich');
+  assert.ok(!workflow.includes('put "server/config.php"'), 'Konfiguration darf nicht übertragen werden');
 });
 
 test('Fahrzeugkosten-Modul bleibt rein und rechnet unverändert', () => {
@@ -78,7 +81,9 @@ test('Cloud-Queue und bestätigte Speicherwege bleiben vorhanden', () => {
   const app = read('app.js');
   assert.ok(cloud.includes('syncCloudQueue'));
   assert.ok(cloud.includes('phev-queue-'));
-  assert.ok(cloud.includes('saveVehicleExpenses'));
+  assert.ok(cloud.includes('saveVehicleExpense'));
+  assert.ok(cloud.includes('deleteVehicleExpense'));
+  assert.ok(cloud.includes("cloudCall('vehicle-expenses')"));
   assert.ok(app.includes('window.collectCloudPreferences'));
   assert.ok(app.includes('window.applyCloudPreferences'));
   assert.ok(app.includes('window.paginateTable'));

@@ -15,7 +15,7 @@ function fail(int $code, string $message): never { respond($code, ['error'=>$mes
 if (!is_file(__DIR__.'/config.php')) fail(503, 'Serverkonfiguration fehlt');
 $config = require __DIR__.'/config.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin && $origin !== $config['allowed_origin']) fail(403, 'Origin nicht erlaubt');
+if ($origin && !in_array($origin, [$config['allowed_origin'], 'capacitor://localhost', 'https://tracker.web-produktion.com'], true)) fail(403, 'Origin nicht erlaubt');
 if ($origin) { header('Access-Control-Allow-Origin: '.$origin); header('Vary: Origin'); }
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -31,11 +31,29 @@ try {
 $action = $_GET['action'] ?? '';
 $body = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 2000000) fail(413, 'Anfrage zu gross');
- $body = json_decode(file_get_contents('php://input'), true);
- if (!is_array($body)) fail(400, 'Ungültiges JSON');
+ if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > (($_GET['action']??'')==='vehicle-photo-upload'?5500000:2000000)) fail(413, 'Anfrage zu gross');
+ if (($_GET['action'] ?? '') !== 'vehicle-photo-upload') {
+  $body = json_decode(file_get_contents('php://input'), true);
+  if (!is_array($body)) fail(400, 'Ungültiges JSON');
+ }
 }
 function email(string $value): string { return mb_strtolower(trim($value)); }
+// Serverkompatible Cookie-Sitzung mit CSRF-Schutz bei POST ohne Bearer-Token.
+const PHEV_SESSION_COOKIE = 'phev_session';
+function sessionCookie(string $token, int $expires): void {
+ setcookie(PHEV_SESSION_COOKIE,$token,['expires'=>$expires,'path'=>'/api/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
+}
+function cookieRequestOriginAllowed(): bool {
+ $expected='https://tracker.web-produktion.com';
+ $origin=$_SERVER['HTTP_ORIGIN']??'';
+ if ($origin!=='') return hash_equals($expected,$origin);
+ $referer=$_SERVER['HTTP_REFERER']??'';
+ if ($referer!=='') {
+  $parts=parse_url($referer);
+  return is_array($parts)&&($parts['scheme']??'')==='https'&&($parts['host']??'')==='tracker.web-produktion.com'&&!isset($parts['port']);
+ }
+ return false;
+}
 if ($action === 'login') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405, 'POST erforderlich');
  $mail = email((string)($body['email'] ?? ''));
@@ -48,15 +66,28 @@ if ($action === 'login') {
  $token=bin2hex(random_bytes(32));
  $stmt=$db->prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 7 DAY))');
  $stmt->execute([hash('sha256',$token),$uid]);
+ sessionCookie($token,time()+7*86400);
  respond(200,['token'=>$token,'email'=>$mail,'role'=>$user['role']]);
 }
 $auth=$_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
-if (!preg_match('/^Bearer ([a-f0-9]{64})$/D',$auth,$match)) fail(401,'Anmeldung erforderlich');
-$hash=hash('sha256',$match[1]);
+ $bearerToken=preg_match('/^Bearer ([a-f0-9]{64})$/D',$auth,$match)?$match[1]:null;
+$cookieToken=$_COOKIE[PHEV_SESSION_COOKIE]??null;
+$cookieToken=is_string($cookieToken)&&preg_match('/^[a-f0-9]{64}$/D',$cookieToken)?$cookieToken:null;
+$token=$bearerToken??$cookieToken;
+if ($token===null) fail(401,'Anmeldung erforderlich');
+if ($bearerToken===null && $_SERVER['REQUEST_METHOD']==='POST' && !cookieRequestOriginAllowed()) fail(403,'Ungültiger Anfragenursprung');
+$hash=hash('sha256',$token);
 $stmt=$db->prepare('SELECT user_id FROM sessions WHERE token_hash=? AND expires_at>UTC_TIMESTAMP()');
 $stmt->execute([$hash]); $uid=$stmt->fetchColumn();
 if (!$uid) fail(401,'Sitzung abgelaufen');
 $uid=(int)$uid;
+if ($action === 'session') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'GET') fail(405,'GET erforderlich');
+ $stmt=$db->prepare('SELECT email,role FROM users WHERE id=?');
+ $stmt->execute([$uid]);$account=$stmt->fetch();
+ if (!$account) fail(401,'Anmeldung erforderlich');
+ respond(200,['email'=>$account['email'],'role'=>$account['role']]);
+}
 if ($action === 'admin-create-user') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
@@ -81,7 +112,7 @@ if ($action === 'admin-users') {
 }
 if ($action === 'logout') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
- $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);respond(200,['ok'=>true]);
+ $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);sessionCookie('',time()-3600);respond(200,['ok'=>true]);
 }
 
 
@@ -121,6 +152,91 @@ if ($action === 'charging-catalog-delete' && $_SERVER['REQUEST_METHOD'] === 'POS
  respond(200,['ok'=>true]);
 }
 
+// Authenticated vehicle photos: files are never served from a public folder.
+if ($action === 'vehicle-photo-upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $vid=filter_var($_POST['vehicle_id']??null,FILTER_VALIDATE_INT);
+ if (!$vid || $vid<1) fail(400,'Ungültiges Fahrzeug');
+ $stmt=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');
+ $stmt->execute([$vid,$uid]);if (!$stmt->fetchColumn()) fail(404,'Fahrzeug nicht gefunden');
+ if (!isset($_FILES['photo']) || !is_array($_FILES['photo']) || $_FILES['photo']['error']!==UPLOAD_ERR_OK) fail(400,'Bild-Upload fehlgeschlagen');
+ $file=$_FILES['photo'];
+ if ($file['size']<1 || $file['size']>5000000 || !is_uploaded_file($file['tmp_name'])) fail(413,'Bild darf maximal 5 MB gross sein');
+ $type=(new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+ if (!in_array($type,['image/jpeg','image/png','image/webp'],true)) fail(415,'Nur JPEG, PNG und WebP erlaubt');
+ if (@getimagesize($file['tmp_name'])===false) fail(415,'Ungültiges Bild');
+ $dir=__DIR__.'/vehicle-images';
+ if (!is_dir($dir) && !mkdir($dir,0700,true)) fail(503,'Bildspeicher nicht verfügbar');
+ if (!is_file($dir.'/.htaccess')) file_put_contents($dir.'/.htaccess',"Require all denied\nDeny from all\n");
+ $extension=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$type];
+ $name=$uid.'-'.$vid.'-'.bin2hex(random_bytes(12)).'.'.$extension;
+ if (!move_uploaded_file($file['tmp_name'],$dir.'/'.$name)) fail(503,'Bild konnte nicht gespeichert werden');
+ @chmod($dir.'/'.$name,0600);
+ respond(200,['ok'=>true,'photo_url'=>'/api/api.php?action=vehicle-photo&vehicle_id='.$vid.'&image='.$name]);
+}
+if ($action === 'vehicle-photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $vid=filter_var($_GET['vehicle_id']??null,FILTER_VALIDATE_INT);
+ $name=$_GET['image']??'';
+ if (!$vid || $vid<1 || !is_string($name) || !preg_match('/^[0-9]+-[0-9]+-[a-f0-9]{24}\\.(jpg|png|webp)$/D',$name)) fail(404,'Bild nicht gefunden');
+ if (!str_starts_with($name,$uid.'-'.$vid.'-')) fail(404,'Bild nicht gefunden');
+ $stmt=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');
+ $stmt->execute([$vid,$uid]);if (!$stmt->fetchColumn()) fail(404,'Bild nicht gefunden');
+ $path=__DIR__.'/vehicle-images/'.$name;
+ if (!is_file($path)) fail(404,'Bild nicht gefunden');
+ header('Content-Type: '.(['jpg'=>'image/jpeg','png'=>'image/png','webp'=>'image/webp'][pathinfo($path,PATHINFO_EXTENSION)]));
+ header('Content-Length: '.filesize($path));
+ header('Cache-Control: private, max-age=3600');
+ readfile($path);exit;
+}
+/*
+ * Fahrzeugausgaben werden separat in vehicle_expenses gespeichert.
+ * Jede Abfrage ist auf den angemeldeten Benutzer begrenzt. Die Kombination
+ * (user_id, vehicle_id) wird beim Speichern explizit geprüft und zusätzlich
+ * durch den zusammengesetzten SQL-Fremdschlüssel abgesichert.
+ */
+if ($action === 'vehicle-expenses' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $stmt=$db->prepare('SELECT id,vehicle_id,category,expense_date AS date,amount,currency,note,mileage_km,next_service_date FROM vehicle_expenses WHERE user_id=? ORDER BY expense_date DESC,id');
+ $stmt->execute([$uid]);
+ respond(200,['expenses'=>$stmt->fetchAll()]);
+}
+if ($action === 'vehicle-expense-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $e=$body['expense']??null;
+ if (!is_array($e)) fail(400,'Ausgabe fehlt');
+ $id=$e['id']??null;
+ $vid=filter_var($e['vehicle_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ $category=trim((string)($e['category']??''));
+ $date=$e['date']??null;
+ $amount=$e['amount']??null;
+ $currency=$e['currency']??null;
+ $note=trim((string)($e['note']??''));
+ $mileage=$e['mileage_km']??null;
+ $next=$e['next_service_date']??null;
+ if (!is_string($id)||!preg_match('/^[a-zA-Z0-9-]{1,64}$/D',$id)||
+     !$vid||!in_array($category,['Versicherung','Verkehrssteuer','Service','Reifen','Reparatur','Parken','Sonstiges'],true)||
+     !is_string($date)||!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$date)||
+     !($parsed=DateTimeImmutable::createFromFormat('!Y-m-d',$date))||$parsed->format('Y-m-d')!==$date||
+     !is_numeric($amount)||(float)$amount<=0||(float)$amount>9999999999.99||
+     !in_array($currency,['CHF','EUR'],true)||mb_strlen($note)>160||
+     ($mileage!==null&&(!is_numeric($mileage)||(float)$mileage<0||(float)$mileage>99999999999.9))||
+     ($next!==null&&(!is_string($next)||!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$next)||
+       !($parsedNext=DateTimeImmutable::createFromFormat('!Y-m-d',$next))||$parsedNext->format('Y-m-d')!==$next)))
+   fail(400,'Ungültige Ausgabendaten');
+ $owner=$db->prepare('SELECT id FROM vehicles WHERE user_id=? AND id=?');
+ $owner->execute([$uid,$vid]);
+ if (!$owner->fetchColumn()) fail(404,'Fahrzeug nicht gefunden');
+ // Keine Übernahme einer fremden ID: der PRIMARY KEY enthält user_id.
+ $stmt=$db->prepare('INSERT INTO vehicle_expenses(user_id,id,vehicle_id,category,expense_date,amount,currency,note,mileage_km,next_service_date) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE vehicle_id=VALUES(vehicle_id),category=VALUES(category),expense_date=VALUES(expense_date),amount=VALUES(amount),currency=VALUES(currency),note=VALUES(note),mileage_km=VALUES(mileage_km),next_service_date=VALUES(next_service_date)');
+ $stmt->execute([$uid,$id,$vid,$category,$date,$amount,$currency,$note,$mileage,$next]);
+ respond(200,['ok'=>true,'id'=>$id]);
+}
+if ($action === 'vehicle-expense-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $id=$body['id']??null;
+ if (!is_string($id)||!preg_match('/^[a-zA-Z0-9-]{1,64}$/D',$id)) fail(400,'Ungültige Ausgaben-ID');
+ $stmt=$db->prepare('DELETE FROM vehicle_expenses WHERE user_id=? AND id=?');
+ $stmt->execute([$uid,$id]);
+ if (!$stmt->rowCount()) fail(404,'Ausgabe nicht gefunden');
+ respond(200,['ok'=>true]);
+}
+
 if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
  $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
@@ -152,6 +268,8 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $vid=(int)($body['id']??0);if ($vid<=0) fail(400,'Fahrzeug fehlt');
  $stmt=$db->prepare('SELECT COUNT(*) FROM records WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
  if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Einträge. Bitte zuerst die Einträge zuordnen oder das Fahrzeug behalten.');
+ $stmt=$db->prepare('SELECT COUNT(*) FROM vehicle_expenses WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
+ if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Wartungs- oder Kostenbuchungen. Bitte zuerst diese Einträge entfernen oder das Fahrzeug behalten.');
  $stmt=$db->prepare('DELETE FROM vehicles WHERE user_id=? AND id=?');$stmt->execute([$uid,$vid]);
  respond(200,['ok'=>true]);
 }

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'server/api.php'
       - '*.js'
       - 'tests/**'
       - '.github/workflows/test-frontend.yml'
@@ -28,5 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: PHP-API-Syntax prüfen
+        run: php -l server/api.php
       - name: Offline-Regressionstests ausführen
         run: node --test tests/smoke.test.cjs tests/refactoring.test.cjs tests/pagination-dom.test.cjs tests/dashboard-contract.test.cjs tests/consumption-dom.test.cjs tests/charts-dom.test.cjs tests/cloud-queue.test.cjs tests/dashboard-dom.test.cjs tests/cloud-overview.test.cjs tests/dashboard-stat-tiles.test.cjs tests/month-comparison-dom.test.cjs tests/timeline-dom.test.cjs tests/fleet-overview-dom.test.cjs tests/vehicle-summary-dom.test.cjs tests/stat-tiles-dom.test.cjs tests/chart-dispatch.test.cjs tests/provider-filter-dom.test.cjs tests/entry-history-dom.test.cjs tests/entry-edit-action.test.cjs tests/entry-delete-action.test.cjs tests/managed-row-actions.test.cjs tests/vehicle-select-options.test.cjs
