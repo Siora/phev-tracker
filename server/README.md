@@ -39,4 +39,6 @@ Vor einer breiteren öffentlichen Nutzung Rate-Limiting, Wiederherstellung von K
 
 ## Version 3.0: Hetzner SMTP-Versand
 
-Konfigurationsvorlage: `reset_mail_from=noreply@web-produktion.com`, `smtp_host=mail.web-produktion.com`, `smtp_username=noreply@web-produktion.com`, `smtp_port=587` mit **STARTTLS**. Port und TLS-Unterstützung beim Provider verifizieren. Das echte `smtp_password` nur in der nicht versionierten produktiven `server/config.php` eintragen (Dateirechte einschränken). Der API-Server versendet Passwort-Reset-Mails über authentifiziertes SMTP, nicht mehr über PHP `mail()`. Vor Aktivierung mit einem Testkonto und gültigem Zertifikat testen; Migration `server/migration-v3-password-resets.sql` nicht vergessen.
+Konfigurationsvorlage: `reset_mail_from=noreply@web-produktion.com`, `smtp_host=mail.your-server.de`, `smtp_username=noreply@web-produktion.com`, `smtp_port=587` mit **STARTTLS**. Port und TLS-Unterstützung beim Provider verifizieren. Das echte `smtp_password` nur in der nicht versionierten produktiven `server/config.php` eintragen (Dateirechte einschränken). Der API-Server versendet Passwort-Reset-Mails über authentifiziertes SMTP, nicht mehr über PHP `mail()`. Vor Aktivierung mit einem Testkonto und gültigem Zertifikat testen; Migration `server/migration-v3-password-resets.sql` nicht vergessen.
+
+Der für dieses Hetzner-Postfach bestätigte SMTP-Host ist `mail.your-server.de`. Der Hostname muss mit dem TLS-Zertifikat übereinstimmen; Zertifikatsprüfung niemals deaktivieren.
