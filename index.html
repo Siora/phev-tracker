@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=94">
+<link rel="stylesheet" href="styles.css?v=200">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -30,12 +30,12 @@
 <button onclick="tab('csv')">↥ Import / Export</button>
 <button onclick="tab('vehicles')">🚘 Fahrzeuge</button><button onclick="tab('charging-management')">⚡ Ladeorte & Anbieter</button>
 <button onclick="tab('options')">⚙ Optionen & Backup</button>
-<button onclick="document.querySelectorAll('main section[id]').forEach(s=>s.classList.toggle('hide',s.id!=='cloud'));document.querySelectorAll('.sidebar nav button').forEach(b=>b.classList.toggle('active',b.textContent.trim()==='Konto'))">Konto</button>
+<button onclick="tab('cloud')">Konto</button>
 </nav>
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 94</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.0</small>
 </div>
 </aside>
 <main class="main">
@@ -262,16 +262,16 @@
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
-<script src="jspdf.umd.min.js?v=94" defer></script>
+<script src="jspdf.umd.min.js?v=200" defer></script>
 <script src="charts.js" defer></script>
-<script src="pagination.js?v=94" defer></script>
-<script src="pdf-report.js?v=94" defer></script>
-<script src="csv-import-utils.js?v=94" defer></script>
-<script src="auto-backup.js?v=94" defer></script>
-<script src="vehicle-costs.js?v=94" defer></script>
-<script src="cloud.js?v=94" defer></script>
-<script src="intelligent-analytics.js?v=94" defer></script>
-<script src="app.js?v=94" defer>
+<script src="pagination.js?v=200" defer></script>
+<script src="pdf-report.js?v=200" defer></script>
+<script src="csv-import-utils.js?v=200" defer></script>
+<script src="auto-backup.js?v=200" defer></script>
+<script src="vehicle-costs.js?v=200" defer></script>
+<script src="cloud.js?v=200" defer></script>
+<script src="intelligent-analytics.js?v=200" defer></script>
+<script src="app.js?v=200" defer>
 </script>
 </main>
 </div>
