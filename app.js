@@ -222,6 +222,26 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * gespeicherten Einträgen des Fahrzeugs ermittelt, während Anzahl, Kosten und
  * Mengen den aktuell gefilterten Zeitraum abbilden. Keine Datenmutation.
  */
+/**
+ * Aktualisiert die Orts-/Tankstellen-Auswahl für das Dashboard.
+ *
+ * Verwendet weiterhin alle gespeicherten Einträge als Optionsquelle,
+ * behält eine gültige Auswahl bei und setzt eine veraltete Auswahl zurück.
+ * Die zurückgegebene Select-Referenz wird anschließend für den Datensatzfilter
+ * verwendet. Keine Änderung an den Einträgen oder an der Cloud.
+ */
+function renderDashboardProviderFilter(){
+  const provider=$('provider');
+  const current=provider.value;
+  const providers=[...new Set(records.map(x=>x.place||'Unbekannt'))].sort();
+  provider.replaceChildren(
+    new Option('Alle Orte / Tankstellen',''),
+    ...providers.map(x=>new Option(x,x))
+  );
+  provider.value=providers.includes(current)?current:'';
+  return provider;
+}
+
 function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost){
   const summary=$('vehicle-summary');summary.replaceChildren();
   if(selectedVehicle&&selectedVehicle!=='none'){
@@ -352,9 +372,7 @@ function render(){
   const now=new Date(),period=$('period').value;
   let y=now.getFullYear(),m=now.getMonth();
   $('customdates').classList.toggle('hide',period!=='custom');
-  let provider=$('provider'),current=provider.value,providers=[...new Set(records.map(x=>x.place||'Unbekannt'))].sort();
-  provider.replaceChildren(new Option('Alle Orte / Tankstellen',''),...providers.map(x=>new Option(x,x)));
-  provider.value=providers.includes(current)?current:'';
+  const provider=renderDashboardProviderFilter();
   let months=Number(period)||1;
   let chosenYear=Number($('chosenYear').value||y),chosenMonth=Number($('chosenMonth').value||m);
   let from,to;
