@@ -109,6 +109,26 @@ if ($action === 'account-change-password') {
  sessionCookie('',time()-3600);
  respond(200,['ok'=>true,'reauthenticate'=>true]);
 }
+// 3.0: Konto nach Passwortprüfung löschen; letzten Administrator schützen.
+if ($action === 'account-delete') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ if (($body['confirmation']??'')!=='KONTO LÖSCHEN') fail(400,'Sicherheitsbestätigung fehlt');
+ $password=(string)($body['password']??'');
+ $db->beginTransaction();
+ try {
+  $stmt=$db->prepare('SELECT password_hash,role FROM users WHERE id=? FOR UPDATE');
+  $stmt->execute([$uid]);$account=$stmt->fetch();
+  if (!$account || !password_verify($password,$account['password_hash'])) { $db->rollBack();usleep(250000);fail(401,'Passwort ist falsch'); }
+  if ($account['role']==='admin') {
+   $stmt=$db->query("SELECT id FROM users WHERE role='admin' FOR UPDATE");
+   if (count($stmt->fetchAll())<=1) { $db->rollBack();fail(409,'Der letzte Administrator kann sein Konto nicht löschen'); }
+  }
+  $stmt=$db->prepare('DELETE FROM users WHERE id=?');$stmt->execute([$uid]);
+  $db->commit();
+ } catch (Throwable $e) {if($db->inTransaction())$db->rollBack();error_log((string)$e);fail(500,'Konto konnte nicht gelöscht werden');}
+ sessionCookie('',time()-3600);
+ respond(200,['ok'=>true]);
+}
 if ($action === 'admin-create-user') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
