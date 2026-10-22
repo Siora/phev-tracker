@@ -63,6 +63,7 @@ function harness(queue = [], options = {}) {
     },
     async cloudCall(action) {
       events.push('api:' + action);
+      if (action === 'vehicle-expenses') return {expenses:[]};
       assert.equal(action, 'data');
       if (dataGate) await dataGate.promise;
       return response;
@@ -75,7 +76,8 @@ function harness(queue = [], options = {}) {
     },
     window: {
       showCloudRecords(records) {events.push('records:' + records.map(r => r.id).join(','));},
-      applyCloudPreferences(preferences) {events.push('preferences:' + preferences.base);}
+      applyCloudPreferences(preferences) {events.push('preferences:' + preferences.base);},
+      setVehicleExpenses(expenses) {events.push('expenses:' + expenses.length);}
     },
     JSON, Map
   };
@@ -95,7 +97,7 @@ test('Fahrzeuge, Einträge, Queue, Katalog und Einstellungen folgen definierter 
   const events = view.events.filter(e => e !== 'indicator');
   assert.deepEqual(events, [
     'vehicles:start','vehicles:end','api:data','records:remote-1',
-    'queue:sync','catalog:start','catalog:end','preferences:CHF'
+    'queue:sync','catalog:start','catalog:end','api:vehicle-expenses','expenses:0','preferences:CHF'
   ]);
   assert.equal(view.elements.get('cloud-count').textContent, 'Cloud-Einträge: 1.');
   assert.equal(view.sandbox.cloudPreferencesReady, true);
