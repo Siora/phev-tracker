@@ -69,7 +69,10 @@ function harness() {
   };
   const run = filtered => {
     sandbox.filtered = filtered;
-    // Jeder Renderdurchlauf erhält seinen eigenen lexikalischen Funktionsscope.\n    // Dadurch können die const-Deklarationen aus render() erneut laufen,\n    // genau wie bei wiederholten Funktionsaufrufen im Browser.\n    vm.runInNewContext('(() => {\\n' + source + '\\n})()', sandbox, {filename:'app.js:dashboard-section'});
+    // Jeder Renderdurchlauf erhält seinen eigenen lexikalischen Funktionsscope.
+    // Dadurch können die const-Deklarationen aus render() erneut laufen,
+    // genau wie bei wiederholten Funktionsaufrufen im Browser.
+    vm.runInNewContext('(() => {\\n' + source + '\\n})()', sandbox, {filename:'app.js:dashboard-section'});
   };
   return {
     run,
