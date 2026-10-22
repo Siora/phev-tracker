@@ -10,7 +10,7 @@ on:
       - '.github/workflows/test-frontend.yml'
       - '.github/workflows/deploy-pwa-hetzner.yml'
   pull_request:
-    branches: [main]
+    branches: [main, audit/v88-initialization-dependencies]
   workflow_dispatch:
 
 permissions:
