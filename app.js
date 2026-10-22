@@ -479,7 +479,7 @@ function settingsSave(){
 
 /* Operating costs are stored per account in existing cloud preferences, without database migrations. */
 let vehicleExpenses=[];
-function expenseCurrency(amount,currency){return currency===settings.base?amount:settings.base==='CHF'?amount*settings.rate:amount/settings.rate;}
+function expenseCurrency(amount,currency){return window.PhevTco.convert(amount,currency,settings);}
 function applyVehicleExpenses(value){if(!Array.isArray(value))return;vehicleExpenses=value.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);renderVehicleExpenses();}
 window.setVehicleExpenses=applyVehicleExpenses;
 /**
@@ -495,12 +495,10 @@ function renderVehicleExpenses(){
  else if(vehicles.length===1)select.value=String(vehicles[0].id);
  list.replaceChildren();summary.replaceChildren();
  const selected=select.value;
- const expenses=vehicleExpenses.filter(x=>!selected||String(x.vehicle_id)===selected).slice().sort((a,b)=>b.date.localeCompare(a.date));
- const extra=expenses.reduce((sum,x)=>sum+expenseCurrency(Number(x.amount),x.currency),0);
- const matching=records.filter(x=>!selected||String(x.vehicle_id)===selected);
- const running=matching.reduce((sum,x)=>sum+conv(x),0);
- const distances=matching.map(x=>Number(x.km)).filter(x=>Number.isFinite(x)&&x>0);
- const distance=distances.length>1?Math.max(...distances)-Math.min(...distances):0;
+ // Nur die reine Berechnung wurde ausgelagert; DOM und Cloud-Speicherung bleiben hier.
+ const {expenses,extra,running,distance}=window.PhevTco.summarize(
+  vehicleExpenses,records,selected,settings,conv
+ );
  const caption=document.createElement('p');caption.className='expense-total';caption.textContent='Gesamtkosten aller erfassten Zeiträume: '+fmt(extra+running,settings.base);
  const detail=document.createElement('small');detail.textContent='Strom & Benzin: '+fmt(running,settings.base)+' · Weitere Ausgaben: '+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+' / km (Näherung)':' · Für Kosten/km fehlen Kilometerstände.');
  summary.append(caption,detail);
