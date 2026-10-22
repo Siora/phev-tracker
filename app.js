@@ -118,7 +118,7 @@ function replaceVehicleOptions(select,placeholder,previous,autoSelectSingle){
     new Option(placeholder,''),
     ...vehicles.map(v=>new Option(vehicleName(v),String(v.id)))
   );
-  const valid=[...select.options].some(option=>option.value===previous);
+  const valid=(!autoSelectSingle||previous!=='')&&[...select.options].some(option=>option.value===previous);
   select.value=valid?previous:(autoSelectSingle&&vehicles.length===1?String(vehicles[0].id):'');
 }
 
