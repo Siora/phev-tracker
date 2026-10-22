@@ -20,16 +20,16 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './styles.css?v=88',
-  './app.js?v=88',
+  './styles.css?v=89',
+  './app.js?v=89',
   './charts.js',
-  './pagination.js?v=88',
-  './pdf-report.js?v=88',
-  './csv-import-utils.js?v=88',
-  './auto-backup.js?v=88',
-  './vehicle-costs.js?v=88',
-  './cloud.js?v=88',
-  './jspdf.umd.min.js?v=88'
+  './pagination.js?v=89',
+  './pdf-report.js?v=89',
+  './csv-import-utils.js?v=89',
+  './auto-backup.js?v=89',
+  './vehicle-costs.js?v=89',
+  './cloud.js?v=89',
+  './jspdf.umd.min.js?v=89'
 ];
 
 self.addEventListener('install', event => {
