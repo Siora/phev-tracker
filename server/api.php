@@ -88,6 +88,27 @@ if ($action === 'session') {
  if (!$account) fail(401,'Anmeldung erforderlich');
  respond(200,['email'=>$account['email'],'role'=>$account['role']]);
 }
+// 3.0: Passwortwechsel nur nach Prüfung des bisherigen Passworts.
+// Nach Erfolg werden alle Sitzungen widerrufen; die Anmeldung ist erneut nötig.
+if ($action === 'account-change-password') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ $old=(string)($body['current_password']??'');
+ $new=(string)($body['new_password']??'');
+ if (strlen($new)<12 || strlen($new)>1024) fail(400,'Neues Passwort muss 12 bis 1024 Zeichen enthalten');
+ if (hash_equals($old,$new)) fail(400,'Das neue Passwort muss sich vom bisherigen unterscheiden');
+ $stmt=$db->prepare('SELECT password_hash FROM users WHERE id=?');
+ $stmt->execute([$uid]);$existing=$stmt->fetchColumn();
+ if (!$existing || !password_verify($old,(string)$existing)) {usleep(250000);fail(401,'Aktuelles Passwort ist falsch');}
+ $db->beginTransaction();
+ try {
+  $stmt=$db->prepare('UPDATE users SET password_hash=? WHERE id=?');
+  $stmt->execute([password_hash($new,PASSWORD_DEFAULT),$uid]);
+  $stmt=$db->prepare('DELETE FROM sessions WHERE user_id=?');$stmt->execute([$uid]);
+  $db->commit();
+ } catch (Throwable $e) { $db->rollBack();error_log((string)$e);fail(500,'Passwort konnte nicht geändert werden'); }
+ sessionCookie('',time()-3600);
+ respond(200,['ok'=>true,'reauthenticate'=>true]);
+}
 if ($action === 'admin-create-user') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);

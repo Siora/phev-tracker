@@ -213,6 +213,26 @@ ce('cloud-login').onsubmit=async event=>{
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
+// 3.0: Passwortwechsel. Der Server widerruft nach Erfolg sämtliche Sitzungen.
+ce('cloud-change-password').onsubmit=async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+ const current=form.elements.current_password.value;
+ const next=form.elements.new_password.value;
+ if(next!==form.elements.confirm_password.value){cs('Neue Passwörter stimmen nicht überein.');return;}
+ if(next===current){cs('Bitte ein anderes neues Passwort wählen.');return;}
+ button.disabled=true;
+ try{
+  await cloudCall('account-change-password',{current_password:current,new_password:next});
+  form.reset();cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';
+  localStorage.removeItem(sessionKey);updateSyncIndicator();
+  document.body.classList.add('login-locked');
+  ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');
+  ce('cloud-count').textContent='';window.showLocalRecords();
+  cs('Passwort geändert. Alle Sitzungen wurden beendet. Bitte erneut anmelden.');
+ }catch(error){cs(error.message);}
+ finally{button.disabled=false;}
+};
 ce('cloud-create').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button');
