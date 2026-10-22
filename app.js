@@ -162,7 +162,7 @@ function renderIntelligence(){
  const result=window.PhevIntelligence.analyze(records,vehicleExpenses,vehicleSelect.value,Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency));
  const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
  summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
- const money=v=>Number(v).toFixed(2)+' '+settings.base;
+ const money=v=>new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
  for(const [label,value] of [['Gesamtkosten',money(result.total)],['Stromkosten',money(result.energyCost)],['Benzinkosten',money(result.fuelCost)],['Weitere Ausgaben',money(result.otherCost)],['Geladene Energie',result.kwh.toFixed(1)+' kWh'],['Benzinmenge',result.liters.toFixed(1)+' l']]){
   const card=document.createElement('article');card.className='quick-card';
   const title=document.createElement('strong');title.textContent=label;
@@ -176,12 +176,16 @@ function renderIntelligence(){
   const fill=document.createElement('div');fill.className='intelligence-fill';
   fill.style.height=(month.total/max*100)+'%';
   track.title=month.month+': '+money(month.total);
+  track.setAttribute('aria-label',track.title);
   const label=document.createElement('small');label.textContent=month.month;
   bar.append(track,label);track.append(fill);chart.append(bar);
   const tr=document.createElement('tr');
-  for(const value of [month.month,money(month.charge),money(month.fuel),money(month.extra),money(month.total)]){
-   const td=document.createElement('td');td.textContent=value;tr.append(td);
+  for(const [index,value] of [month.month,money(month.charge),money(month.fuel),money(month.extra),money(month.total)].entries()){
+   const td=document.createElement(index===0?'th':'td');
+   if(index===0)td.scope='row';
+   td.textContent=value;tr.append(td);
   }
+  if(month.total>0)tr.classList.add('intelligence-month-active');
   body.append(tr);
  }
  for(const insight of result.messages){
