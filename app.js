@@ -87,16 +87,41 @@ async function updateVehiclePhoto(vehicle){
 }
 
 // Aktualisiert sämtliche Fahrzeug-Auswahllisten nach Anmeldung oder Änderungen.
+/**
+ * Aktualisiert alle Fahrzeug-Auswahllisten, ohne eine noch gültige Auswahl
+ * zurückzusetzen. Das Einzelfahrzeug wird im Eingabeformular und in
+ * Schnellformularen automatisch ausgewählt, falls nur eines vorhanden ist.
+ * Die Aktualisierung des Sammelformularzählers bleibt der letzte Schritt.
+ */
 function refreshVehicles(){
- const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
- filter.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
- const reportVehicle=$('report-vehicle');if(reportVehicle){const prev=reportVehicle.value;reportVehicle.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));reportVehicle.value=[...reportVehicle.options].some(o=>o.value===prev)?prev:'';}
- entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
- document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{const prev=sel.value;sel.replaceChildren(new Option('Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));sel.value=vehicles.some(v=>String(v.id)===prev)?prev:(vehicles.length===1?String(vehicles[0].id):'');});
- updateBulkCount();
+  const filter=$('vehicleFilter');
+  const selected=filter.value;
+  const entry=$('entryVehicle');
+  const chosen=entry.value;
+  replaceVehicleOptions(filter,'Alle Fahrzeuge',selected,false);
+  const reportVehicle=$('report-vehicle');
+  if(reportVehicle)replaceVehicleOptions(reportVehicle,'Alle Fahrzeuge',reportVehicle.value,false);
+  replaceVehicleOptions(entry,'Bitte Fahrzeug auswählen',chosen,true);
+  document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{
+    replaceVehicleOptions(sel,'Fahrzeug auswählen',sel.value,true);
+  });
+  updateBulkCount();
 }
+
+/**
+ * Schreibt Fahrzeugoptionen in eine Select-Liste.
+ * Die bisherige Auswahl hat Vorrang; nur Eingabeformulare wählen bei genau
+ * einem Fahrzeug automatisch dessen ID. Dashboard/Report bleiben auf „Alle“.
+ */
+function replaceVehicleOptions(select,placeholder,previous,autoSelectSingle){
+  select.replaceChildren(
+    new Option(placeholder,''),
+    ...vehicles.map(v=>new Option(vehicleName(v),String(v.id)))
+  );
+  const valid=(!autoSelectSingle||previous!=='')&&[...select.options].some(option=>option.value===previous);
+  select.value=valid?previous:(autoSelectSingle&&vehicles.length===1?String(vehicles[0].id):'');
+}
+
 function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+' Einträge ohne Fahrzeugzuordnung.';}
 // Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
@@ -176,6 +201,281 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  if(liters>0)add('Erfasste Benzinmenge',liters.toFixed(1)+' Liter','Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.');
 }
 
+/**
+ * Baut ausschließlich die zehn Kennzahlen-Kacheln für das Dashboard.
+ *
+ * Eingabe: bereits gefilterte Lade-/Tankvorgänge, aggregierte Kosten,
+ * Kilometerstandsspanne und formatierte Durchschnittspreise.
+ * Ausgabe: neues Array aus [Beschriftung, Anzeigewert] ohne DOM-Zugriff,
+ * Storage-Schreibzugriff oder Veränderung der übergebenen Einträge.
+ *
+ * Die Reihenfolge und Formeln entsprechen exakt der bisherigen v88-Logik.
+ * Eine Auslagerung der Verbrauchsdiagramme ist ausdrücklich nicht enthalten.
+ */
+/**
+ * Rendert die drei kostenstärksten Monate des aktuell gefilterten Zeitraums.
+ *
+ * Der Helfer greift ausschließlich auf die bereits gefilterten Einträge zu;
+ * der globale Filterzustand, die Datensätze und die Cloud bleiben unverändert.
+ * Die Monatsaggregation, Sortierung (neuester Monat zuerst), Skalierung und
+ * Leermeldung entsprechen der bisherigen v88-Implementierung.
+ */
+/**
+ * Zeichnet die letzten acht Lade- und Tankvorgänge im Dashboard.
+ *
+ * Erwartet die bereits nach Zeitraum, Fahrzeug und Ort gefilterten Einträge.
+ * Sortierung, Anzeigeformat, Ladeart, Fahrzeugname und Leermeldung entsprechen
+ * der v88-Ansicht. Die übergebene Liste wird nicht sortiert oder verändert.
+ *
+ * Keine Cloud-Zugriffe und keine Änderungen an der Fahrzeugübersicht.
+ */
+/**
+ * Rendert die Fahrzeugübersicht im Dashboard unabhängig vom Zeitraumfilter.
+ *
+ * Verwendet wie in v88 alle Fahrzeuge und alle Einträge zur Zählung.
+ * Die Schaltflächen setzen den Fahrzeugfilter, rendern das Dashboard erneut
+ * und scrollen an den Seitenanfang. Es werden keine Daten verändert.
+ *
+ * Wichtig: Diese Funktion ist nicht an den Timeline- oder Monatsvergleich-
+ * Container gekoppelt, damit die Fahrzeugübersicht stets sichtbar bleibt.
+ */
+/**
+ * Rendert die Detailzusammenfassung des explizit ausgewählten Fahrzeugs.
+ *
+ * Die Übersicht bleibt bei "Alle Fahrzeuge" und "Ohne Fahrzeugzuordnung"
+ * wie bisher leer. Der höchste Kilometerstand wird bewusst aus allen
+ * gespeicherten Einträgen des Fahrzeugs ermittelt, während Anzahl, Kosten und
+ * Mengen den aktuell gefilterten Zeitraum abbilden. Keine Datenmutation.
+ */
+/**
+ * Aktualisiert die Orts-/Tankstellen-Auswahl für das Dashboard.
+ *
+ * Verwendet weiterhin alle gespeicherten Einträge als Optionsquelle,
+ * behält eine gültige Auswahl bei und setzt eine veraltete Auswahl zurück.
+ * Die zurückgegebene Select-Referenz wird anschließend für den Datensatzfilter
+ * verwendet. Keine Änderung an den Einträgen oder an der Cloud.
+ */
+/**
+ * Baut die vollständige Eintragshistorie unabhängig von Dashboard-Filtern auf.
+ *
+ * Behält die v88-Sortierung, die sieben Spalten, Bearbeiten-/Löschen-Aktionen
+ * und die Seitengröße von 20 Einträgen bei. Keine Cloud-Aktion beim Rendern.
+ * Änderungen an Datensätzen erfolgen ausschließlich über die vorhandenen
+ * Benutzeraktionen und ihre bestehenden Speicher-/Bestätigungswege.
+ */
+/**
+ * Überträgt einen vorhandenen Lade- oder Tankvorgang ins Bearbeitungsformular.
+ *
+ * Die Reihenfolge ist bewusst identisch mit v88: erst Art/Ortsanzeige,
+ * anschließend Werte, Preisberechnung, Zusatzangaben und Formularnavigation.
+ * Es wird hier weder gespeichert noch ein Cloud-Aufruf ausgeführt.
+ */
+/**
+ * Löscht einen Eintrag ausschließlich nach Bestätigung des Benutzers.
+ *
+ * Entspricht dem bisherigen v88-Verhalten: Abbruch verändert keine Daten;
+ * Bestätigung entfernt alle Einträge mit der angegebenen ID und ruft genau
+ * einmal den bestehenden Speicherweg auf. Kein direktes Cloud-API.
+ */
+function deleteEntryWithConfirmation(id){
+  if(confirm('Eintrag löschen?')){
+    records=records.filter(r=>r.id!==id);
+    save();
+  }
+}
+
+function beginEntryEdit(x){
+  const f=$('form');
+  f.elements.type.value=x.type;
+  updateEntryPlaceVisibility();
+  f.elements.date.value=x.date;
+  f.elements.time.value=recordTime(x.id);
+  f.elements.amount.value=x.amount;
+  f.elements.cost.value=x.cost;
+  setUnitPriceFromTotal(f);
+  f.elements.currency.value=x.currency;
+  f.elements.km.value=x.km||'';
+  f.elements.place.value=x.place||'';
+  f.elements.managed_location.value='';
+  f.elements.managed_provider.value='';
+  f.elements.charge_kind.value=getChargingType(x.id);
+  f.elements.charge_mode.value=getChargeMode(x.id);
+  f.elements.vehicle_id.value=x.vehicle_id||'';
+  f.dataset.editId=x.id;
+  f.querySelector('button').textContent='Änderungen speichern';
+  tab('add');
+}
+
+function renderEntryHistory(){
+  // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
+  const entries=$('entries');
+  entries.replaceChildren();
+  const table=document.createElement('table');
+  table.className='entry-history-table';
+  const head=document.createElement('thead'),heading=document.createElement('tr');
+  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
+  const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
+  }
+  head.append(heading);table.append(head);
+  const tbody=document.createElement('tbody');
+  const ordered=records.slice().sort(compareRecordDateTime);
+  if(!ordered.length){
+  const tr=document.createElement('tr'),td=document.createElement('td');
+  td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
+  }
+  const makeEntryRow=x=>{
+  const tr=document.createElement('tr');
+  const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
+  const values=[
+  recordDateTime(x),
+  x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
+  vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
+  String(x.amount)+(x.type==='charge'?' kWh':' l'),
+  fmt(x.cost,x.currency),
+  x.place||'–'
+  ];
+  for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
+  const actions=document.createElement('td');actions.className='entry-table-actions';
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+  edit.onclick=()=>beginEntryEdit(x);
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
+  remove.onclick=()=>deleteEntryWithConfirmation(x.id);
+  actions.append(edit,remove);tr.append(actions);return tr;
+  };
+  table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
+}
+
+function renderDashboardProviderFilter(){
+  const provider=$('provider');
+  const current=provider.value;
+  const providers=[...new Set(records.map(x=>x.place||'Unbekannt'))].sort();
+  provider.replaceChildren(
+    new Option('Alle Orte / Tankstellen',''),
+    ...providers.map(x=>new Option(x,x))
+  );
+  provider.value=providers.includes(current)?current:'';
+  return provider;
+}
+
+function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost){
+  const summary=$('vehicle-summary');summary.replaceChildren();
+  if(selectedVehicle&&selectedVehicle!=='none'){
+  const v=vehicles.find(v=>String(v.id)===selectedVehicle);
+  if(v){
+  const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
+  const mileage=records.filter(r=>String(r.vehicle_id)===selectedVehicle&&Number(r.km)>0).map(r=>Number(r.km));
+  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+r.amount,0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+r.amount,0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString('de-CH')+' km':'–')+'.';
+  summary.append(details,latest);
+  }
+  }
+}
+
+function renderDashboardFleetOverview(){
+  const fleet=$('fleet-overview');
+  fleet.replaceChildren();
+  vehicles.forEach(v=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='fleet-row';
+    const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;
+    btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';
+    btn.onclick=()=>{
+      $('vehicleFilter').value=String(v.id);
+      render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    fleet.append(btn);
+  });
+  if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
+}
+
+function renderDashboardTimeline(filtered){
+  const recent=$('recent-entries');recent.replaceChildren();
+  filtered.slice().sort(compareRecordDateTime).slice(0,8).forEach(r=>{
+    const isCharge=r.type==='charge';
+    const item=document.createElement('article');item.className='timeline-event '+(isCharge?'timeline-charge':'timeline-fuel');
+    const marker=document.createElement('span');marker.className='timeline-marker';marker.textContent=isCharge?'⚡':'⛽';marker.setAttribute('aria-hidden','true');
+    const content=document.createElement('div');content.className='timeline-content';
+    const head=document.createElement('div');head.className='timeline-head';
+    const title=document.createElement('strong');title.textContent=isCharge?'Ladung':'Tankung';
+    const date=document.createElement('time');date.textContent=recordDateTime(r).replace(' ',' · ');
+    head.append(title,date);
+    const details=document.createElement('div');details.className='timeline-details';
+    const amount=Number(r.amount)||0;
+    details.textContent=amount.toLocaleString('de-CH',{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
+    const notes=document.createElement('small');notes.className='timeline-notes';
+    const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
+    notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');
+    content.append(head,details);if(notes.textContent)content.append(notes);
+    item.append(marker,content);recent.append(item);
+    });
+  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
+}
+
+function renderMonthComparison(filtered){
+  const compare=$('month-compare');
+  compare.replaceChildren();
+  const monthsMap=new Map();
+  filtered.forEach(r=>{
+    const month=r.date.slice(0,7);
+    monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));
+  });
+  const maxMonth=Math.max(1,...monthsMap.values());
+  [...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{
+    const line=document.createElement('div');line.className='compare-row';
+    const label=document.createElement('span');label.textContent=month;
+    const track=document.createElement('div');track.className='compare-track';
+    const bar=document.createElement('div');bar.className='compare-fill';
+    bar.style.width=(value/maxMonth*100)+'%';track.append(bar);
+    const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);
+    line.append(label,track,amount);compare.append(line);
+  });
+  if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
+}
+
+/**
+ * Schreibt die vorbereiteten Dashboard-Kennzahlen in den bestehenden Container.
+ *
+ * Die HTML-Struktur bleibt exakt wie in v88. Dieser Helfer berechnet keine
+ * Werte und verändert weder Einträge noch Filter oder Cloud-Zustand.
+ */
+/**
+ * Aktualisiert die vier Dashboard-Diagramme in der bisherigen Reihenfolge.
+ *
+ * Übergibt ausschließlich bereits gefilterte Daten an die vorhandenen
+ * AnalyticsCharts-Funktionen. Die Diagrammberechnung selbst bleibt unangetastet,
+ * insbesondere die kritischen Verbrauchs- und Fahrzeugübersichten.
+ */
+function renderDashboardCharts(filtered,charges){
+  const metric = $('trendMetric').value;
+  AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
+  AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
+  AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
+  AnalyticsCharts.providers($('providerchart'), charges);
+}
+
+function renderDashboardStatTiles(tiles){
+  $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
+}
+
+function buildDashboardStatTiles({
+  averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
+  distance, currency
+}){
+  return [
+    ['⚡ Ø Preis pro kWh',averageElectric],
+    ['⛽ Ø Preis pro Liter',averageFuel],
+    ['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],
+    ['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],
+    ['💰 Gesamtkosten',fmt(cost,currency)],
+    ['🔌 Stromkosten',fmt(electric,currency)],
+    ['⛽ Benzinkosten',fmt(petrol,currency)],
+    ['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,currency):'–'],
+    ['Ladevorgänge',charges.length],
+    ['Tankungen',fuel.length]
+  ];
+}
+
 /* Tabellen-Pagination: siehe pagination.js. */
 /**
  * Rendert Dashboard, Tabellen und Auswertungen aus dem aktuellen Datenbestand.
@@ -187,9 +487,7 @@ function render(){
   const now=new Date(),period=$('period').value;
   let y=now.getFullYear(),m=now.getMonth();
   $('customdates').classList.toggle('hide',period!=='custom');
-  let provider=$('provider'),current=provider.value,providers=[...new Set(records.map(x=>x.place||'Unbekannt'))].sort();
-  provider.replaceChildren(new Option('Alle Orte / Tankstellen',''),...providers.map(x=>new Option(x,x)));
-  provider.value=providers.includes(current)?current:'';
+  const provider=renderDashboardProviderFilter();
   let months=Number(period)||1;
   let chosenYear=Number($('chosenYear').value||y),chosenMonth=Number($('chosenMonth').value||m);
   let from,to;
@@ -214,16 +512,7 @@ function render(){
     let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   renderVehicleExpenses();
-  const summary=$('vehicle-summary');summary.replaceChildren();
-  if(selectedVehicle&&selectedVehicle!=='none'){
-   const v=vehicles.find(v=>String(v.id)===selectedVehicle);
-   if(v){
-    const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
-    const mileage=records.filter(r=>String(r.vehicle_id)===selectedVehicle&&Number(r.km)>0).map(r=>Number(r.km));
-    const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+r.amount,0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+r.amount,0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString('de-CH')+' km':'–')+'.';
-    summary.append(details,latest);
-   }
-  }
+  renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost);
   // Die Werte beziehen sich auf die Kilometerstandsspanne im gewählten Zeitraum.
   // Geladene/getankte Mengen sind Näherungen, kein gemessener Antriebsverbrauch.
   const consumption=$('consumption-stats');
@@ -254,74 +543,16 @@ function render(){
   const fueledLiters=fuel.reduce((sum,r)=>sum+Number(r.amount||0),0);
   const averageElectric=chargedKwh>0?fmt(electric/chargedKwh,settings.base)+' / kWh':'–';
   const averageFuel=fueledLiters>0?fmt(petrol/fueledLiters,settings.base)+' / Liter':'–';
-  let tiles=[['⚡ Ø Preis pro kWh',averageElectric],['⛽ Ø Preis pro Liter',averageFuel],['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],['💰 Gesamtkosten',fmt(cost,settings.base)],['🔌 Stromkosten',fmt(electric,settings.base)],['⛽ Benzinkosten',fmt(petrol,settings.base)],['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,settings.base):'–'],['Ladevorgänge',charges.length],['Tankungen',fuel.length]];
-  $('stats').innerHTML=tiles.map(x=>'<div class="tile"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
-  const metric = $('trendMetric').value;
-  AnalyticsCharts.trend($('trendchart'), filtered, metric, settings.base, conv);
-  AnalyticsCharts.donut($('donutchart'), filtered, settings.base, conv);
-  AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
-  AnalyticsCharts.providers($('providerchart'), charges);
-  const recent=$('recent-entries');recent.replaceChildren();
-  filtered.slice().sort(compareRecordDateTime).slice(0,8).forEach(r=>{
-    const isCharge=r.type==='charge';
-    const item=document.createElement('article');item.className='timeline-event '+(isCharge?'timeline-charge':'timeline-fuel');
-    const marker=document.createElement('span');marker.className='timeline-marker';marker.textContent=isCharge?'⚡':'⛽';marker.setAttribute('aria-hidden','true');
-    const content=document.createElement('div');content.className='timeline-content';
-    const head=document.createElement('div');head.className='timeline-head';
-    const title=document.createElement('strong');title.textContent=isCharge?'Ladung':'Tankung';
-    const date=document.createElement('time');date.textContent=recordDateTime(r).replace(' ',' · ');
-    head.append(title,date);
-    const details=document.createElement('div');details.className='timeline-details';
-    const amount=Number(r.amount)||0;
-    details.textContent=amount.toLocaleString('de-CH',{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
-    const notes=document.createElement('small');notes.className='timeline-notes';
-    const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
-    notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');
-    content.append(head,details);if(notes.textContent)content.append(notes);
-    item.append(marker,content);recent.append(item);
+  const tiles=buildDashboardStatTiles({
+    averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
+    distance, currency:settings.base
   });
-  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
-
-  const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
-  const compare=$('month-compare');compare.replaceChildren();const monthsMap=new Map();filtered.forEach(r=>{const month=r.date.slice(0,7);monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));});const maxMonth=Math.max(1,...monthsMap.values());[...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{const line=document.createElement('div');line.className='compare-row';const label=document.createElement('span');label.textContent=month;const track=document.createElement('div');track.className='compare-track';const bar=document.createElement('div');bar.className='compare-fill';bar.style.width=(value/maxMonth*100)+'%';track.append(bar);const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);line.append(label,track,amount);compare.append(line);});if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
-  // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
-  const entries=$('entries');
-  entries.replaceChildren();
-  const table=document.createElement('table');
-  table.className='entry-history-table';
-  const head=document.createElement('thead'),heading=document.createElement('tr');
-  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
-    const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
-  }
-  head.append(heading);table.append(head);
-  const tbody=document.createElement('tbody');
-  const ordered=records.slice().sort(compareRecordDateTime);
-  if(!ordered.length){
-    const tr=document.createElement('tr'),td=document.createElement('td');
-    td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
-  }
-  const makeEntryRow=x=>{
-    const tr=document.createElement('tr');
-    const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
-    const values=[
-      recordDateTime(x),
-      x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
-      vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
-      String(x.amount)+(x.type==='charge'?' kWh':' l'),
-      fmt(x.cost,x.currency),
-      x.place||'–'
-    ];
-    for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
-    const actions=document.createElement('td');actions.className='entry-table-actions';
-    const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-    edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-    };
-    const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
-    remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
-    actions.append(edit,remove);tr.append(actions);return tr;
-  };
-  table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
+  renderDashboardStatTiles(tiles);
+  renderDashboardCharts(filtered,charges);
+  renderDashboardTimeline(filtered);
+  renderDashboardFleetOverview();
+  renderMonthComparison(filtered);
+  renderEntryHistory();
 }
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g,c=>({
@@ -370,6 +601,31 @@ window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.
  * Je Liste werden fünf Datensätze angezeigt; Bearbeiten/Löschen referenziert
  * weiterhin das unveränderte Originalobjekt aus chargingData().
  */
+/**
+ * Füllt das Formular für einen bestehenden Ladeort oder Anbieter.
+ * Übernimmt unverändert die v88-Felder und scrollt zum Bearbeitungsformular.
+ */
+function beginManagedChargingEdit(type,item){
+  const form=$(type==='locations'?'managed-location-form':'managed-provider-form');
+  form.dataset.editId=item.id;
+  form.elements.name.value=item.name;
+  form.elements.price.value=item.price??'';
+  if(type==='locations')form.elements.kind.value=item.kind||'';
+  form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+  form.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/**
+ * Löscht einen verwalteten Ladeort/Anbieter erst nach Bestätigung.
+ * Bestehende Ladungen werden nicht verändert. Der vorhandene Speicherweg
+ * übernimmt anschließend die weitere Synchronisierung.
+ */
+function deleteManagedChargingItem(data,type,id){
+  if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;
+  data[type]=data[type].filter(x=>x.id!==id);
+  storeChargingData(data);
+}
+
 function renderChargingManagement(){
  const data=chargingData();
  for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
@@ -386,8 +642,8 @@ function renderChargingManagement(){
    for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
    const actions=document.createElement('td');actions.className='management-actions';
    const edit=document.createElement('button'),del=document.createElement('button');
-   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';form.scrollIntoView({behavior:'smooth',block:'start'});};
-   del.textContent='Löschen';del.type='button';del.onclick=()=>{if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;data[type]=data[type].filter(x=>x.id!==item.id);storeChargingData(data);};
+   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>beginManagedChargingEdit(type,item);
+   del.textContent='Löschen';del.type='button';del.onclick=()=>deleteManagedChargingItem(data,type,item.id);
    actions.append(edit,del);row.append(actions);return row;
   };
   table.append(tbody);window.paginateTable(list,table,tbody,data[type],5,'managed-'+type,makeManagedRow);
