@@ -12,7 +12,7 @@ const listPageState=new Map();
  * @param {HTMLTableElement} table - Bereits angelegte Tabelle mit Kopfzeile.
  * @param {HTMLTableSectionElement} tbody - Zu ersetzende Tabellenzeilen.
  * @param {Array} items - Gesamtliste; wird weder verändert noch gekürzt.
- * @param {number} pageSize - Einträge pro Seite (20 bzw. 5).
+ * @param {number} pageSize - Einträge pro Seite (5, 10 oder 20).
  * @param {string} key - Eindeutiger Schlüssel für die aktuelle Seite.
  * @param {Function} makeRow - Erzeugt eine Tabellenzeile mit Aktionen.
  */
@@ -42,6 +42,11 @@ window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
  };
  const top=createControls('oben');
  const bottom=createControls('unten');
+ // Bei nur einer Seite werden beide Navigationsleisten vollständig verborgen.
+ // Die Tabellenzeilen werden unabhängig davon wie bisher angezeigt.
+ const hasMultiplePages=pages>1;
+ top.nav.hidden=!hasMultiplePages;
+ bottom.nav.hidden=!hasMultiplePages;
 
  /** Aktualisiert den gemeinsamen Seitenzustand und rendert beide Leisten. */
  const show=()=>{

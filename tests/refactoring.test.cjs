@@ -105,3 +105,12 @@ test('Fahrzeugausgaben: 10 Zeilen je Seite, Navigation oben und unten, Aktionen 
   assert.ok(pagination.includes("createControls('oben')"));
   assert.ok(pagination.includes("createControls('unten')"));
 });
+
+test('Seitennavigation erscheint erst ab mehr als einer Seite', () => {
+  const pagination=read('pagination.js');
+  const styles=read('styles.css');
+  assert.match(pagination, /const hasMultiplePages=pages>1/);
+  assert.match(pagination, /top\.nav\.hidden=!hasMultiplePages/);
+  assert.match(pagination, /bottom\.nav\.hidden=!hasMultiplePages/);
+  assert.match(styles, /\.table-pagination\[hidden\]\{display:none!important\}/);
+});
