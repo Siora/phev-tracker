@@ -187,6 +187,35 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * Die Reihenfolge und Formeln entsprechen exakt der bisherigen v88-Logik.
  * Eine Auslagerung der Verbrauchsdiagramme ist ausdrücklich nicht enthalten.
  */
+/**
+ * Rendert die drei kostenstärksten Monate des aktuell gefilterten Zeitraums.
+ *
+ * Der Helfer greift ausschließlich auf die bereits gefilterten Einträge zu;
+ * der globale Filterzustand, die Datensätze und die Cloud bleiben unverändert.
+ * Die Monatsaggregation, Sortierung (neuester Monat zuerst), Skalierung und
+ * Leermeldung entsprechen der bisherigen v88-Implementierung.
+ */
+function renderMonthComparison(filtered){
+  const compare=$('month-compare');
+  compare.replaceChildren();
+  const monthsMap=new Map();
+  filtered.forEach(r=>{
+    const month=r.date.slice(0,7);
+    monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));
+  });
+  const maxMonth=Math.max(1,...monthsMap.values());
+  [...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{
+    const line=document.createElement('div');line.className='compare-row';
+    const label=document.createElement('span');label.textContent=month;
+    const track=document.createElement('div');track.className='compare-track';
+    const bar=document.createElement('div');bar.className='compare-fill';
+    bar.style.width=(value/maxMonth*100)+'%';track.append(bar);
+    const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);
+    line.append(label,track,amount);compare.append(line);
+  });
+  if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
+}
+
 function buildDashboardStatTiles({
   averageElectric, averageFuel, charges, fuel, cost, electric, petrol,
   distance, currency
@@ -315,7 +344,7 @@ function render(){
   if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
 
   const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
-  const compare=$('month-compare');compare.replaceChildren();const monthsMap=new Map();filtered.forEach(r=>{const month=r.date.slice(0,7);monthsMap.set(month,(monthsMap.get(month)||0)+conv(r));});const maxMonth=Math.max(1,...monthsMap.values());[...monthsMap].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3).forEach(([month,value])=>{const line=document.createElement('div');line.className='compare-row';const label=document.createElement('span');label.textContent=month;const track=document.createElement('div');track.className='compare-track';const bar=document.createElement('div');bar.className='compare-fill';bar.style.width=(value/maxMonth*100)+'%';track.append(bar);const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);line.append(label,track,amount);compare.append(line);});if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
+  renderMonthComparison(filtered);
   // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
   const entries=$('entries');
   entries.replaceChildren();

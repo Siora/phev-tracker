@@ -67,6 +67,12 @@ function harness() {
     window: {scrollTo: () => {scrollCalls++;}},
     Map, Math, Number, String
   };
+  // Monatsvergleich in derselben VM laden, damit der Dashboard-Ausschnitt
+  // nach der Auslagerung weiterhin mit der echten Funktion ausgeführt wird.
+  const monthStart = app.indexOf('function renderMonthComparison(');
+  const monthEnd = app.indexOf('\nfunction buildDashboardStatTiles(', monthStart);
+  assert.ok(monthStart >= 0 && monthEnd > monthStart);
+  vm.runInNewContext(app.slice(monthStart, monthEnd), sandbox);
   const run = filtered => {
     sandbox.filtered = filtered;
     // Jeder Renderdurchlauf erhält seinen eigenen lexikalischen Funktionsscope.
