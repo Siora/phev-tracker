@@ -202,6 +202,8 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $vid=(int)($body['id']??0);if ($vid<=0) fail(400,'Fahrzeug fehlt');
  $stmt=$db->prepare('SELECT COUNT(*) FROM records WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
  if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Einträge. Bitte zuerst die Einträge zuordnen oder das Fahrzeug behalten.');
+ $stmt=$db->prepare('SELECT COUNT(*) FROM vehicle_expenses WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
+ if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Wartungs- oder Kostenbuchungen. Bitte zuerst diese Einträge entfernen oder das Fahrzeug behalten.');
  $stmt=$db->prepare('DELETE FROM vehicles WHERE user_id=? AND id=?');$stmt->execute([$uid,$vid]);
  respond(200,['ok'=>true]);
 }
