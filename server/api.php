@@ -221,6 +221,17 @@ if ($action === 'account-delete') {
   $stmt=$db->prepare('DELETE FROM users WHERE id=?');$stmt->execute([$uid]);
   $db->commit();
  } catch (Throwable $e) {if($db->inTransaction())$db->rollBack();error_log((string)$e);fail(500,'Konto konnte nicht gelöscht werden');}
+ // Erst nach erfolgreichem Commit ausschließlich Bilddateien dieses Benutzers entfernen.
+ // Keine rekursive Löschung und keine Pfade aus Benutzereingaben verwenden.
+ $imagesDir=__DIR__.'/vehicle-images';
+ if (is_dir($imagesDir)) {
+  foreach (glob($imagesDir.'/'.$uid.'-*-*') ?: [] as $imagePath) {
+   $filename=basename($imagePath);
+   if (preg_match('/^'.preg_quote((string)$uid,'/').'-[0-9]+-[a-f0-9]{24}\\.(jpg|png|webp)$/D',$filename) && is_file($imagePath) && !is_link($imagePath)) {
+    if (!@unlink($imagePath)) error_log('PHEV account deletion: failed to remove owned image');
+   }
+  }
+ }
  sessionCookie('',time()-3600);
  respond(200,['ok'=>true]);
 }
