@@ -1133,8 +1133,18 @@ function exportPdfReport(mode){
  const extraExpenses=vehicleExpenses.filter(x=>String(x.date||'').startsWith(period)&&(!vehicleId||String(x.vehicle_id)===vehicleId));
  const extras=extraExpenses.reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0);
  const combined=total+extras;
- const kmValues=data.map(x=>Number(x.km)).filter(x=>Number.isFinite(x)&&x>0);
- const kmSpan=kmValues.length>1?Math.max(...kmValues)-Math.min(...kmValues):0;
+ // Für mehrere Fahrzeuge Kilometerstandsspannen getrennt ermitteln.
+ // Eine gemeinsame Min/Max-Spanne würde verschiedene Tachostände vermischen.
+ const vehicleGroups=new Map();
+ for(const row of data){
+  const key=String(row.vehicle_id??'');
+  const km=Number(row.km);
+  if(!Number.isFinite(km)||km<=0)continue;
+  if(!vehicleGroups.has(key))vehicleGroups.set(key,[]);
+  vehicleGroups.get(key).push(km);
+ }
+ const spans=[...vehicleGroups.values()].map(values=>values.length>=2?Math.max(...values)-Math.min(...values):0);
+ const kmSpan=spans.reduce((a,b)=>a+b,0);
  const providers=new Map();
  for(const row of charges){const name=String(row.place||'Unbekannt');const p=providers.get(name)||{name,energy:0,cost:0,count:0};p.energy+=Number(row.amount||0);p.cost+=conv(row);p.count++;providers.set(name,p);}
  const ranked=[...providers.values()].sort((a,b)=>b.energy-a.energy);
