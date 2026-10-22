@@ -262,6 +262,15 @@
 <p id="cloud-upload-info"></p>
 <button id="cloud-logout" type="button">Abmelden</button>
 <p id="cloud-count"></p>
+<details id="cloud-delete-section">
+<summary>Konto dauerhaft löschen</summary>
+<p><strong>Achtung:</strong> Dein Konto und die zugehörigen Cloud-Daten werden dauerhaft gelöscht. Lokale Daten auf diesem Gerät bleiben erhalten. Dieser Vorgang kann nicht rückgängig gemacht werden.</p>
+<form id="cloud-delete-account">
+<label>Passwort zur Bestätigung<input name="password" type="password" autocomplete="current-password" required></label>
+<label>Zur Bestätigung KONTO LÖSCHEN eingeben<input name="confirmation" type="text" required pattern="KONTO LÖSCHEN" autocomplete="off"></label>
+<button type="submit">Mein Konto endgültig löschen</button>
+</form>
+</details>
 <div id="cloud-admin" class="hide">
 <h2>Benutzer erstellen</h2>
 <form id="cloud-create">
