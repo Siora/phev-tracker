@@ -29,4 +29,4 @@ jobs:
         with:
           node-version: '22'
       - name: Offline-Regressionstests ausführen
-        run: node --test tests/smoke.test.cjs tests/refactoring.test.cjs tests/pagination-dom.test.cjs tests/dashboard-contract.test.cjs tests/consumption-dom.test.cjs tests/charts-dom.test.cjs
+        run: node --test tests/smoke.test.cjs tests/refactoring.test.cjs tests/pagination-dom.test.cjs tests/dashboard-contract.test.cjs tests/consumption-dom.test.cjs tests/charts-dom.test.cjs tests/cloud-queue.test.cjs
