@@ -978,3 +978,17 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .table-pagination button:disabled{opacity:.4;cursor:default}
 .table-pagination span{text-align:center;flex:1;white-space:nowrap}
 @media(max-width:480px){.table-pagination{gap:7px}.table-pagination button{min-width:78px;padding:9px!important;font-size:12px}.table-pagination span{font-size:11px}}
+
+/* V90: Fahrzeugausgaben als kompakte Tabelle mit eigener Scrollfläche.
+ * Auf schmalen Bildschirmen bleibt jede Spalte erreichbar; die Navigation
+ * liegt ausserhalb der Scrollfläche und ist oben wie unten sichtbar. */
+#expense-list{min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+.expense-table{width:100%;min-width:800px;border-collapse:collapse;font-size:13px;color:#e0edf5}
+.expense-table th,.expense-table td{padding:11px 12px;text-align:left;border-bottom:1px solid #ffffff20;vertical-align:middle}
+.expense-table th{background:#203e50;color:#d9eef5;font-weight:700;white-space:nowrap}
+.expense-table tbody tr:hover{background:#ffffff0a}
+.expense-table td:nth-child(3){font-weight:700;white-space:nowrap}
+.expense-table-actions{white-space:nowrap}
+.expense-table-actions button{width:auto!important;margin:2px 5px 2px 0!important;padding:8px 10px!important;font-size:12px}
+.expense-table-actions button:last-child{background:#53313a;color:#ffe0e5}
+#expense-list .table-pagination{min-width:0;position:sticky;left:0}

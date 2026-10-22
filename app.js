@@ -785,28 +785,54 @@ function renderVehicleExpenses(){
   }
   summary.append(heading,breakdownList);
  }
- for(const x of expenses){
-  const row=document.createElement('div');row.className='expense-row';
-  const info=document.createElement('span');info.textContent=x.date+' · '+x.category+' · '+fmt(Number(x.amount),x.currency)+(x.note?' · '+x.note:'');
-  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-  edit.onclick=()=>{
-   form.dataset.editId=x.id;
-   form.elements.vehicle_id.value=String(x.vehicle_id);
-   form.elements.category.value=x.category;
-   form.elements.date.value=x.date;
-   form.elements.amount.value=x.amount;
-   form.elements.currency.value=x.currency;
-   form.elements.note.value=x.note||'';
-   form.elements.mileage_km.value=x.mileage_km??'';
-   form.elements.next_service_date.value=x.next_service_date||'';
-   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
-   form.scrollIntoView({behavior:'smooth',block:'start'});
-  };
-  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
-  remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
-  row.append(info,edit,remove);list.append(row);
+ /**
+  * Wartungskosten als sortierte, paginierte Tabelle.
+  * Die reine DOM-Seitennavigation verändert weder die SQL-Datensätze noch
+  * die Summenberechnung. Beide Navigationsleisten bleiben synchron.
+  */
+ const table=document.createElement('table');
+ table.className='expense-table';
+ table.setAttribute('aria-label','Wartungs- und Fahrzeugkosten');
+ const thead=document.createElement('thead');
+ const headRow=document.createElement('tr');
+ for(const heading of ['Datum','Kategorie','Betrag','Kilometerstand','Nächste Wartung','Notiz','Aktionen']){
+  const th=document.createElement('th');th.scope='col';th.textContent=heading;headRow.append(th);
  }
- if(!expenses.length){const empty=document.createElement('p');empty.textContent='Noch keine zusätzlichen Fahrzeugausgaben erfasst.';list.append(empty);}
+ thead.append(headRow);table.append(thead);
+ const tbody=document.createElement('tbody');table.append(tbody);
+ const sorted=[...expenses].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id).localeCompare(String(a.id)));
+ const makeExpenseRow=x=>{
+  const row=document.createElement('tr');
+  const fields=[
+   x.date||'–',x.category||'–',fmt(Number(x.amount),x.currency),
+   x.mileage_km===null||x.mileage_km===undefined||x.mileage_km===''?'–':Number(x.mileage_km).toLocaleString('de-CH')+' km',
+   x.next_service_date||'–',x.note||'–'
+  ];
+  for(const value of fields){
+   const cell=document.createElement('td');cell.textContent=value;row.append(cell);
+  }
+  const actionCell=document.createElement('td');actionCell.className='expense-table-actions';
+const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+    edit.onclick=()=>{
+     form.dataset.editId=x.id;
+     form.elements.vehicle_id.value=String(x.vehicle_id);
+     form.elements.category.value=x.category;
+     form.elements.date.value=x.date;
+     form.elements.amount.value=x.amount;
+     form.elements.currency.value=x.currency;
+     form.elements.note.value=x.note||'';
+     form.elements.mileage_km.value=x.mileage_km??'';
+     form.elements.next_service_date.value=x.next_service_date||'';
+     form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+     form.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
+    remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
+  
+  actionCell.append(edit,remove);row.append(actionCell);
+  return row;
+ };
+ window.paginateTable(list,table,tbody,sorted,10,'vehicle-expenses',makeExpenseRow);
 }
 $('expense-form').elements.vehicle_id.addEventListener('change',renderVehicleExpenses);
 $('expense-form').onsubmit=async e=>{
