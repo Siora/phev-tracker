@@ -15,7 +15,7 @@ function fail(int $code, string $message): never { respond($code, ['error'=>$mes
 if (!is_file(__DIR__.'/config.php')) fail(503, 'Serverkonfiguration fehlt');
 $config = require __DIR__.'/config.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin && $origin !== $config['allowed_origin']) fail(403, 'Origin nicht erlaubt');
+if ($origin && !in_array($origin, [$config['allowed_origin'], 'capacitor://localhost', 'https://tracker.web-produktion.com'], true)) fail(403, 'Origin nicht erlaubt');
 if ($origin) { header('Access-Control-Allow-Origin: '.$origin); header('Vary: Origin'); }
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -31,11 +31,29 @@ try {
 $action = $_GET['action'] ?? '';
 $body = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 2000000) fail(413, 'Anfrage zu gross');
- $body = json_decode(file_get_contents('php://input'), true);
- if (!is_array($body)) fail(400, 'Ungültiges JSON');
+ if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > (($_GET['action']??'')==='vehicle-photo-upload'?5500000:2000000)) fail(413, 'Anfrage zu gross');
+ if (($_GET['action'] ?? '') !== 'vehicle-photo-upload') {
+  $body = json_decode(file_get_contents('php://input'), true);
+  if (!is_array($body)) fail(400, 'Ungültiges JSON');
+ }
 }
 function email(string $value): string { return mb_strtolower(trim($value)); }
+// Serverkompatible Cookie-Sitzung mit CSRF-Schutz bei POST ohne Bearer-Token.
+const PHEV_SESSION_COOKIE = 'phev_session';
+function sessionCookie(string $token, int $expires): void {
+ setcookie(PHEV_SESSION_COOKIE,$token,['expires'=>$expires,'path'=>'/api/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
+}
+function cookieRequestOriginAllowed(): bool {
+ $expected='https://tracker.web-produktion.com';
+ $origin=$_SERVER['HTTP_ORIGIN']??'';
+ if ($origin!=='') return hash_equals($expected,$origin);
+ $referer=$_SERVER['HTTP_REFERER']??'';
+ if ($referer!=='') {
+  $parts=parse_url($referer);
+  return is_array($parts)&&($parts['scheme']??'')==='https'&&($parts['host']??'')==='tracker.web-produktion.com'&&!isset($parts['port']);
+ }
+ return false;
+}
 if ($action === 'login') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405, 'POST erforderlich');
  $mail = email((string)($body['email'] ?? ''));
@@ -48,15 +66,28 @@ if ($action === 'login') {
  $token=bin2hex(random_bytes(32));
  $stmt=$db->prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 7 DAY))');
  $stmt->execute([hash('sha256',$token),$uid]);
+ sessionCookie($token,time()+7*86400);
  respond(200,['token'=>$token,'email'=>$mail,'role'=>$user['role']]);
 }
 $auth=$_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
-if (!preg_match('/^Bearer ([a-f0-9]{64})$/D',$auth,$match)) fail(401,'Anmeldung erforderlich');
-$hash=hash('sha256',$match[1]);
+ $bearerToken=preg_match('/^Bearer ([a-f0-9]{64})$/D',$auth,$match)?$match[1]:null;
+$cookieToken=$_COOKIE[PHEV_SESSION_COOKIE]??null;
+$cookieToken=is_string($cookieToken)&&preg_match('/^[a-f0-9]{64}$/D',$cookieToken)?$cookieToken:null;
+$token=$bearerToken??$cookieToken;
+if ($token===null) fail(401,'Anmeldung erforderlich');
+if ($bearerToken===null && $_SERVER['REQUEST_METHOD']==='POST' && !cookieRequestOriginAllowed()) fail(403,'Ungültiger Anfragenursprung');
+$hash=hash('sha256',$token);
 $stmt=$db->prepare('SELECT user_id FROM sessions WHERE token_hash=? AND expires_at>UTC_TIMESTAMP()');
 $stmt->execute([$hash]); $uid=$stmt->fetchColumn();
 if (!$uid) fail(401,'Sitzung abgelaufen');
 $uid=(int)$uid;
+if ($action === 'session') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'GET') fail(405,'GET erforderlich');
+ $stmt=$db->prepare('SELECT email,role FROM users WHERE id=?');
+ $stmt->execute([$uid]);$account=$stmt->fetch();
+ if (!$account) fail(401,'Anmeldung erforderlich');
+ respond(200,['email'=>$account['email'],'role'=>$account['role']]);
+}
 if ($action === 'admin-create-user') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
@@ -81,7 +112,7 @@ if ($action === 'admin-users') {
 }
 if ($action === 'logout') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
- $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);respond(200,['ok'=>true]);
+ $stmt=$db->prepare('DELETE FROM sessions WHERE token_hash=?');$stmt->execute([$hash]);sessionCookie('',time()-3600);respond(200,['ok'=>true]);
 }
 
 
