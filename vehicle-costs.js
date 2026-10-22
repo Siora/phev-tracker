@@ -9,6 +9,30 @@
  */
 window.PhevTco = Object.freeze({
   /**
+   * Fällige und bevorstehende Wartungen aus vorhandenen Fahrzeugausgaben.
+   * Pro Kategorie/Fahrzeug zählt nur der jüngste Eintrag mit Folgetermin.
+   * So werden historische Services nicht mehrfach als Erinnerung angezeigt.
+   * Keine zusätzlichen Kosten: die bestehenden Ausgaben bleiben die Quelle.
+   */
+  reminders(expenses,vehicleId,today=new Date(),horizonDays=30){
+    const day=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    const latest=new Map();
+    for(const expense of expenses){
+      if(vehicleId&&String(expense.vehicle_id)!==String(vehicleId))continue;
+      if(!expense.next_service_date||!/^\\d{4}-\\d{2}-\\d{2}$/.test(expense.next_service_date))continue;
+      const key=String(expense.vehicle_id)+'|'+String(expense.category);
+      const existing=latest.get(key);
+      if(!existing||String(expense.date)>String(existing.date))latest.set(key,expense);
+    }
+    return [...latest.values()].map(expense=>{
+      const [year,month,date]=expense.next_service_date.split('-').map(Number);
+      const due=new Date(year,month-1,date);
+      if(due.getFullYear()!==year||due.getMonth()!==month-1||due.getDate()!==date)return null;
+      const days=Math.round((due-day)/86400000);
+      return {...expense,days,overdue:days<0};
+    }).filter(x=>x&&x.days<=horizonDays).sort((a,b)=>a.days-b.days);
+  },
+  /**
    * Rechnet einen Ausgabenbetrag in die eingestellte Basiswährung um.
    * Der Wechselkurs wird exakt wie in der bisherigen App verwendet.
    * @param {number} amount Originalbetrag.
