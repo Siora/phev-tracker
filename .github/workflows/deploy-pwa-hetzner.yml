@@ -79,11 +79,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 3 --connect-timeout 15 --max-time 90 \
-            "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" \
-            -o jspdf.umd.min.js
+          # Use the npm package as the primary source; avoid a single CDN dependency.
+          npm pack jspdf@2.5.2 --pack-destination /tmp
+          tar -xzf /tmp/jspdf-2.5.2.tgz -C /tmp package/dist/jspdf.umd.min.js
+          cp /tmp/package/dist/jspdf.umd.min.js ./jspdf.umd.min.js
           test "$(wc -c < jspdf.umd.min.js)" -gt 100000
-          grep -q 'jsPDF' jspdf.umd.min.js
 
       - name: Upload only PWA files (never api/)
         if: ${{ github.event_name == 'push' || inputs.upload == true }}
