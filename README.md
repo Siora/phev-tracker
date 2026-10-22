@@ -1,10 +1,31 @@
-# PHEV Tracker – BYD Seal U DM-i
+# PHEV Tracker
 
-Mobile Web-App zur Erfassung von Ladevorgängen, Tankungen, Kilometerständen und Kosten in CHF/EUR. Lokale Speicherung im Browser, CSV-Import und JSON-Backup.
+Deutschsprachige Progressive Web App zur Verwaltung von Plug-in-Hybrid-Fahrzeugen: Ladevorgänge, Tankungen, Kilometerstände, Energie- und Fahrzeugkosten, Wartungserinnerungen sowie Auswertungen in CHF/EUR.
 
-## Veröffentlichung
-GitHub Pages unter Settings → Pages → Build and deployment → Deploy from a branch → main / (root) aktivieren.
+**Aktueller Stand:** Version 2.3 (individuell konfigurierbares Dashboard).
 
-**Datenschutz:** Persönliche ChargeLog-CSV-Dateien nicht ins öffentliche Repository hochladen. Die App speichert Einträge lokal auf dem Gerät.
+## Betrieb und Veröffentlichung
 
-**Hinweis:** Der CSV-Import erkennt häufige Spaltennamen, muss aber bei abweichenden ChargeLog-Exporten geprüft werden.
+Die produktive Anwendung läuft unter https://tracker.web-produktion.com/ auf Hetzner. Änderungen am Frontend werden über `.github/workflows/deploy-pwa-hetzner.yml` aus `main` veröffentlicht, nachdem die automatischen Tests erfolgreich waren. Das PHP-/MySQL-Backend liegt unter `/api/api.php` und wird **nicht** durch den Frontend-Upload ersetzt.
+
+GitHub Pages ist **nicht** der produktive Veröffentlichungsweg. Das Repository enthält außerdem einen manuellen SFTP-Workflow für das Backend; dieser darf nicht versehentlich als Frontend-Deployment verwendet werden.
+
+## Funktionen
+
+- Fahrzeuge und zugehörige Lade-/Tankvorgänge verwalten.
+- Fahrzeug-Gesamtkosten einschließlich SQL-gespeicherter Ausgaben und Wartungserinnerungen anzeigen.
+- Verbrauch, Energiebilanz, Kostenentwicklung und Jahreskostenprognose auswerten.
+- Dashboard-Kacheln ausblenden und anordnen; Layout lokal und über vorhandene Cloud-Preferences synchronisieren.
+- CSV-Import, PDF-Berichte, lokale Sicherungen und PWA-Offline-Cache.
+
+## Entwicklung und Tests
+
+- Frontend: `index.html`, `app.js`, modulare `*.js`-Helfer und `styles.css`.
+- Backend: `server/api.php` und SQL-Migrationen in `server/`.
+- Regressionstests: `node --test tests/*.test.cjs` (einzelne Browser-/Produktivtests benötigen eine geeignete Umgebung).
+- PHP-Syntax: `php -l server/api.php`.
+- Architektur, Cache-Versionierung und Releasehinweise: [ENTWICKLERHANDBUCH.md](ENTWICKLERHANDBUCH.md).
+
+## Datenschutz und Sicherheit
+
+Keine echten CSV-Exporte, Zugangsdaten, `config.php`, Sessioninformationen oder Nutzerdaten ins öffentliche Repository übernehmen. Cloud-Daten, Offline-Warteschlangen und Browser-Caches nicht ohne Migrationskonzept löschen. Backups vor Backend-Migrationen anfertigen.
