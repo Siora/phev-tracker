@@ -854,7 +854,7 @@ class PhevPdfReport{
  cmd(s){this.ops.push(s);}
  color(rgb){this.cmd(rgb.join(' ')+' rg');}
  rect(x,y,w,h,rgb){this.color(rgb);this.cmd(x+' '+y+' '+w+' '+h+' re f');}
- text(x,y,v,size=10,rgb=[0.13,0.2,0.3],bold=false){this.color(rgb);this.cmd('BT /'+(bold?'F2':'F1')+' '+size+' Tf 1 0 0 1 '+x+' '+y+' Tm ('+this.esc(v)+') Tj ET');}
+ text(x,y,v,size=10,rgb=[0.13,0.2,0.3],bold=false){const safe=rgb.every(c=>c>=0.97)?[1,1,1]:[0.13,0.2,0.3];this.color(safe);this.cmd('BT /'+(bold?'F2':'F1')+' '+size+' Tf 1 0 0 1 '+x+' '+y+' Tm ('+this.esc(v)+') Tj ET');}
  coverOverview(o){
   this.ops.length=0;
   const blue=[0.08,0.42,0.78],dark=[0.08,0.13,0.21],muted=[0.48,0.52,0.57],line=[0.85,0.88,0.92];
