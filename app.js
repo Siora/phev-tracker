@@ -87,16 +87,41 @@ async function updateVehiclePhoto(vehicle){
 }
 
 // Aktualisiert sämtliche Fahrzeug-Auswahllisten nach Anmeldung oder Änderungen.
+/**
+ * Aktualisiert alle Fahrzeug-Auswahllisten, ohne eine noch gültige Auswahl
+ * zurückzusetzen. Das Einzelfahrzeug wird im Eingabeformular und in
+ * Schnellformularen automatisch ausgewählt, falls nur eines vorhanden ist.
+ * Die Aktualisierung des Sammelformularzählers bleibt der letzte Schritt.
+ */
 function refreshVehicles(){
- const filter=$('vehicleFilter'),selected=filter.value,entry=$('entryVehicle'),chosen=entry.value;
- filter.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
- const reportVehicle=$('report-vehicle');if(reportVehicle){const prev=reportVehicle.value;reportVehicle.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));reportVehicle.value=[...reportVehicle.options].some(o=>o.value===prev)?prev:'';}
- entry.replaceChildren(new Option('Bitte Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
- entry.value=[...entry.options].some(o=>o.value===chosen)?chosen:(vehicles.length===1?String(vehicles[0].id):'');
- document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{const prev=sel.value;sel.replaceChildren(new Option('Fahrzeug auswählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));sel.value=vehicles.some(v=>String(v.id)===prev)?prev:(vehicles.length===1?String(vehicles[0].id):'');});
- updateBulkCount();
+  const filter=$('vehicleFilter');
+  const selected=filter.value;
+  const entry=$('entryVehicle');
+  const chosen=entry.value;
+  replaceVehicleOptions(filter,'Alle Fahrzeuge',selected,false);
+  const reportVehicle=$('report-vehicle');
+  if(reportVehicle)replaceVehicleOptions(reportVehicle,'Alle Fahrzeuge',reportVehicle.value,false);
+  replaceVehicleOptions(entry,'Bitte Fahrzeug auswählen',chosen,true);
+  document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{
+    replaceVehicleOptions(sel,'Fahrzeug auswählen',sel.value,true);
+  });
+  updateBulkCount();
 }
+
+/**
+ * Schreibt Fahrzeugoptionen in eine Select-Liste.
+ * Die bisherige Auswahl hat Vorrang; nur Eingabeformulare wählen bei genau
+ * einem Fahrzeug automatisch dessen ID. Dashboard/Report bleiben auf „Alle“.
+ */
+function replaceVehicleOptions(select,placeholder,previous,autoSelectSingle){
+  select.replaceChildren(
+    new Option(placeholder,''),
+    ...vehicles.map(v=>new Option(vehicleName(v),String(v.id)))
+  );
+  const valid=[...select.options].some(option=>option.value===previous);
+  select.value=valid?previous:(autoSelectSingle&&vehicles.length===1?String(vehicles[0].id):'');
+}
+
 function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+' Einträge ohne Fahrzeugzuordnung.';}
 // Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
