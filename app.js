@@ -171,6 +171,26 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  if(liters>0)add('Erfasste Benzinmenge',liters.toFixed(1)+' Liter','Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.');
 }
 
+/* V82 — shared client-side pagination; never modifies underlying records. */
+const listPageState=new Map();
+window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
+ const pages=Math.max(1,Math.ceil(items.length/pageSize));
+ let page=Math.min(Math.max(1,listPageState.get(key)||1),pages);
+ const controls=document.createElement('nav');controls.className='table-pagination';controls.setAttribute('aria-label','Seitennavigation');
+ const previous=document.createElement('button'),next=document.createElement('button'),info=document.createElement('span');
+ previous.type=next.type='button';previous.textContent='‹ Zurück';next.textContent='Weiter ›';info.setAttribute('aria-live','polite');
+ const show=()=>{
+  listPageState.set(key,page);tbody.replaceChildren();
+  if(!items.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=table.querySelectorAll('thead th').length;cell.textContent='Keine Einträge vorhanden.';row.append(cell);tbody.append(row);}
+  else items.slice((page-1)*pageSize,page*pageSize).forEach(item=>tbody.append(makeRow(item)));
+  previous.disabled=page===1;next.disabled=page===pages;
+  const first=items.length?(page-1)*pageSize+1:0,last=Math.min(items.length,page*pageSize);
+  info.textContent=first+'–'+last+' von '+items.length+' · Seite '+page+' / '+pages;
+ };
+ previous.onclick=()=>{if(page>1){page--;show();}};
+ next.onclick=()=>{if(page<pages){page++;show();}};
+ controls.append(previous,info,next);container.append(table,controls);show();
+};
 function render(){
   updateLoginNotice();
   const now=new Date(),period=$('period').value;
@@ -289,7 +309,7 @@ function render(){
     const tr=document.createElement('tr'),td=document.createElement('td');
     td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
   }
-  for(const x of ordered){
+  const makeEntryRow=x=>{
     const tr=document.createElement('tr');
     const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
     const values=[
@@ -308,9 +328,9 @@ function render(){
     };
     const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
     remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
-    actions.append(edit,remove);tr.append(actions);tbody.append(tr);
-  }
-  table.append(tbody);entries.append(table);
+    actions.append(edit,remove);tr.append(actions);return tr;
+  };
+  table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
 }
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g,c=>({
@@ -364,7 +384,7 @@ function renderChargingManagement(){
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
   if(!data[type].length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=type==='locations'?4:3;td.textContent=type==='locations'?'Noch keine Ladeorte angelegt.':'Noch keine Anbieter angelegt.';tr.append(td);tbody.append(tr);}
-  for(const item of data[type]){
+  const makeManagedRow=item=>{
    const row=document.createElement('tr');
    const values=type==='locations'?[item.name,item.kind||'–',item.price===null?'–':item.price+' '+settings.base]:[item.name,item.price===null?'–':item.price+' '+settings.base];
    for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
@@ -372,9 +392,9 @@ function renderChargingManagement(){
    const edit=document.createElement('button'),del=document.createElement('button');
    edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>{const form=$(type==='locations'?'managed-location-form':'managed-provider-form');form.dataset.editId=item.id;form.elements.name.value=item.name;form.elements.price.value=item.price??'';if(type==='locations')form.elements.kind.value=item.kind||'';form.querySelector('button[type=submit]').textContent='Änderungen speichern';form.scrollIntoView({behavior:'smooth',block:'start'});};
    del.textContent='Löschen';del.type='button';del.onclick=()=>{if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;data[type]=data[type].filter(x=>x.id!==item.id);storeChargingData(data);};
-   actions.append(edit,del);row.append(actions);tbody.append(row);
-  }
-  table.append(tbody);list.append(table);
+   actions.append(edit,del);row.append(actions);return row;
+  };
+  table.append(tbody);window.paginateTable(list,table,tbody,data[type],5,'managed-'+type,makeManagedRow);
   document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{const select=form.elements[field];if(!select)return;const previous=select.value;select.replaceChildren(new Option(type==='locations'?'Kein gespeicherter Ladeort':'Kein Anbieter',''),...data[type].map(x=>new Option(x.name,x.id)));select.value=data[type].some(x=>x.id===previous)?previous:'';});
  }
 }
