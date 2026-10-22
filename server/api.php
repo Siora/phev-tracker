@@ -152,6 +152,41 @@ if ($action === 'charging-catalog-delete' && $_SERVER['REQUEST_METHOD'] === 'POS
  respond(200,['ok'=>true]);
 }
 
+// Authenticated vehicle photos: files are never served from a public folder.
+if ($action === 'vehicle-photo-upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $vid=filter_var($_POST['vehicle_id']??null,FILTER_VALIDATE_INT);
+ if (!$vid || $vid<1) fail(400,'Ungültiges Fahrzeug');
+ $stmt=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');
+ $stmt->execute([$vid,$uid]);if (!$stmt->fetchColumn()) fail(404,'Fahrzeug nicht gefunden');
+ if (!isset($_FILES['photo']) || !is_array($_FILES['photo']) || $_FILES['photo']['error']!==UPLOAD_ERR_OK) fail(400,'Bild-Upload fehlgeschlagen');
+ $file=$_FILES['photo'];
+ if ($file['size']<1 || $file['size']>5000000 || !is_uploaded_file($file['tmp_name'])) fail(413,'Bild darf maximal 5 MB gross sein');
+ $type=(new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+ if (!in_array($type,['image/jpeg','image/png','image/webp'],true)) fail(415,'Nur JPEG, PNG und WebP erlaubt');
+ if (@getimagesize($file['tmp_name'])===false) fail(415,'Ungültiges Bild');
+ $dir=__DIR__.'/vehicle-images';
+ if (!is_dir($dir) && !mkdir($dir,0700,true)) fail(503,'Bildspeicher nicht verfügbar');
+ if (!is_file($dir.'/.htaccess')) file_put_contents($dir.'/.htaccess',"Require all denied\nDeny from all\n");
+ $extension=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$type];
+ $name=$uid.'-'.$vid.'-'.bin2hex(random_bytes(12)).'.'.$extension;
+ if (!move_uploaded_file($file['tmp_name'],$dir.'/'.$name)) fail(503,'Bild konnte nicht gespeichert werden');
+ @chmod($dir.'/'.$name,0600);
+ respond(200,['ok'=>true,'photo_url'=>'/api/api.php?action=vehicle-photo&vehicle_id='.$vid.'&image='.$name]);
+}
+if ($action === 'vehicle-photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $vid=filter_var($_GET['vehicle_id']??null,FILTER_VALIDATE_INT);
+ $name=$_GET['image']??'';
+ if (!$vid || $vid<1 || !is_string($name) || !preg_match('/^[0-9]+-[0-9]+-[a-f0-9]{24}\\.(jpg|png|webp)$/D',$name)) fail(404,'Bild nicht gefunden');
+ if (!str_starts_with($name,$uid.'-'.$vid.'-')) fail(404,'Bild nicht gefunden');
+ $stmt=$db->prepare('SELECT id FROM vehicles WHERE id=? AND user_id=?');
+ $stmt->execute([$vid,$uid]);if (!$stmt->fetchColumn()) fail(404,'Bild nicht gefunden');
+ $path=__DIR__.'/vehicle-images/'.$name;
+ if (!is_file($path)) fail(404,'Bild nicht gefunden');
+ header('Content-Type: '.(['jpg'=>'image/jpeg','png'=>'image/png','webp'=>'image/webp'][pathinfo($path,PATHINFO_EXTENSION)]));
+ header('Content-Length: '.filesize($path));
+ header('Cache-Control: private, max-age=3600');
+ readfile($path);exit;
+}
 if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
  $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
