@@ -247,6 +247,14 @@
 </form>
 <div id="cloud-account" class="hide">
 <p id="cloud-identity"></p>
+<h3>Passwort ändern</h3>
+<form id="cloud-change-password">
+<label>Aktuelles Passwort<input name="current_password" type="password" autocomplete="current-password" required></label>
+<label>Neues Passwort (mindestens 12 Zeichen)<input name="new_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
+<label>Neues Passwort bestätigen<input name="confirm_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
+<button type="submit">Passwort ändern</button>
+<p><small>Danach werden alle Sitzungen beendet. Bitte erneut anmelden.</small></p>
+</form>
 <button id="cloud-check" type="button">Cloud-Einträge zählen</button>
 <button type="button" id="cloud-preferences-upload">Lokale Einstellungen und Fahrzeugfotos in die Cloud übernehmen</button>
 <p><small>Einmalige Übernahme nach der Datenbank-Erweiterung. Danach werden Änderungen an diesen Einstellungen automatisch synchronisiert.</small></p>
