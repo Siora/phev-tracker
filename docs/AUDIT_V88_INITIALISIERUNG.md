@@ -1,6 +1,6 @@
 # PHEV Tracker – Abhängigkeits- und Initialisierungsprüfung (v88)
 
-Stand: 2026-10-22. Ausgangsbasis: `main`, Frontend-Version 88. **Nur statische Prüfung; kein Browser-/Cloud-Test.**
+Stand: 2026-10-22. Ausgangsbasis: `main`, Frontend-Version 88. **Statische Analyse und isolierte ausführbare Node-/DOM-Tests; keine echten Browser-/Cloud-End-to-End-Tests.**
 
 ## Schutzbereich
 Keine Änderungen an `app.js`, `cloud.js`, `index.html`, `sw.js`, Datenbank, Cloud-Warteschlange, Einstellungen oder Benutzer-/Fahrzeugdaten. Der Audit liegt auf dem separaten Branch `audit/v88-initialization-dependencies`; `main` bleibt unverändert.
@@ -33,7 +33,7 @@ Keine Änderungen an `app.js`, `cloud.js`, `index.html`, `sw.js`, Datenbank, Clo
 4. `app.js:554`: `showCloudRecords` → Daten normalisieren → Backup vormerken → `render` → Zähler aktualisieren.
 5. `app.js:185-286`: `render` liest aktuelle globale `records`, `vehicles`, `settings`, Filter und DOM-Elemente; ruft Verbrauchsanalyse, Energiebilanz, Trend, Kostenvergleich und `AnalyticsCharts` auf. Timeline und Fahrzeugübersicht werden in derselben Funktion aufgebaut. Eine ungeschützte Exception vor `:264-285` kann diese Bereiche leer lassen.
 6. `app.js:531-552`: `applyCloudPreferences` aktualisiert Einstellungen und rendert erneut.
-7. `app.js:130-135`: `save` nutzt bei Cloud-Ansicht `queueCloudChanges`; `cloud.js:360,366` schreibt Queue/Cache und synchronisiert sequenziell. **Nicht refactoren, bevor Fehler- und Offline-Tests vorliegen.**
+7. `app.js:130-135`: `save` nutzt bei Cloud-Ansicht `queueCloudChanges`; `cloud.js:360,366` schreibt Queue/Cache und synchronisiert sequenziell. **Isolierte Fehler- und Offline-Queue-Tests liegen inzwischen vor; echte Browser-/Cloud-Integrationsprüfungen stehen aus.**
 
 ## Beobachtungen und Prüfbedarf
 
@@ -45,9 +45,23 @@ Keine Änderungen an `app.js`, `cloud.js`, `index.html`, `sw.js`, Datenbank, Clo
 - **Priorität niedrig:** `charts.js` wird in `index.html` ohne `?v=88` geladen. Der bestehende Test nimmt diese Datei ausdrücklich von der Query-Parameter-Prüfung aus. Cache-/Update-Verhalten gesondert prüfen.
 - **Testgrenze:** `tests/refactoring.test.cjs` prüft Syntax, Reihenfolge und einzelne Berechnungen, aber keine echten DOM-Renderzyklen, Browser-Ladefehler oder Cloud-Races.
 
+## Erweiterte Regressionstests (Audit-Branch)
+
+Die folgenden Tests führen produktive Funktionen unverändert mit künstlichen Daten aus; sie greifen weder auf produktiven Storage noch auf API-Endpunkte zu:
+
+| Testdatei | Schutzbereich |
+| --- | --- |
+| `tests/pagination-dom.test.cjs` | 20/5 Einträge je Seite, Zustandswechsel, leere Tabellen |
+| `tests/dashboard-contract.test.cjs` | Dashboard-Aufrufkette, Cloud-Callbacks, Queue-Vertrag |
+| `tests/consumption-dom.test.cjs` | Leere Daten, Kosten/100 km, gewichtete Strompreise, Ausreißer |
+| `tests/charts-dom.test.cjs` | Alle vier Diagrammtypen, SVG, DOM-Neuzeichnung |
+| `tests/cloud-queue.test.cjs` | Bestätigte Operationen, Fehlererhalt, Offline, leere Queue |
+
+Der GitHub-Actions-Lauf für Commit `0faf9bf3` ist erfolgreich abgeschlossen. Diese Tests sind keine Garantie für korrektes Verhalten in echten Browsern oder bei konkurrierenden Netzwerkantworten.
+
 ## Empfohlene sichere Fortsetzung
 
-1. Auf diesem Audit-Branch einen **read-only DOM-Regressionstest** mit synthetischen Einträgen/Fahrzeugen erstellen, ohne produktive Storage-/API-Aufrufe.
-2. Einen gezielten Test für Fehlerisolierung und Reihenfolge der Dashboard-Teilrenderer konzipieren.
-3. Queue-Tests ausschließlich mit In-Memory-Storage und gemocktem Netzwerk durchführen; niemals echte Cloud-Requests.
-4. Erst nach grünen Tests eine kleine, isolierte Änderung als eigenen PR vorschlagen. `main` und Deployment bis zur Freigabe nicht verändern.
+1. Als Nächstes einen **vollständigen Dashboard-DOM-Test** mit synthetischen Einträgen/Fahrzeugen ergänzen; besonders Timeline und Fahrzeugübersicht nach Filterwechseln.
+2. Die Auswirkungen eines Fehlers in einem Teilrenderer mit einem gezielten Test sichtbar machen; eine produktive Fehlerisolierung erst nach gesonderter Freigabe ändern.
+3. Asynchrone Cloud-Initialisierung und Queue-Zusammenführung getrennt mit gemockten Antworten prüfen.
+4. Danach einen **kleinen, reversiblen** Refactoring-Schritt in einem eigenen PR vorbereiten; `main` und Deployment bis zur ausdrücklichen Freigabe nicht verändern.
