@@ -54,6 +54,52 @@ function cookieRequestOriginAllowed(): bool {
  }
  return false;
 }
+// 3.0: Öffentliche Passwort-Wiederherstellung ohne Konten-Offenlegung.
+// SMTP-/Mailtransport und Migration müssen vor Freischaltung eingerichtet sein.
+if ($action === 'password-reset-request') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ $mail=email((string)($body['email']??''));
+ if (!filter_var($mail,FILTER_VALIDATE_EMAIL)) fail(400,'Ungültige E-Mail-Adresse');
+ $sender=(string)($config['reset_mail_from']??'');
+ if (!filter_var($sender,FILTER_VALIDATE_EMAIL)) fail(503,'Passwort-Wiederherstellung ist noch nicht eingerichtet');
+ $stmt=$db->prepare('SELECT id FROM users WHERE email=?');$stmt->execute([$mail]);$target=$stmt->fetchColumn();
+ if ($target) {
+  $stmt=$db->prepare('SELECT COUNT(*) FROM password_resets WHERE user_id=? AND created_at>DATE_SUB(UTC_TIMESTAMP(),INTERVAL 10 MINUTE)');
+  $stmt->execute([$target]);
+  if (!(int)$stmt->fetchColumn()) {
+   $token=bin2hex(random_bytes(32));$hash=hash('sha256',$token);
+   $stmt=$db->prepare('DELETE FROM password_resets WHERE user_id=? OR expires_at<UTC_TIMESTAMP()');$stmt->execute([$target]);
+   $stmt=$db->prepare('INSERT INTO password_resets(user_id,token_hash,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 30 MINUTE))');
+   $stmt->execute([$target,$hash]);
+   $link='https://tracker.web-produktion.com/#reset-token='.$token;
+   $subject='PHEV Tracker - Passwort zuruecksetzen';
+   $message="Zum Zuruecksetzen des Passworts diesen Link innerhalb von 30 Minuten oeffnen:\n".$link."\nFalls du dies nicht angefordert hast, ignoriere diese E-Mail.\n";
+   $headers=['From: '.$sender,'Content-Type: text/plain; charset=UTF-8'];
+   if (!mail($mail,$subject,$message,implode("\r\n",$headers))) {
+    $stmt=$db->prepare('DELETE FROM password_resets WHERE token_hash=?');$stmt->execute([$hash]);
+    error_log('PHEV password reset email delivery failed');
+   }
+  }
+ }
+ respond(200,['ok'=>true,'message'=>'Falls das Konto existiert, erhältst du eine E-Mail mit weiteren Schritten.']);
+}
+if ($action === 'password-reset-confirm') {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ $token=(string)($body['token']??'');$new=(string)($body['new_password']??'');
+ if (!preg_match('/^[a-f0-9]{64}$/D',$token)) fail(400,'Ungültiger Reset-Link');
+ if (strlen($new)<12 || strlen($new)>1024) fail(400,'Neues Passwort muss 12 bis 1024 Zeichen enthalten');
+ $db->beginTransaction();
+ try {
+  $stmt=$db->prepare('SELECT user_id FROM password_resets WHERE token_hash=? AND expires_at>UTC_TIMESTAMP() FOR UPDATE');
+  $stmt->execute([hash('sha256',$token)]);$target=$stmt->fetchColumn();
+  if (!$target){$db->rollBack();fail(400,'Reset-Link ist ungültig oder abgelaufen');}
+  $stmt=$db->prepare('UPDATE users SET password_hash=? WHERE id=?');$stmt->execute([password_hash($new,PASSWORD_DEFAULT),$target]);
+  $stmt=$db->prepare('DELETE FROM sessions WHERE user_id=?');$stmt->execute([$target]);
+  $stmt=$db->prepare('DELETE FROM password_resets WHERE user_id=?');$stmt->execute([$target]);
+  $db->commit();
+ }catch(Throwable $e){if($db->inTransaction())$db->rollBack();error_log((string)$e);fail(500,'Passwort konnte nicht zurückgesetzt werden');}
+ sessionCookie('',time()-3600);respond(200,['ok'=>true]);
+}
 if ($action === 'login') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405, 'POST erforderlich');
  $mail = email((string)($body['email'] ?? ''));

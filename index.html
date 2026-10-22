@@ -244,6 +244,19 @@
 <label>E-Mail<input name="email" type="email" autocomplete="username" required></label>
 <label>Passwort<input name="password" type="password" autocomplete="current-password" required></label>
 <button>Anmelden</button>
+<button id="cloud-forgot-password" type="button">Passwort vergessen?</button>
+</form>
+<form id="cloud-reset-request" class="hide">
+<h3>Passwort zurücksetzen</h3>
+<label>E-Mail-Adresse<input name="email" type="email" autocomplete="email" required></label>
+<button type="submit">Reset-Link anfordern</button>
+<button id="cloud-reset-cancel" type="button">Zurück zur Anmeldung</button>
+</form>
+<form id="cloud-reset-confirm" class="hide">
+<h3>Neues Passwort festlegen</h3>
+<label>Neues Passwort<input name="new_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
+<label>Passwort bestätigen<input name="confirm_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
+<button type="submit">Passwort zurücksetzen</button>
 </form>
 <div id="cloud-account" class="hide">
 <p id="cloud-identity"></p>
