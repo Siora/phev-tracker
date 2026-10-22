@@ -177,3 +177,7 @@ Die Dateien unter `docs/*V88*` sind historische Audit-Protokolle, **keine** Besc
 - Cloud-Preferences und SQL-Fahrzeugausgaben getrennt behandeln; keine lokalen Warteschlangen oder Nutzerdaten löschen.
 - Bei Änderungen an Dashboard-Widgets deren DOM-IDs, Diagramm-Initialisierung und Cloud-Restore prüfen.
 - Backend-Migrationen und API-Deployment nur gesondert und mit Backup durchführen.
+
+## CI-Abdeckung vor Version 3.0
+
+Der Workflow `.github/workflows/test-frontend.yml` führt die isolierten Node-Regressionstests inklusive `tests/vehicle-cost-breakdown.test.cjs` aus. Browserintegration und schreibgeschützte Produktionsprüfung bleiben in ihren getrennten Workflows, da sie eine Browser- bzw. Netzwerkumgebung benötigen. Änderungen an `release.json`, `scripts/`, `sw.js` oder `styles.css` lösen ebenfalls den Regressionstest aus. Die explizite Testliste im Workflow muss bei neu angelegten Tests erweitert werden.
