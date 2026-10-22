@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 88 · Branch `main`
+Stand: Version 2.3 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -11,13 +11,14 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
 | `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
 | `consumption-analysis.js` | Archivierter, derzeit **nicht eingebundener** Versuch der Analyse-Auslagerung aus v86 |
-| `vehicle-costs.js` | Reine TCO-Berechnung und Währungsumrechnung, ohne DOM oder Cloud-Nebenwirkungen |
+| `vehicle-costs.js` | Reine TCO-Berechnung, Währungsumrechnung und Wartungserinnerungen, ohne DOM oder Cloud-Nebenwirkungen |
 | `csv-import-utils.js` | CSV-Zeilenparser und Datumsnormalisierung für den Import |
 | `auto-backup.js` | Kontobezogene, rotierende lokale Sicherungen ohne Cloud-Eingriff |
 | `pdf-report.js` | jsPDF-basierte Layout-Klasse `PhevPdfReport` |
 | `app.js` | Einträge, Fahrzeugauswahl, Dashboard, Filter, Ladeorte/Anbieter, Kosten, CSV-/PDF-Export, lokale Backups |
 | `cloud.js` | Anmeldung, Cloud-API, Fahrzeugverwaltung, Benutzerverwaltung, Synchronisationswarteschlange und Kontoeinstellungen |
 | `charts.js` | Diagramme aus bereits gefilterten Einträgen |
+| `intelligent-analytics.js` | Intelligente Auswertung und jährliche Kostenprognose |
 | `styles.css` | Responsives Design und spätere visuelle Overrides |
 | `sw.js` | Cache der PWA-Dateien und Offline-Verfügbarkeit |
 | `manifest.webmanifest` | Installationsmetadaten |
@@ -42,7 +43,7 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 
 ### Cloud
 
-`cloud.js` kommuniziert mit `https://tracker.web-produktion.com/api/api.php`. Die Anmeldung verwendet eine Cookie-Sitzung; Anfragen verwenden `credentials: 'same-origin'`. Fahrzeuge, Einträge und Kontoeinstellungen werden über die vorhandenen API-Aktionen geladen und gespeichert. Zusätzliche Fahrzeugausgaben stehen im Preferences-Feld `vehicle_expenses`; sie sind keine eigene SQL-Tabelle.
+`cloud.js` kommuniziert mit `https://tracker.web-produktion.com/api/api.php`. Die Anmeldung verwendet eine Cookie-Sitzung; Anfragen verwenden `credentials: 'same-origin'`. Fahrzeuge, Einträge und Kontoeinstellungen werden über die vorhandenen API-Aktionen geladen und gespeichert. Zusätzliche Fahrzeugausgaben werden in der SQL-Tabelle `vehicle_expenses` über die API-Aktionen `vehicle-expenses`, `vehicle-expense-save` und `vehicle-expense-delete` verwaltet. Sie sind **nicht** Teil des Preferences-Feldes.
 
 ## 3. Wichtige Abläufe
 
@@ -155,3 +156,25 @@ Die Datei `tests/refactoring.test.cjs` enthält reine Node.js-Tests ohne Netzwer
 6. Existenz der Cloud-Warteschlange und der Preferences-Schnittstellen.
 
 **Ausführung:** `node --test tests/refactoring.test.cjs` im Repository-Stammverzeichnis. GitHub Actions führt diese Tests nun **vor** dem SFTP-Upload aus; bei Fehlschlag darf kein Upload stattfinden. Es handelt sich um statische und isolierte Regressionstests, **nicht** um einen vollständigen Browser-/iPhone-Test. Da keine ausgelieferten App-Dateien geändert wurden, bleibt die sichtbare Version 88 erhalten.
+
+
+## 9. Stand der Versionen 2.1–2.3 (vor 3.0)
+
+- **2.1:** Intelligente Jahreskostenprognose in `intelligent-analytics.js`. Prognosen sind Näherungen und benötigen ausreichend erfasste Monate.
+- **2.2:** Wartungserinnerungen verwenden `next_service_date` vorhandener SQL-Fahrzeugausgaben. Es werden keine zusätzlichen Kosten erzeugt.
+- **2.3:** Dashboard-Kacheln können ausgeblendet und umsortiert werden. Die lokale Einstellung `phev-dashboard-layout-v1` wird zusätzlich über `dashboard_layout` in den Cloud-Preferences transportiert, sofern der Cloud-Einstellungsabgleich erfolgt.
+
+### Versions- und Cache-Pflege
+
+Die sichtbare Versionsnummer in `index.html`, die Asset-Parameter `?v=NNN` in `index.html` und `sw.js` sowie der Cache-Name `phev-tracker-vNNN` müssen **gleichzeitig** aktualisiert werden. Beispiel: Version 2.3 → `203`. Der Regressionstest in `tests/refactoring.test.cjs` überprüft diese Konsistenz; seine Versionsanzeige-Erwartung muss ebenfalls angepasst werden. Dies ist derzeit ein manueller Release-Schritt und ein Kandidat für eine spätere zentrale Versionsverwaltung.
+
+### Historische Refactoring-Dokumente
+
+Die Dateien unter `docs/*V88*` sind historische Audit-Protokolle, **keine** Beschreibung des aktuellen Releases. Die nicht eingebundene Datei `consumption-analysis.js` dokumentiert einen zurückgenommenen Versuch; sie darf nicht ohne Browser-Regressionsprüfung reaktiviert werden.
+
+### Vor Version 3.0 prüfen
+
+- Offline-Cache und Asset-Versionen mit jeder Veröffentlichung testen.
+- Cloud-Preferences und SQL-Fahrzeugausgaben getrennt behandeln; keine lokalen Warteschlangen oder Nutzerdaten löschen.
+- Bei Änderungen an Dashboard-Widgets deren DOM-IDs, Diagramm-Initialisierung und Cloud-Restore prüfen.
+- Backend-Migrationen und API-Deployment nur gesondert und mit Backup durchführen.
