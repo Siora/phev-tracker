@@ -57,6 +57,7 @@ test('Eintragshistorie behält sieben Spalten und Seitengröße 20', () => {
   assert.ok(helper.includes("$('entries')"));
   assert.ok(helper.includes('window.paginateTable(entries,table,tbody,ordered,20,'));
   assert.ok(helper.includes("edit.textContent='Bearbeiten'"));
+  assert.ok(helper.includes('edit.onclick=()=>beginEntryEdit(x);'));
   assert.ok(helper.includes("remove.textContent='Löschen'"));
 });
 
