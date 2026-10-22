@@ -65,6 +65,18 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.equal(await page.locator('#vehicleFilter option').count(),8);
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
+    // Beide Navigationsleisten müssen existieren und dieselbe Seite steuern.
+    for(const selector of ['#entries','#vehicle-list','#cloud-users','#managed-locations-list','#managed-providers-list']){
+      assert.equal(await page.locator(selector+' > nav.table-pagination').count(),2,selector+': oben und unten');
+    }
+    const entryNav=page.locator('#entries > nav.table-pagination');
+    await entryNav.first().locator('button').last().click();
+    assert.equal(await page.locator('#entries tbody tr').count(),5,'Einträge: zweite Seite mit 5 Zeilen');
+    assert.equal(await entryNav.first().locator('span').text(),await entryNav.last().locator('span').text(),'Seitentexte synchron');
+    assert.match(await entryNav.last().locator('span').text(),/Seite 2 \/ 2/);
+    await entryNav.last().locator('button').first().click();
+    assert.equal(await page.locator('#entries tbody tr').count(),20,'Untere Navigation führt zurück');
+    assert.match(await entryNav.first().locator('span').text(),/Seite 1 \/ 2/);
     await page.evaluate(()=>tab('add'));
     await page.locator('#entries tbody tr button').first().click();
     assert.equal(await page.locator('#form').getAttribute('data-edit-id')!==null,true);
