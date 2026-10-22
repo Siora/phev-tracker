@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 82 · Branch `main`
+Stand: Version 84 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -9,6 +9,8 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | Datei | Verantwortung |
 | --- | --- |
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
+| `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
+| `pdf-report.js` | jsPDF-basierte Layout-Klasse `PhevPdfReport` |
 | `app.js` | Einträge, Fahrzeugauswahl, Dashboard, Filter, Ladeorte/Anbieter, Kosten, CSV-/PDF-Export, lokale Backups |
 | `cloud.js` | Anmeldung, Cloud-API, Fahrzeugverwaltung, Benutzerverwaltung, Synchronisationswarteschlange und Kontoeinstellungen |
 | `charts.js` | Diagramme aus bereits gefilterten Einträgen |
@@ -60,7 +62,7 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 
 ### Tabellen und Seitennavigation
 
-Die gemeinsame Funktion `window.paginateTable(container, table, tbody, items, pageSize, key, makeRow)` in `app.js` zeigt nur einen Ausschnitt der bereits vorhandenen Datensätze. Sie ändert weder Einträge noch die Datenbank.
+Die gemeinsame Funktion `window.paginateTable(container, table, tbody, items, pageSize, key, makeRow)` in `pagination.js` zeigt nur einen Ausschnitt der bereits vorhandenen Datensätze. Sie ändert weder Einträge noch die Datenbank.
 
 | Liste | Größe pro Seite |
 | --- | ---: |
@@ -74,7 +76,7 @@ Die Seitennummer wird während der geöffneten Sitzung je Liste gespeichert und 
 
 ### PDF-Berichte
 
-`exportPdfReport(mode)` berechnet den Bericht aus Einträgen und zusätzlichen Fahrzeugausgaben. `PhevPdfReport` setzt die Darstellung mit **jsPDF** um. Die Bibliothek wird als `jspdf.umd.min.js` vom selben Webserver geladen und durch den Deployment-Workflow aus der festgelegten npm-Version bereitgestellt. PDF-Erstellung findet im Browser statt; es werden dafür keine Berichtsdaten an einen PDF-Dienst gesendet.
+`exportPdfReport(mode)` berechnet den Bericht aus Einträgen und zusätzlichen Fahrzeugausgaben. `PhevPdfReport` aus `pdf-report.js` setzt die Darstellung mit **jsPDF** um. Die Bibliothek wird als `jspdf.umd.min.js` vom selben Webserver geladen und durch den Deployment-Workflow aus der festgelegten npm-Version bereitgestellt. PDF-Erstellung findet im Browser statt; es werden dafür keine Berichtsdaten an einen PDF-Dienst gesendet.
 
 ### Service Worker und Releases
 
@@ -106,3 +108,9 @@ Die Seitennummer wird während der geöffneten Sitzung je Liste gespeichert und 
 - `app.js` und `cloud.js` enthalten mehrere große Funktionen und kompakte Einzeiler. Eine spätere Modulaufteilung sollte separat und mit Regressionstests erfolgen.
 - `styles.css` enthält ältere Themes und mehrere Override-Blöcke. Eine Bereinigung erfordert visuelle Tests auf iPhone und Desktop.
 - Ein erfolgreicher GitHub-Commit allein beweist keinen erfolgreichen Hetzner-Upload oder Browser-Test.
+
+## 7. Refactoring-Stand (v84)
+
+**Erste abgeschlossene Etappe:** Die Tabellen-Pagination und das PDF-Layout wurden unverändert aus `app.js` in eigenständige Dateien verschoben. `app.js` enthält weiterhin die Berechnung der Berichte und die Eintragsverwaltung. Die Reihenfolge der `defer`-Skripte in `index.html` ist relevant: jsPDF → Diagramme → Pagination → PDF-Layout → Cloud → App. Der Hetzner-Workflow und der Service-Worker-Cache berücksichtigen beide neuen Dateien.
+
+**Nächste mögliche Etappen:** Diagramm-/Auswertungslogik, Import-/Exportfunktionen und Fahrzeugkostenverwaltung weiter isolieren. Vor jedem Schritt Syntax-, Lade- und Funktionstests durchführen. Die Datenhaltung und das API-Protokoll bleiben unangetastet.
