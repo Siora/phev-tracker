@@ -19,7 +19,7 @@ window.PhevTco = Object.freeze({
     const latest=new Map();
     for(const expense of expenses){
       if(vehicleId&&String(expense.vehicle_id)!==String(vehicleId))continue;
-      if(!expense.next_service_date||!/^\\d{4}-\\d{2}-\\d{2}$/.test(expense.next_service_date))continue;
+      if(!expense.next_service_date||!/^\d{4}-\d{2}-\d{2}$/.test(expense.next_service_date))continue;
       const key=String(expense.vehicle_id)+'|'+String(expense.category);
       const existing=latest.get(key);
       if(!existing||String(expense.date)>String(existing.date))latest.set(key,expense);
