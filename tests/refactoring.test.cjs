@@ -136,8 +136,8 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
- assert.match(html,/intelligent-analytics\.js\?v=201/);
- assert.match(sw,/intelligent-analytics\.js\?v=201/);
+ assert.match(html,/intelligent-analytics\.js\?v=202/);
+ assert.match(sw,/intelligent-analytics\.js\?v=202/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
@@ -161,10 +161,10 @@ test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwer
  assert.match(app,/tab\(restoredPage\(\)\)/);
  assert.match(html,/onclick="tab\('cloud'\)">Konto/);
 });
-test('Angezeigte Version 2.1 verwendet konsistent den internen Cache-Code 201', () => {
+test('Angezeigte Version 2.2 verwendet konsistent den internen Cache-Code 202', () => {
  assert.match(html, /Version 2\.1/);
- assert.match(html, /app\.js\?v=201/);
- assert.match(sw, /phev-tracker-v201/);
+ assert.match(html, /app\.js\?v=202/);
+ assert.match(sw, /phev-tracker-v202/);
 });
 
 test('Kostenprognose vermeidet Schätzung bei zu wenig Daten und rechnet volle Monate hoch',()=>{
@@ -177,4 +177,21 @@ test('Kostenprognose vermeidet Schätzung bei zu wenig Daten und rechnet volle M
  assert.equal(forecast(months,2027,new Date('2026-10-15')).available,false);
  assert.equal(forecast(months,2025,new Date('2026-10-15')).projected,300);
  assert.match(read('index.html'),/id="intelligence-forecast"/);
+});
+
+test('Serviceerinnerungen verwenden vorhandene Ausgaben ohne Doppelzählung',()=>{
+ const sandbox={window:{},Date};
+ vm.runInNewContext(read('vehicle-costs.js'),sandbox);
+ const reminders=sandbox.window.PhevTco.reminders;
+ const entries=[
+  {id:'old',vehicle_id:1,category:'Service',date:'2025-01-01',next_service_date:'2026-10-01'},
+  {id:'new',vehicle_id:1,category:'Service',date:'2026-06-01',next_service_date:'2026-11-01'},
+  {id:'other',vehicle_id:2,category:'Reifen',date:'2026-07-01',next_service_date:'2026-10-20'}
+ ];
+ const result=reminders(entries,'1',new Date(2026,9,22));
+ assert.equal(result.length,1);
+ assert.equal(result[0].id,'new');
+ assert.equal(result[0].days,10);
+ assert.equal(reminders(entries,'2',new Date(2026,9,22))[0].overdue,true);
+ assert.match(read('index.html'),/id="expense-reminders"/);
 });
