@@ -69,6 +69,7 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     for(const selector of ['#entries','#vehicle-list','#cloud-users','#managed-locations-list','#managed-providers-list']){
       assert.equal(await page.locator(selector+' > nav.table-pagination').count(),2,selector+': oben und unten');
     }
+    await page.evaluate(()=>tab('add'));
     const entryNav=page.locator('#entries > nav.table-pagination');
     await entryNav.first().locator('button').last().click();
     assert.equal(await page.locator('#entries tbody tr').count(),5,'Einträge: zweite Seite mit 5 Zeilen');
