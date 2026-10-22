@@ -82,7 +82,11 @@ function sendResetMail(array $config,string $recipient,string $subject,string $m
   if ($read()!==220) return false;
   $send('EHLO tracker.web-produktion.com');if ($read()!==250)return false;
   $send('STARTTLS');if ($read()!==220)return false;
-  if (!stream_socket_enable_crypto($socket,true,STREAM_CRYPTO_METHOD_TLS_CLIENT))return false;
+  // TLS-Zertifikat und Hostname bleiben zwingend geprüft; Warnungen dürfen kein JSON beschädigen.
+  if (@stream_socket_enable_crypto($socket,true,STREAM_CRYPTO_METHOD_TLS_CLIENT)!==true) {
+   error_log('PHEV SMTP STARTTLS failed: check configured host against certificate SAN and server TLS settings');
+   return false;
+  }
   $send('EHLO tracker.web-produktion.com');if ($read()!==250)return false;
   $send('AUTH LOGIN');if ($read()!==334)return false;
   $send(base64_encode($username));if ($read()!==334)return false;
