@@ -2,7 +2,7 @@
 
 Deutschsprachige Progressive Web App zur Verwaltung von Plug-in-Hybrid-Fahrzeugen: Ladevorgänge, Tankungen, Kilometerstände, Energie- und Fahrzeugkosten, Wartungserinnerungen sowie Auswertungen in CHF/EUR.
 
-**Aktueller Stand:** Version 2.3 (individuell konfigurierbares Dashboard).
+**Aktueller Stand:** Version 3.0 in Entwicklung, auf Basis von Version 2.3. Die Kontofunktionen sind im Quellcode integriert; produktive Abnahme und Backend-Bereitstellung sind separat zu prüfen. Siehe [Roadmap 3.0](ROADMAP-3.0.md).
 
 ## Betrieb und Veröffentlichung
 
