@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 2.3 · Branch `main`
+Stand: Version 3.0 in Entwicklung · Branch `main` · [Roadmap 3.0](ROADMAP-3.0.md)
 
 ## 1. Systemüberblick
 
