@@ -69,6 +69,11 @@ function harness() {
   };
   // Monatsvergleich in derselben VM laden, damit der Dashboard-Ausschnitt
   // nach der Auslagerung weiterhin mit der echten Funktion ausgeführt wird.
+  // Der Flotten-Helfer wird im selben DOM-Sandbox-Kontext wie render() geladen.
+  const fleetStart = app.indexOf('function renderDashboardFleetOverview(');
+  const fleetEnd = app.indexOf('\nfunction renderDashboardTimeline(', fleetStart);
+  assert.ok(fleetStart >= 0 && fleetEnd > fleetStart);
+  vm.runInNewContext(app.slice(fleetStart, fleetEnd), sandbox);
   const timelineStart = app.indexOf('function renderDashboardTimeline(');
   const timelineEnd = app.indexOf('\nfunction renderMonthComparison(', timelineStart);
   assert.ok(timelineStart >= 0 && timelineEnd > timelineStart);
