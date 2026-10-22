@@ -1051,3 +1051,24 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .dashboard-layout-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(128,128,128,.18)}
 .dashboard-layout-row label{flex:1;display:flex;align-items:center;gap:8px;min-width:0}
 .dashboard-layout-row button{min-width:38px;padding:7px}
+
+/* Desktop-Verwaltung: Inhaltsbreite nicht durch Dashboard-Karten begrenzen.
+ * Tabellen scrollen nur innerhalb ihrer eigenen Fläche, niemals aus der Karte heraus. */
+#charging-management,#add,#vehicles{min-width:0;width:100%}
+#charging-management>.dashboard-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+  width:100%;
+}
+#charging-management>.dashboard-actions>.quick-card{min-width:0;width:100%}
+#charging-management .quick-card form{min-width:0}
+#charging-management .quick-card input,#charging-management .quick-card select{max-width:100%}
+#managed-locations-list,#managed-providers-list{width:100%;max-width:100%;overflow-x:auto}
+#add .entry-table-section{min-width:0;width:100%}
+#add #entries{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden}
+#add .entry-history-table{min-width:720px;width:100%}
+#vehicles #vehicle-list{width:100%;max-width:100%;overflow-x:auto}
+@media(max-width:900px){
+  #charging-management>.dashboard-actions{grid-template-columns:minmax(0,1fr)}
+}
