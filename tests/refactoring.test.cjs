@@ -136,10 +136,19 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
- assert.match(html,/intelligent-analytics\.js\?v=93/);
- assert.match(sw,/intelligent-analytics\.js\?v=93/);
+ assert.match(html,/intelligent-analytics\.js\?v=94/);
+ assert.match(sw,/intelligent-analytics\.js\?v=94/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
  assert.match(analytics,/Array\.from\(\{length:12\}/);
+});
+
+test('v94: mobile analysis table has sticky month column and all chart bars fit', () => {
+ const html=read('index.html'),css=read('styles.css'),app=read('app.js');
+ assert.match(html,/class="intelligence-table-scroll"/);
+ assert.match(html,/class="intelligence-table"/);
+ assert.match(css,/\.intelligence-table th:first-child\{position:sticky/);
+ assert.match(css,/\.intelligence-chart\{width:100%;height:240px;overflow-x:hidden/);
+ assert.match(app,/intelligence-month-active/);
 });
