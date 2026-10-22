@@ -122,6 +122,11 @@ function tab(t){
   render();
   window.scrollTo(0,0)
 }
+/**
+ * Persistiert Änderungen an Lade-/Tankeinträgen und aktualisiert die Anzeige.
+ * Die Cloud-Warteschlange wird getrennt in cloud.js verarbeitet: ein Verbindungsfehler
+ * darf keine lokal noch ausstehenden Änderungen beseitigen.
+ */
 function save(){
   if(cloudView){window.queueCloudChanges(records);scheduleAutomaticBackup();render();return;}
   localStorage.setItem(key,JSON.stringify(records));
@@ -173,6 +178,16 @@ function renderConsumptionInsights(items,charges,fuel,distance){
 
 /* V82 — shared client-side pagination; never modifies underlying records. */
 const listPageState=new Map();
+/**
+ * Clientseitige Seitennavigation für vorhandene DOM-Tabellen.
+ * @param {HTMLElement} container - Zielbereich inklusive Navigation.
+ * @param {HTMLTableElement} table - Bereits angelegte Tabelle mit Kopfzeile.
+ * @param {HTMLTableSectionElement} tbody - Zu ersetzende Tabellenzeilen.
+ * @param {Array} items - Gesamtliste; wird weder verändert noch gekürzt.
+ * @param {number} pageSize - Einträge pro Seite (20 bzw. 5).
+ * @param {string} key - Eindeutiger Schlüssel für die aktuelle Seite.
+ * @param {Function} makeRow - Erzeugt eine Tabellenzeile mit Aktionen.
+ */
 window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
  const pages=Math.max(1,Math.ceil(items.length/pageSize));
  let page=Math.min(Math.max(1,listPageState.get(key)||1),pages);
@@ -191,6 +206,11 @@ window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
  next.onclick=()=>{if(page<pages){page++;show();}};
  controls.append(previous,info,next);container.append(table,controls);show();
 };
+/**
+ * Rendert Dashboard, Tabellen und Auswertungen aus dem aktuellen Datenbestand.
+ * Nebenwirkung: ersetzt DOM-Inhalte; speichert keine Datensätze und sendet keine API-Anfrage.
+ * Die vollständige Eintragsliste wird erst beim Tabellenaufbau paginiert.
+ */
 function render(){
   updateLoginNotice();
   const now=new Date(),period=$('period').value;
@@ -374,6 +394,11 @@ function chargingData(){try{const d=JSON.parse(localStorage.getItem(managedCharg
 function storeChargingData(d){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));window.syncManagedCharging?.(d);renderChargingManagement();}
 window.getManagedCharging=()=>chargingData();
 window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.providers)){localStorage.setItem(managedChargingKey+'-'+chargingAccountKey(),JSON.stringify(d));renderChargingManagement();}};
+/**
+ * Baut die Verwaltungstabellen für Ladeorte und Anbieter auf.
+ * Je Liste werden fünf Datensätze angezeigt; Bearbeiten/Löschen referenziert
+ * weiterhin das unveränderte Originalobjekt aus chargingData().
+ */
 function renderChargingManagement(){
  const data=chargingData();
  for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
@@ -486,6 +511,11 @@ let vehicleExpenses=[];
 function expenseCurrency(amount,currency){return currency===settings.base?amount:settings.base==='CHF'?amount*settings.rate:amount/settings.rate;}
 function applyVehicleExpenses(value){if(!Array.isArray(value))return;vehicleExpenses=value.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);renderVehicleExpenses();}
 window.setVehicleExpenses=applyVehicleExpenses;
+/**
+ * Stellt zusätzliche Fahrzeugausgaben und die daraus abgeleitete TCO-Näherung dar.
+ * Beträge werden in die eingestellte Basiswährung umgerechnet; Kosten/km basieren
+ * nur auf vorhandenen Kilometerständen und sind keine vollständige Abschreibung.
+ */
 function renderVehicleExpenses(){
  const form=$('expense-form'),list=$('expense-list'),summary=$('expense-summary');if(!form||!list||!summary)return;
  const select=form.elements.vehicle_id,previous=select.value;
@@ -815,6 +845,12 @@ function renderChargingTypes(charges){
 /* Eigenständiger PDF-Export ohne externe Bibliothek oder Serverübertragung. */
 
 /* Druckfertiger A4-Bericht: Vektordiagramme, Kennzahlen und paginierte Tabellen. */
+/**
+ * Erstellt Monats- oder Jahresberichte vollständig im Browser mit jsPDF.
+ * Datenbasis: erfasste Ladungen/Tankungen und zusätzliche Fahrzeugausgaben.
+ * Keine serverseitige PDF-Erstellung und keine Änderung der Quelldaten.
+ * @param {'month'|'year'} mode - Berichtszeitraum.
+ */
 function exportPdfReport(mode){
  const year=Number($('report-year').value),month=$('report-month').value,vehicleId=$('report-vehicle').value;
  if(!Number.isInteger(year)||year<2020||year>2100){alert('Bitte gültiges Jahr auswählen.');return;}
@@ -869,6 +905,11 @@ function exportPdfReport(mode){
  const link=document.createElement('a');link.href=url;link.download='phev-'+(mode==='month'?'monat-':'jahr-')+period+'.pdf';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
 
+/**
+ * Layout-Helfer für die jsPDF-Bibliothek. Koordinaten der bestehenden Berichte
+ * werden von unten nach oben angegeben und in text()/rect() auf PDF-Koordinaten
+ * umgerechnet. Seitenwechsel und Tabellenkopf werden zentral verwaltet.
+ */
 class PhevPdfReport{
  constructor(title,vehicle,currency){
   if(!window.jspdf?.jsPDF)throw Error('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.');
