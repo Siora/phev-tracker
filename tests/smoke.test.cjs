@@ -13,9 +13,9 @@ const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const html = read('index.html');
 const sw = read('sw.js');
-const scripts = [...html.matchAll(/<script\\s+[^>]*src="([^"]+)"/g)].map(match => match[1]);
+const scripts = [...html.matchAll(/<script\s+[^>]*src="([^"]+)"/g)].map(match => match[1]);
 const localScripts = scripts.map(src => src.split('?')[0]);
-const version = html.match(/styles\\.css\\?v=(\\d+)/)?.[1];
+const version = html.match(/styles\.css\?v=(\d+)/)?.[1];
 
 test('all referenced local JavaScript files exist', () => {
   for (const file of localScripts) {
@@ -56,7 +56,7 @@ test('deployment uploads all shipped scripts but never the API', () => {
     if (file === 'jspdf.umd.min.js') continue;
     assert.ok(upload.includes(file), 'deployment missing ' + file);
   }
-  assert.ok(!/for file in[^\\n]*api\\//.test(upload), 'server API must never be deployed');
+  assert.ok(!/for file in[^\n]*api\//.test(upload), 'server API must never be deployed');
 });
 
 test('TCO calculation stays pure and matches known CHF/EUR example', () => {
@@ -84,7 +84,7 @@ test('TCO calculation stays pure and matches known CHF/EUR example', () => {
 test('CSV parser retains quoted delimiters and normalizes dates', () => {
   const context = {};
   vm.runInNewContext(read('csv-import-utils.js'), context);
-  const rows = context.csvRows('Datum;Ort;Kosten\\r\\n22.10.2026;"Zürich; Zentrum";12.50\\r\\n');
+  const rows = context.csvRows('Datum;Ort;Kosten\r\n22.10.2026;"Zürich; Zentrum";12.50\r\n');
   assert.equal(rows.length, 2);
   assert.equal(rows[1][1], 'Zürich; Zentrum');
   assert.equal(context.date('22.10.2026'), '2026-10-22');
