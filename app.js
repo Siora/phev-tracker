@@ -204,6 +204,35 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  *
  * Keine Cloud-Zugriffe und keine Änderungen an der Fahrzeugübersicht.
  */
+/**
+ * Rendert die Fahrzeugübersicht im Dashboard unabhängig vom Zeitraumfilter.
+ *
+ * Verwendet wie in v88 alle Fahrzeuge und alle Einträge zur Zählung.
+ * Die Schaltflächen setzen den Fahrzeugfilter, rendern das Dashboard erneut
+ * und scrollen an den Seitenanfang. Es werden keine Daten verändert.
+ *
+ * Wichtig: Diese Funktion ist nicht an den Timeline- oder Monatsvergleich-
+ * Container gekoppelt, damit die Fahrzeugübersicht stets sichtbar bleibt.
+ */
+function renderDashboardFleetOverview(){
+  const fleet=$('fleet-overview');
+  fleet.replaceChildren();
+  vehicles.forEach(v=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='fleet-row';
+    const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;
+    btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';
+    btn.onclick=()=>{
+      $('vehicleFilter').value=String(v.id);
+      render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    fleet.append(btn);
+  });
+  if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
+}
+
 function renderDashboardTimeline(filtered){
   const recent=$('recent-entries');recent.replaceChildren();
   filtered.slice().sort(compareRecordDateTime).slice(0,8).forEach(r=>{
@@ -355,7 +384,7 @@ function render(){
   AnalyticsCharts.price($('pricechart'), filtered, settings.base, conv);
   AnalyticsCharts.providers($('providerchart'), charges);
   renderDashboardTimeline(filtered);
-  const fleet=$('fleet-overview');fleet.replaceChildren();vehicles.forEach(v=>{const btn=document.createElement('button');btn.type='button';btn.className='fleet-row';const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';btn.onclick=()=>{$('vehicleFilter').value=String(v.id);render();window.scrollTo({top:0,behavior:'smooth'});};fleet.append(btn);});if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
+  renderDashboardFleetOverview();
   renderMonthComparison(filtered);
   // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
   const entries=$('entries');
