@@ -992,3 +992,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .expense-table-actions button{width:auto!important;margin:2px 5px 2px 0!important;padding:8px 10px!important;font-size:12px}
 .expense-table-actions button:last-child{background:#53313a;color:#ffe0e5}
 #expense-list .table-pagination{min-width:0;position:sticky;left:0}
+
+/* V91: hidden-Attribut muss auch bei flex-basierter Navigation greifen. */
+.table-pagination[hidden]{display:none!important}
