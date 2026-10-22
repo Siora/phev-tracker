@@ -50,7 +50,7 @@ test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht',
     'AnalyticsCharts.price(',
     'AnalyticsCharts.providers(',
     'renderDashboardTimeline(filtered);',
-    "$('fleet-overview')",
+    'renderDashboardFleetOverview();',
     "$('entries')",
     'window.paginateTable(entries,table,tbody,ordered,20,'
   ]);
@@ -60,6 +60,14 @@ test('Timeline-Helfer zeichnet weiterhin den vorgesehenen DOM-Container', () => 
   const helper = section(app, 'function renderDashboardTimeline(filtered){', '\nfunction renderMonthComparison(');
   assert.ok(helper.includes("$('recent-entries')"));
   assert.ok(helper.includes('filtered.slice().sort(compareRecordDateTime).slice(0,8)'));
+});
+
+test('Flottenübersicht bleibt separat an ihren DOM-Container gebunden', () => {
+  const fleet = section(app, 'function renderDashboardFleetOverview(){', '\\nfunction renderDashboardTimeline(');
+  assert.ok(fleet.includes("$('fleet-overview')"));
+  assert.ok(fleet.includes('vehicles.forEach('));
+  assert.ok(fleet.includes('render();'));
+  assert.ok(fleet.includes('Bitte ein Fahrzeug anlegen.'));
 });
 
 test('Cloud-Datenübernahme und Preferences stoßen weiterhin Rendering an', () => {
