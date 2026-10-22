@@ -10,7 +10,6 @@ Die Anwendung ist eine deutschsprachige Progressive Web App (PWA) mit einer HTML
 | --- | --- |
 | `index.html` | Seiten, Formulare, Navigation und Einbindung der Skripte |
 | `pagination.js` | Wiederverwendbare Tabellen-Pagination (ohne Änderung der Quelldaten) |
-| `consumption-analysis.js` | Archivierter, derzeit **nicht eingebundener** Versuch der Analyse-Auslagerung aus v86 |
 | `vehicle-costs.js` | Reine TCO-Berechnung, Währungsumrechnung und Wartungserinnerungen, ohne DOM oder Cloud-Nebenwirkungen |
 | `csv-import-utils.js` | CSV-Zeilenparser und Datumsnormalisierung für den Import |
 | `auto-backup.js` | Kontobezogene, rotierende lokale Sicherungen ohne Cloud-Eingriff |
@@ -130,7 +129,7 @@ Die Verbrauchs- und Energiebilanzfunktionen (`fuelEnergyFactor`, `energyBalance`
 
 ## 10. Dashboard-Stabilisierung v87
 
-Nach v86 meldete ein iPhone-Test leere Diagramme, Timeline und Fahrzeugübersicht. Zur Risikobegrenzung wurde die v86-Auslagerung der Verbrauchsanalysen rückgängig gemacht: Die unveränderten Funktionen stehen wieder in `app.js`. `consumption-analysis.js` bleibt vorerst nur als ungenutzte Datei im Repository und wird **nicht** in HTML, Service Worker oder Hetzner-Upload eingebunden. Dies ist ein gezielter Rollback des letzten Refactorings, kein Löschen von Nutzerdaten. Vor einem erneuten Auslagern sind Browser-Konsole, Ladefehler und ein Dashboard-Regressionstest zu prüfen.
+Nach v86 meldete ein iPhone-Test leere Diagramme, Timeline und Fahrzeugübersicht. Zur Risikobegrenzung wurde die v86-Auslagerung der Verbrauchsanalysen rückgängig gemacht: Die unveränderten Funktionen stehen wieder in `app.js`. Die ehemals ungenutzte Datei `consumption-analysis.js` wurde vor Version 3.0 aus dem Repository entfernt. Sie war nicht in HTML, Service Worker oder Hetzner-Upload eingebunden. Dies ist ein gezielter Rollback des letzten Refactorings, kein Löschen von Nutzerdaten. Vor einem erneuten Auslagern sind Browser-Konsole, Ladefehler und ein Dashboard-Regressionstest zu prüfen.
 
 ## 11. Vorsichtige TCO-Auslagerung v88
 
@@ -170,7 +169,7 @@ Die sichtbare Versionsnummer in `index.html`, die Asset-Parameter `?v=NNN` in `i
 
 ### Historische Refactoring-Dokumente
 
-Die Dateien unter `docs/*V88*` sind historische Audit-Protokolle, **keine** Beschreibung des aktuellen Releases. Die nicht eingebundene Datei `consumption-analysis.js` dokumentiert einen zurückgenommenen Versuch; sie darf nicht ohne Browser-Regressionsprüfung reaktiviert werden.
+Die Dateien unter `docs/*V88*` sind historische Audit-Protokolle, **keine** Beschreibung des aktuellen Releases. Der deaktivierte Analyse-Rollback aus v86/v87 wurde als ungenutzte Datei entfernt. Die produktiven Verbrauchsfunktionen bleiben in `app.js`; historische Audit-Protokolle in `docs/` bleiben als Kontext erhalten.
 
 ### Vor Version 3.0 prüfen
 
