@@ -70,7 +70,7 @@ test('Cloud-Datenübernahme und Preferences stoßen weiterhin Rendering an', () 
 });
 
 test('Cloud-Initialisierung respektiert Cache, Offline-Queue und Preferences', () => {
-  const overview = section(cloud, 'async function loadCloudOverview(){', '\n /**\n  * Lädt Fahrzeuge');
+  const overview = section(cloud, 'async function loadCloudOverview(){', '\n/**\n * Lädt Fahrzeuge');
   inOrder(overview, [
     'await loadVehicles()',
     "cloudCall('data')",
