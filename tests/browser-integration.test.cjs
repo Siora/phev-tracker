@@ -73,11 +73,11 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     const entryNav=page.locator('#entries > nav.table-pagination');
     await entryNav.first().locator('button').last().click();
     assert.equal(await page.locator('#entries tbody tr').count(),5,'Einträge: zweite Seite mit 5 Zeilen');
-    assert.equal(await entryNav.first().locator('span').text(),await entryNav.last().locator('span').text(),'Seitentexte synchron');
-    assert.match(await entryNav.last().locator('span').text(),/Seite 2 \/ 2/);
+    assert.equal(await entryNav.first().locator('span').textContent(),await entryNav.last().locator('span').textContent(),'Seitentexte synchron');
+    assert.match(await entryNav.last().locator('span').textContent(),/Seite 2 \/ 2/);
     await entryNav.last().locator('button').first().click();
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Untere Navigation führt zurück');
-    assert.match(await entryNav.first().locator('span').text(),/Seite 1 \/ 2/);
+    assert.match(await entryNav.first().locator('span').textContent(),/Seite 1 \/ 2/);
     await page.evaluate(()=>tab('add'));
     await page.locator('#entries tbody tr button').first().click();
     assert.equal(await page.locator('#form').getAttribute('data-edit-id')!==null,true);
