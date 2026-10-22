@@ -48,9 +48,16 @@ test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht',
     'renderDashboardCharts(filtered,charges);',
     'renderDashboardTimeline(filtered);',
     'renderDashboardFleetOverview();',
-    "$('entries')",
-    'window.paginateTable(entries,table,tbody,ordered,20,'
+    'renderEntryHistory();'
   ]);
+});
+
+test('Eintragshistorie behält sieben Spalten und Seitengröße 20', () => {
+  const helper = section(app, 'function renderEntryHistory(){', '\nfunction renderDashboardProviderFilter(');
+  assert.ok(helper.includes("$('entries')"));
+  assert.ok(helper.includes('window.paginateTable(entries,table,tbody,ordered,20,'));
+  assert.ok(helper.includes("edit.textContent='Bearbeiten'"));
+  assert.ok(helper.includes("remove.textContent='Löschen'"));
 });
 
 test('Timeline-Helfer zeichnet weiterhin den vorgesehenen DOM-Container', () => {
