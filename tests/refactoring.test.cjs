@@ -136,8 +136,8 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
- assert.match(html,/intelligent-analytics\.js\?v=200/);
- assert.match(sw,/intelligent-analytics\.js\?v=200/);
+ assert.match(html,/intelligent-analytics\.js\?v=201/);
+ assert.match(sw,/intelligent-analytics\.js\?v=201/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
@@ -161,8 +161,20 @@ test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwer
  assert.match(app,/tab\(restoredPage\(\)\)/);
  assert.match(html,/onclick="tab\('cloud'\)">Konto/);
 });
-test('Angezeigte Version 2.0 verwendet konsistent den internen Cache-Code 200', () => {
- assert.match(html, /Version 2\.0/);
- assert.match(html, /app\.js\?v=200/);
- assert.match(sw, /phev-tracker-v200/);
+test('Angezeigte Version 2.1 verwendet konsistent den internen Cache-Code 201', () => {
+ assert.match(html, /Version 2\.1/);
+ assert.match(html, /app\.js\?v=201/);
+ assert.match(sw, /phev-tracker-v201/);
+});
+
+test('Kostenprognose vermeidet Schätzung bei zu wenig Daten und rechnet volle Monate hoch',()=>{
+ const sandbox={window:{},Date};
+ vm.runInNewContext(read('intelligent-analytics.js'),sandbox);
+ const forecast=sandbox.window.PhevIntelligence.forecast;
+ const months=Array.from({length:12},(_,i)=>({total:i<3?100:0}));
+ assert.equal(forecast(months,2026,new Date('2026-04-15')).projected,1200);
+ assert.equal(forecast(months,2026,new Date('2026-03-15')).available,false);
+ assert.equal(forecast(months,2027,new Date('2026-10-15')).available,false);
+ assert.equal(forecast(months,2025,new Date('2026-10-15')).projected,300);
+ assert.match(read('index.html'),/id="intelligence-forecast"/);
 });

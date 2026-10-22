@@ -7,6 +7,23 @@
  * Monatsvergleiche sind nur für vollständige Kalendermonate sinnvoll.
  */
 window.PhevIntelligence=Object.freeze({
+ /**
+  * Vorsichtige Jahreshochrechnung auf Basis abgeschlossener Monate.
+  * Aktueller und zukünftige Monate werden nicht als Nullkosten interpretiert.
+  * Bei weniger als drei beobachteten Monaten wird keine Zahl prognostiziert.
+  */
+ forecast(months,year,today=new Date()){
+  const currentYear=today.getFullYear();
+  const completed=year<currentYear?12:year===currentYear?today.getMonth():0;
+  if(year>currentYear||completed===0)return {available:false,reason:"Für diesen Zeitraum gibt es noch keine abgeschlossenen Monate."};
+  const observed=months.slice(0,completed);
+  const active=observed.filter(m=>m.total>0);
+  if(active.length<3)return {available:false,reason:"Mindestens drei Monate mit erfassten Kosten sind für eine Hochrechnung erforderlich."};
+  const actual=observed.reduce((sum,m)=>sum+m.total,0);
+  const average=actual/completed;
+  const projected=year<currentYear?actual:average*12;
+  return {available:true,actual,average,projected,remaining:Math.max(0,projected-actual),completed,active:active.length,partial:active.length<completed,final:year<currentYear};
+ },
  analyze(records,expenses,vehicleId,year,convertRecord,convertExpense){
   const valid=records.filter(r=>String(r.date||'').startsWith(String(year)+'-')&&(!vehicleId||String(r.vehicle_id)===String(vehicleId)));
   const extra=expenses.filter(r=>String(r.date||'').startsWith(String(year)+'-')&&(!vehicleId||String(r.vehicle_id)===String(vehicleId)));
@@ -42,6 +59,7 @@ window.PhevIntelligence=Object.freeze({
    if(change!==null&&Math.abs(change)>=20)messages.push({type:'warning',title:'Deutliche Kostenänderung',detail:'Letzter abgeschlossener Monat gegenüber dem Vormonat: '+(change>0?'+':'')+change.toFixed(1)+' %. Die Anzahl der Vorgänge kann variieren.'});
    if(sum('kwh')>0&&sum('liters')>0)messages.push({type:'info',title:'Gemischter Energieeinsatz',detail:'Strom und Benzin wurden beide erfasst. Ohne Fahrstrecken pro Antriebsart ist kein elektrischer Fahranteil bestimmbar.'});
   }
-  return {year,months,total,energyCost,fuelCost,otherCost,kwh:sum('kwh'),liters:sum('liters'),charges:sum('charges'),fuels:sum('fuels'),expensive,change,messages};
+  const forecast=window.PhevIntelligence.forecast(months,year,today);
+  return {forecast,year,months,total,energyCost,fuelCost,otherCost,kwh:sum('kwh'),liters:sum('liters'),charges:sum('charges'),fuels:sum('fuels'),expensive,change,messages};
  }
 });
