@@ -6,6 +6,10 @@ return [
  'user' => 'YOUR_DATABASE_USER',
  'password' => 'YOUR_DATABASE_PASSWORD',
  'allowed_origin' => 'https://tracker.web-produktion.com',
- 'reset_mail_from' => 'no-reply@example.com', // Erst nach Einrichtung des E-Mail-Versands produktiv setzen.
+ 'reset_mail_from' => 'noreply@web-produktion.com',
+ 'smtp_host' => 'mail.web-produktion.com',
+ 'smtp_port' => 587, // STARTTLS; Port beim Anbieter verifizieren.
+ 'smtp_username' => 'noreply@web-produktion.com',
+ 'smtp_password' => 'SET_ONLY_ON_SERVER', // Niemals ins Repository übernehmen.
  'registration_enabled' => false, // Set true temporarily to create accounts, then disable.
 ];
