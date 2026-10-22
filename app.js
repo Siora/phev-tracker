@@ -230,6 +230,55 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * Die zurückgegebene Select-Referenz wird anschließend für den Datensatzfilter
  * verwendet. Keine Änderung an den Einträgen oder an der Cloud.
  */
+/**
+ * Baut die vollständige Eintragshistorie unabhängig von Dashboard-Filtern auf.
+ *
+ * Behält die v88-Sortierung, die sieben Spalten, Bearbeiten-/Löschen-Aktionen
+ * und die Seitengröße von 20 Einträgen bei. Keine Cloud-Aktion beim Rendern.
+ * Änderungen an Datensätzen erfolgen ausschließlich über die vorhandenen
+ * Benutzeraktionen und ihre bestehenden Speicher-/Bestätigungswege.
+ */
+function renderEntryHistory(){
+  // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
+  const entries=$('entries');
+  entries.replaceChildren();
+  const table=document.createElement('table');
+  table.className='entry-history-table';
+  const head=document.createElement('thead'),heading=document.createElement('tr');
+  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
+  const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
+  }
+  head.append(heading);table.append(head);
+  const tbody=document.createElement('tbody');
+  const ordered=records.slice().sort(compareRecordDateTime);
+  if(!ordered.length){
+  const tr=document.createElement('tr'),td=document.createElement('td');
+  td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
+  }
+  const makeEntryRow=x=>{
+  const tr=document.createElement('tr');
+  const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
+  const values=[
+  recordDateTime(x),
+  x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
+  vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
+  String(x.amount)+(x.type==='charge'?' kWh':' l'),
+  fmt(x.cost,x.currency),
+  x.place||'–'
+  ];
+  for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
+  const actions=document.createElement('td');actions.className='entry-table-actions';
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+  edit.onclick=()=>{
+  let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
+  };
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
+  remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
+  actions.append(edit,remove);tr.append(actions);return tr;
+  };
+  table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
+}
+
 function renderDashboardProviderFilter(){
   const provider=$('provider');
   const current=provider.value;
@@ -437,44 +486,7 @@ function render(){
   renderDashboardTimeline(filtered);
   renderDashboardFleetOverview();
   renderMonthComparison(filtered);
-  // Full record history lives on the Ladungen / Tankungen page, independent of dashboard filters.
-  const entries=$('entries');
-  entries.replaceChildren();
-  const table=document.createElement('table');
-  table.className='entry-history-table';
-  const head=document.createElement('thead'),heading=document.createElement('tr');
-  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
-    const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
-  }
-  head.append(heading);table.append(head);
-  const tbody=document.createElement('tbody');
-  const ordered=records.slice().sort(compareRecordDateTime);
-  if(!ordered.length){
-    const tr=document.createElement('tr'),td=document.createElement('td');
-    td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
-  }
-  const makeEntryRow=x=>{
-    const tr=document.createElement('tr');
-    const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
-    const values=[
-      recordDateTime(x),
-      x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
-      vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
-      String(x.amount)+(x.type==='charge'?' kWh':' l'),
-      fmt(x.cost,x.currency),
-      x.place||'–'
-    ];
-    for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
-    const actions=document.createElement('td');actions.className='entry-table-actions';
-    const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-    edit.onclick=()=>{
-      let f=$('form');f.elements.type.value=x.type;updateEntryPlaceVisibility();f.elements.date.value=x.date;f.elements.time.value=recordTime(x.id);f.elements.amount.value=x.amount;f.elements.cost.value=x.cost;setUnitPriceFromTotal(f);f.elements.currency.value=x.currency;f.elements.km.value=x.km||'';f.elements.place.value=x.place||'';f.elements.managed_location.value='';f.elements.managed_provider.value='';f.elements.charge_kind.value=getChargingType(x.id);f.elements.charge_mode.value=getChargeMode(x.id);f.elements.vehicle_id.value=x.vehicle_id||'';f.dataset.editId=x.id;f.querySelector('button').textContent='Änderungen speichern';tab('add')
-    };
-    const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
-    remove.onclick=()=>{if(confirm('Eintrag löschen?')){records=records.filter(r=>r.id!==x.id);save();}};
-    actions.append(edit,remove);tr.append(actions);return tr;
-  };
-  table.append(tbody);window.paginateTable(entries,table,tbody,ordered,20,'entries',makeEntryRow);
+  renderEntryHistory();
 }
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g,c=>({
