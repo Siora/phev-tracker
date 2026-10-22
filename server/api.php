@@ -187,6 +187,56 @@ if ($action === 'vehicle-photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  header('Cache-Control: private, max-age=3600');
  readfile($path);exit;
 }
+/*
+ * Fahrzeugausgaben werden separat in vehicle_expenses gespeichert.
+ * Jede Abfrage ist auf den angemeldeten Benutzer begrenzt. Die Kombination
+ * (user_id, vehicle_id) wird beim Speichern explizit geprüft und zusätzlich
+ * durch den zusammengesetzten SQL-Fremdschlüssel abgesichert.
+ */
+if ($action === 'vehicle-expenses' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+ $stmt=$db->prepare('SELECT id,vehicle_id,category,expense_date AS date,amount,currency,note,mileage_km,next_service_date FROM vehicle_expenses WHERE user_id=? ORDER BY expense_date DESC,id');
+ $stmt->execute([$uid]);
+ respond(200,['expenses'=>$stmt->fetchAll()]);
+}
+if ($action === 'vehicle-expense-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $e=$body['expense']??null;
+ if (!is_array($e)) fail(400,'Ausgabe fehlt');
+ $id=$e['id']??null;
+ $vid=filter_var($e['vehicle_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ $category=trim((string)($e['category']??''));
+ $date=$e['date']??null;
+ $amount=$e['amount']??null;
+ $currency=$e['currency']??null;
+ $note=trim((string)($e['note']??''));
+ $mileage=$e['mileage_km']??null;
+ $next=$e['next_service_date']??null;
+ if (!is_string($id)||!preg_match('/^[a-zA-Z0-9-]{1,64}$/D',$id)||
+     !$vid||!in_array($category,['Versicherung','Verkehrssteuer','Service','Reifen','Reparatur','Parken','Sonstiges'],true)||
+     !is_string($date)||!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$date)||
+     !($parsed=DateTimeImmutable::createFromFormat('!Y-m-d',$date))||$parsed->format('Y-m-d')!==$date||
+     !is_numeric($amount)||(float)$amount<=0||(float)$amount>9999999999.99||
+     !in_array($currency,['CHF','EUR'],true)||mb_strlen($note)>160||
+     ($mileage!==null&&(!is_numeric($mileage)||(float)$mileage<0||(float)$mileage>99999999999.9))||
+     ($next!==null&&(!is_string($next)||!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$next)||
+       !($parsedNext=DateTimeImmutable::createFromFormat('!Y-m-d',$next))||$parsedNext->format('Y-m-d')!==$next)))
+   fail(400,'Ungültige Ausgabendaten');
+ $owner=$db->prepare('SELECT id FROM vehicles WHERE user_id=? AND id=?');
+ $owner->execute([$uid,$vid]);
+ if (!$owner->fetchColumn()) fail(404,'Fahrzeug nicht gefunden');
+ // Keine Übernahme einer fremden ID: der PRIMARY KEY enthält user_id.
+ $stmt=$db->prepare('INSERT INTO vehicle_expenses(user_id,id,vehicle_id,category,expense_date,amount,currency,note,mileage_km,next_service_date) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE vehicle_id=VALUES(vehicle_id),category=VALUES(category),expense_date=VALUES(expense_date),amount=VALUES(amount),currency=VALUES(currency),note=VALUES(note),mileage_km=VALUES(mileage_km),next_service_date=VALUES(next_service_date)');
+ $stmt->execute([$uid,$id,$vid,$category,$date,$amount,$currency,$note,$mileage,$next]);
+ respond(200,['ok'=>true,'id'=>$id]);
+}
+if ($action === 'vehicle-expense-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+ $id=$body['id']??null;
+ if (!is_string($id)||!preg_match('/^[a-zA-Z0-9-]{1,64}$/D',$id)) fail(400,'Ungültige Ausgaben-ID');
+ $stmt=$db->prepare('DELETE FROM vehicle_expenses WHERE user_id=? AND id=?');
+ $stmt->execute([$uid,$id]);
+ if (!$stmt->rowCount()) fail(404,'Ausgabe nicht gefunden');
+ respond(200,['ok'=>true]);
+}
+
 if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
  $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
@@ -218,6 +268,8 @@ if ($action === 'vehicle-delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $vid=(int)($body['id']??0);if ($vid<=0) fail(400,'Fahrzeug fehlt');
  $stmt=$db->prepare('SELECT COUNT(*) FROM records WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
  if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Einträge. Bitte zuerst die Einträge zuordnen oder das Fahrzeug behalten.');
+ $stmt=$db->prepare('SELECT COUNT(*) FROM vehicle_expenses WHERE user_id=? AND vehicle_id=?');$stmt->execute([$uid,$vid]);
+ if ((int)$stmt->fetchColumn()>0) fail(409,'Fahrzeug hat Wartungs- oder Kostenbuchungen. Bitte zuerst diese Einträge entfernen oder das Fahrzeug behalten.');
  $stmt=$db->prepare('DELETE FROM vehicles WHERE user_id=? AND id=?');$stmt->execute([$uid,$vid]);
  respond(200,['ok'=>true]);
 }
