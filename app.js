@@ -187,6 +187,24 @@ function renderIntelligence(){
   const number=document.createElement('p');number.textContent=value;
   card.append(title,number);summary.append(card);
  }
+ // Prognose bewusst separat anzeigen: eine Hochrechnung ist keine Ist-Ausgabe.
+ const forecastPanel=$('intelligence-forecast');
+ if(forecastPanel){
+  forecastPanel.replaceChildren();
+  const forecast=result.forecast;
+  const line=document.createElement('p');
+  line.textContent=forecast.available
+   ?(forecast.final?'Erfasste Jahreskosten: ':'Voraussichtliche Jahreskosten: ')+money(forecast.projected)
+   :forecast.reason;
+  forecastPanel.append(line);
+  if(forecast.available){
+   const detail=document.createElement('small');
+   detail.textContent=forecast.final
+    ?'Abgeschlossenes Jahr; keine Hochrechnung.'
+    :'Durchschnitt pro abgeschlossenem Monat: '+money(forecast.average)+' · Hochrechnung aus '+forecast.completed+' Monaten mit '+forecast.active+' aktiven Kostenmonaten.'+(forecast.partial?' Achtung: Monate ohne Einträge können unvollständig sein.':'');
+   forecastPanel.append(detail);
+  }
+ }
  const max=Math.max(1,...result.months.map(m=>m.total));
  for(const month of result.months){
   const bar=document.createElement('div');bar.className='intelligence-bar';
