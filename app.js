@@ -764,6 +764,26 @@ function renderVehicleExpenses(){
  const caption=document.createElement('p');caption.className='expense-total';caption.textContent='Gesamtkosten aller erfassten Zeiträume: '+fmt(extra+running,settings.base);
  const detail=document.createElement('small');detail.textContent='Strom & Benzin: '+fmt(running,settings.base)+' · Weitere Ausgaben: '+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+' / km (Näherung)':' · Für Kosten/km fehlen Kilometerstände.');
  summary.append(caption,detail);
+
+ /**
+  * Die Kategorieübersicht verwendet dieselbe Fahrzeugauswahl und dieselbe
+  * Währungsumrechnung wie die Gesamtsumme. Sie enthält alle erfassten
+  * Zeiträume und vermischt keine gefilterten Dashboard-Monatswerte damit.
+  */
+ const breakdown=window.PhevTco.breakdown(vehicleExpenses,records,selected,settings,conv);
+ if(breakdown.length){
+  const heading=document.createElement('h4');heading.textContent='Kosten nach Kategorie';
+  const breakdownList=document.createElement('div');breakdownList.className='expense-breakdown';
+  const total=breakdown.reduce((sum,item)=>sum+item.amount,0);
+  for(const item of breakdown){
+   const row=document.createElement('div');row.className='expense-row';
+   const name=document.createElement('span');name.textContent=item.category;
+   const value=document.createElement('strong');
+   value.textContent=fmt(item.amount,settings.base)+' · '+(total>0?(item.amount/total*100).toFixed(1):'0.0')+' %';
+   row.append(name,value);breakdownList.append(row);
+  }
+  summary.append(heading,breakdownList);
+ }
  for(const x of expenses){
   const row=document.createElement('div');row.className='expense-row';
   const info=document.createElement('span');info.textContent=x.date+' · '+x.category+' · '+fmt(Number(x.amount),x.currency)+(x.note?' · '+x.note:'');
