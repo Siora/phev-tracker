@@ -90,7 +90,7 @@ async function loadVehicles(){
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
   if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='Noch keine Fahrzeuge angelegt.';tr.append(td);tbody.append(tr);}
-  for(const v of data.vehicles){
+  const makeVehicleRow=v=>{
    const row=document.createElement('tr');
    for(const value of [[v.brand,v.model].filter(Boolean).join(' '),v.model_year||'–',v.plate||'–',v.drivetrain||'–',v.battery_kwh==null?'–':v.battery_kwh+' kWh',v.tank_liters==null?'–':v.tank_liters+' l']){
     const cell=document.createElement('td');cell.textContent=value;row.append(cell);
@@ -138,9 +138,9 @@ async function loadVehicles(){
     picker.click();
    };
 
-   actions.append(edit,photo,del);row.append(actions);tbody.append(row);
-  }
-  table.append(tbody);list.append(table);
+   actions.append(edit,photo,del);row.append(actions);return row;
+  };
+  table.append(tbody);window.paginateTable(list,table,tbody,data.vehicles,5,'vehicles',makeVehicleRow);
  }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
 }
 ce('vehicle-cancel').onclick=()=>{
@@ -169,14 +169,14 @@ async function cloudUsers(){
  thead.append(heading);table.append(thead);
  const tbody=document.createElement('tbody');
  if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=2;cell.textContent='Noch keine Benutzer vorhanden.';row.append(cell);tbody.append(row);}
- for(const user of result.users){
+ const makeUserRow=user=>{
   const row=document.createElement('tr');
   for(const value of [user.email,user.role==='admin'?'Administrator':'Benutzer']){
    const cell=document.createElement('td');cell.textContent=value;row.append(cell);
   }
-  tbody.append(row);
- }
- table.append(tbody);container.append(table);
+  return row;
+ };
+ table.append(tbody);window.paginateTable(container,table,tbody,result.users,20,'users',makeUserRow);
 }
 
 ce('cloud-login').onsubmit=async event=>{
