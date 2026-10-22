@@ -235,6 +235,30 @@ if ($action === 'account-delete') {
  sessionCookie('',time()-3600);
  respond(200,['ok'=>true]);
 }
+// Familienfunktionen sind erst nach der separaten SQL-Migration verfügbar.
+if (in_array($action,['family-list','family-create'],true)) {
+ if (!$db->query("SHOW TABLES LIKE 'family_groups'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
+ if ($action==='family-list') {
+  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
+  $stmt=$db->prepare('SELECT g.id,g.name,m.role,g.created_at FROM family_groups g JOIN family_members m ON m.family_id=g.id WHERE m.user_id=? ORDER BY g.id DESC');
+  $stmt->execute([$uid]);respond(200,['families'=>$stmt->fetchAll()]);
+ }
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ $name=trim((string)($body['name']??''));
+ if ($name===''||mb_strlen($name)>120) fail(400,'Ungültiger Familienname (maximal 120 Zeichen)');
+ try {
+  $db->beginTransaction();
+  $stmt=$db->prepare('INSERT INTO family_groups(name,created_by) VALUES (?,?)');$stmt->execute([$name,$uid]);
+  $familyId=(int)$db->lastInsertId();
+  $stmt=$db->prepare("INSERT INTO family_members(family_id,user_id,role) VALUES (?,?,'owner')");$stmt->execute([$familyId,$uid]);
+  $db->commit();
+ } catch (Throwable $e) {
+  if ($db->inTransaction()) $db->rollBack();
+  error_log('PHEV family creation failed: '.get_class($e));
+  fail(500,'Familie konnte nicht erstellt werden');
+ }
+ respond(201,['ok'=>true,'family'=>['id'=>$familyId,'name'=>$name,'role'=>'owner']]);
+}
 if ($action === 'admin-create-user') {
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
