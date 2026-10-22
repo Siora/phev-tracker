@@ -832,7 +832,7 @@ function exportPdfReport(mode){
  pdf.heading('Kostenverteilung');
  pdf.donut([sum(charges,conv),sum(fuel,conv),extras],['Strom','Benzin','Weitere Ausgaben']);
  pdf.heading(mode==='year'?'Kosten nach Monat':'Kosten nach Tag');
- const buckets=mode==='year'?Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')):[...new Set(data.map(r=>r.date.slice(8,10)))].sort();
+ const buckets=mode==='year'?Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')):[...new Set([...data.map(r=>r.date.slice(8,10)),...extraExpenses.map(x=>x.date.slice(8,10))])].sort();
  const points=buckets.map(k=>sum(data.filter(r=>(mode==='year'?r.date.slice(5,7):r.date.slice(8,10))===k),conv)+extraExpenses.filter(x=>(mode==='year'?x.date.slice(5,7):x.date.slice(8,10))===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0));
  pdf.bars(buckets,points);
  if(mode==='year'){
@@ -840,7 +840,7 @@ function exportPdfReport(mode){
   pdf.table(['Monat','Ladungen','Tankungen','Kosten '+settings.base],buckets.map((k,i)=>{const rows=data.filter(r=>r.date.slice(5,7)===k);return [k,String(rows.filter(r=>r.type==='charge').length),String(rows.filter(r=>r.type==='fuel').length),(sum(rows,conv)+extraExpenses.filter(x=>x.date.slice(5,7)===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0)).toFixed(2)];}),[70,125,125,165]);
  }
  pdf.heading('Einzelne Einträge');
- const sorted=data.slice().sort((x,y)=>String(x.date).localeCompare(String(y.date)));
+ const sorted=data.slice().sort((x,y)=>recordDateTime(x).localeCompare(recordDateTime(y)));
  pdf.table(['Datum / Zeit','Art','Menge','Ort','Kosten '+settings.base],sorted.map(r=>[recordDateTime(r),r.type==='charge'?'Strom':'Benzin',Number(r.amount||0).toFixed(2)+(r.type==='charge'?' kWh':' l'),r.place||'–',conv(r).toFixed(2)]),[105,65,90,145,90]);
  if(!data.length)pdf.note('Keine Einträge im gewählten Zeitraum.');
  pdf.note('Beträge gemäß aktuellen Währungseinstellungen umgerechnet. Diagramme zeigen erfasste Vorgänge.');
@@ -904,7 +904,7 @@ class PhevPdfReport{
   this.text(322,216,o.providers[0]?.name||'Keine Angaben',10,dark,true);
   this.text(322,188,'BESTER STROMPREIS',8,muted,true);
   this.text(322,171,o.best?(conv(o.best)/Number(o.best.amount)).toFixed(2)+' '+this.currency+'/kWh':'–',11,dark,true);
-  this.text(322,143,'Alle Werte aus erfassten Eintraegen',8,muted);
+  this.text(322,143,'Kosten/100 km: Kilometerstand-Naeherung',8,muted);
   this.text(289,40,'1',9,muted);
   this.newPage();
  }
