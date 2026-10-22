@@ -136,8 +136,8 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  const html=read('index.html'),app=read('app.js'),sw=read('sw.js'),analytics=read('intelligent-analytics.js');
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
- assert.match(html,/intelligent-analytics\.js\?v=202/);
- assert.match(sw,/intelligent-analytics\.js\?v=202/);
+ assert.match(html,/intelligent-analytics\.js\?v=203/);
+ assert.match(sw,/intelligent-analytics\.js\?v=203/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
@@ -161,10 +161,10 @@ test('Navigation merkt die zuletzt gewählte Seite und nutzt sichere Standardwer
  assert.match(app,/tab\(restoredPage\(\)\)/);
  assert.match(html,/onclick="tab\('cloud'\)">Konto/);
 });
-test('Angezeigte Version 2.2 verwendet konsistent den internen Cache-Code 202', () => {
- assert.match(html, /Version 2\.2/);
- assert.match(html, /app\.js\?v=202/);
- assert.match(sw, /phev-tracker-v202/);
+test('Angezeigte Version 2.3 verwendet konsistent den internen Cache-Code 203', () => {
+ assert.match(html, /Version 2\.3/);
+ assert.match(html, /app\.js\?v=203/);
+ assert.match(sw, /phev-tracker-v203/);
 });
 
 test('Kostenprognose vermeidet Schätzung bei zu wenig Daten und rechnet volle Monate hoch',()=>{
@@ -194,4 +194,15 @@ test('Serviceerinnerungen verwenden vorhandene Ausgaben ohne Doppelzählung',()=
  assert.equal(result[0].days,10);
  assert.equal(reminders(entries,'2',new Date(2026,9,22))[0].overdue,true);
  assert.match(read('index.html'),/id="expense-reminders"/);
+});
+
+test('Dashboard-Layout kann Kacheln verbergen, verschieben und zurücksetzen',()=>{
+ const html=read('index.html'),app=read('app.js'),css=read('styles.css');
+ assert.match(html,/id="dashboard-layout-controls"/);
+ assert.match(html,/id="dashboard-layout-reset"/);
+ assert.match(html,/data-dashboard-widget="Monatlicher Verlauf"/);
+ assert.match(app,/function initializeDashboardLayout\(\)/);
+ assert.match(app,/localStorage\.setItem\(key,JSON\.stringify\(state\)\)/);
+ assert.match(app,/widget\.hidden=state\.hidden\.includes\(id\)/);
+ assert.match(css,/\[data-dashboard-widget\]\[hidden\]\{display:none!important\}/);
 });
