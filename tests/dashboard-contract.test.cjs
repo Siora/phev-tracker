@@ -37,7 +37,7 @@ function inOrder(source, tokens) {
 }
 
 test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht', () => {
-  const render = section(app, 'function render(){', '\n function escapeHTML(');
+  const render = section(app, 'function render(){', '\nfunction escapeHTML(');
   inOrder(render, [
     'renderVehicleExpenses();',
     'renderConsumptionInsights(filtered,charges,fuel,distance);',
@@ -57,14 +57,14 @@ test('Dashboard enthält Verbrauch, Diagramme, Timeline und Fahrzeugübersicht',
 });
 
 test('Cloud-Datenübernahme und Preferences stoßen weiterhin Rendering an', () => {
-  const vehicles = section(app, 'window.setVehicles=function(items)', '\n // Lokale Bildwahl');
+  const vehicles = section(app, 'window.setVehicles=function(items)', '\n// Lokale Bildwahl');
   assert.ok(vehicles.includes('refreshVehicles();'));
   assert.ok(vehicles.includes('render();'));
 
-  const preferences = section(app, 'window.applyCloudPreferences=function(prefs)', '\n window.showCloudRecords=');
+  const preferences = section(app, 'window.applyCloudPreferences=function(prefs)', '\nwindow.showCloudRecords=');
   assert.ok(preferences.includes('render();'));
 
-  const records = section(app, 'window.showCloudRecords=function(items)', '\n window.showLocalRecords=');
+  const records = section(app, 'window.showCloudRecords=function(items)', '\nwindow.showLocalRecords=');
   assert.ok(records.includes('scheduleAutomaticBackup();render();'));
   assert.ok(records.includes('updateBulkCount();'));
 });
@@ -81,7 +81,7 @@ test('Cloud-Initialisierung respektiert Cache, Offline-Queue und Preferences', (
     'await loadChargingCatalog();',
     'window.applyCloudPreferences('
   ]);
-  const startup = section(cloud, '(async()=>{', '\n let cloudSyncing=false;');
+  const startup = section(cloud, '(async()=>{', '\nlet cloudSyncing=false;');
   assert.ok(startup.includes("cloudCall('session')"));
   assert.ok(startup.includes('window.setVehicles(cachedVehicles)'));
   assert.ok(startup.includes('window.showCloudRecords(cachedRecords)'));
@@ -96,7 +96,7 @@ test('Gefährliche v86-Extraktion bleibt deaktiviert', () => {
 });
 
 test('Cloud-Queue entfernt Operationen erst nach bestätigtem Request', () => {
-  const sync = section(cloud, 'async function syncCloudQueue(){', '\n window.addEventListener(');
+  const sync = section(cloud, 'async function syncCloudQueue(){', '\nwindow.addEventListener(');
   inOrder(sync, [
     'while(queue.length)',
     'await cloudCall(op.action,',
