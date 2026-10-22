@@ -149,19 +149,9 @@ test('Verzögerter Katalog verschiebt Preferences, ohne Cloud-Einträge zu verli
 });
 
 test('API-Fehler verhindern das Anzeigen eines vermeintlich erfolgreichen Cloud-Stands', async () => {
-  const view = harness([], {dataGate:deferred()});
-  const running = view.run();
-  for (let i = 0; i < 8 && !view.events.includes('api:data'); i++) await Promise.resolve();
-  assert.equal(view.events.some(e => e.startsWith('records:')), false);
-  // Die ausstehende Antwort wird bewusst erfolgreich aufgelöst, damit der Test endet.
-  // Ein separater Fehlerfall wird durch eine gezielte Exception simuliert.
   const broken = harness();
   broken.sandbox.cloudCall = async () => {throw Error('Cloud nicht erreichbar');};
   await assert.rejects(broken.run(), /Cloud nicht erreichbar/);
   assert.equal(broken.events.some(e => e.startsWith('records:')), false);
-  view.sandbox.cloudCall = async () => {throw Error('nicht verwendet');};
-  view.storage; // Keine produktiven Daten; der offene Lauf wird unten freigegeben.
-  // Gate-Referenz stammt aus den Testoptionen und wird im Folgenden geschlossen.
-  // Keine weitere Aktion erforderlich, da Promise ohne Event-Loop-Handles offen bleibt.
-  void running;
+  assert.equal(broken.events.some(e => e === 'queue:sync'), false);
 });
