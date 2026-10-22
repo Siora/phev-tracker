@@ -18,7 +18,7 @@ Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme si
 - [x] Passwort-Reset-Migration ausgeführt (Betreiberbestätigung)
 - [x] Passwort-Reset mit E-Mail erfolgreich getestet (Betreiberbestätigung)
 - [x] Aktuelle PHP-API nach PR #47 auf Hetzner bereitgestellt (Betreiberbestätigung; keine unabhängige Versionsprüfung)
-- [ ] Passwortänderung mit einem Testkonto prüfen
+- [x] Passwortänderung mit einem Testkonto erfolgreich geprüft (Betreiberbestätigung)
 - [x] Kontolöschung mit einem separaten Testkonto erfolgreich getestet (Betreiberbestätigung; serverseitige Bilddatei-Löschung nicht unabhängig geprüft)
 - [ ] Passwort-Reset-Ansicht nach Frontend-Deployment erneut prüfen
 - [ ] iPhone-/Safari-Test für Login, Dashboard, Offline-Cache und Cloud-Synchronisierung
