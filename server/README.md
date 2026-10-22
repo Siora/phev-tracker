@@ -1,15 +1,28 @@
-# PHEV Tracker – Hetzner PHP/MySQL backend
+# PHEV Tracker – Hetzner PHP/MySQL-Backend
 
-**Preparation only.** This server directory is not automatically deployed by GitHub Pages.
-The existing app continues to use localStorage until a separate, tested client migration is enabled.
+**Status:** Produktiv verwendete API. Dieser Ordner ist keine bloße Vorbereitung und wird nicht durch den Frontend-Workflow automatisch in `/api/` hochgeladen.
 
-1. In konsoleH, configure HTTPS for tracker.web-produktion.com and ensure PHP 8.5 with PDO MySQL.
-2. In phpMyAdmin, import schema.sql into the dedicated database.
-3. Upload api.php and .htaccess to a protected server directory such as /api; place config.php alongside them. GitHub Pages cannot run PHP.
-4. Copy config.example.php to config.php **on the server only**, fill in database settings. Never upload config.php to GitHub or send credentials in chat.
-5. For account creation, temporarily set registration_enabled=true, register intended accounts using a controlled HTTPS client, then set false again. Do not leave public registration open.
-6. Keep backups. Use unique strong passwords; add rate limiting at the hosting/proxy layer before exposing public login. Consider an invite-only registration workflow and password reset before wider use.
-7. Test with a new account and sample data before importing existing records. Verify that user A cannot access user B's records.
-8. Client integration and migration must be implemented and tested separately; do not delete localStorage.
+## Architektur
 
-Security notes: TLS is mandatory; bearer tokens expire after seven days and should be kept in memory (not localStorage). This starter API does not yet implement password reset, brute-force rate limiting, or transactional bulk import. These are required before production rollout to multiple users.
+- Die PWA ruft `https://tracker.web-produktion.com/api/api.php` auf.
+- Anmeldung und Berechtigungen werden serverseitig geprüft; die Anwendung verwendet eine Cookie-Sitzung.
+- Fahrzeuge, Einträge, Ladeort-/Anbieterkatalog und Fahrzeugausgaben werden über die API und MySQL verwaltet.
+- Fahrzeugausgaben stehen in der SQL-Tabelle `vehicle_expenses`, **nicht** in den Cloud-Preferences. Die API-Aktionen lauten `vehicle-expenses`, `vehicle-expense-save`, `vehicle-expense-delete`.
+- Dashboard-Anordnung und weitere Benutzereinstellungen können über Cloud-Preferences synchronisiert werden.
+
+## Sichere Änderungen
+
+1. Vor Änderungen an SQL oder PHP ein Datenbank- und Dateibackup anfertigen.
+2. Migrationen in `server/` auf einer Testumgebung prüfen; niemals bereits vorhandene Nutzerdaten überschreiben.
+3. `server/config.example.php` ist nur eine Vorlage. Die produktive `config.php` mit Zugangsdaten gehört **nicht** ins Repository.
+4. PHP-Syntax mit `php -l server/api.php` und die relevanten Regressionstests prüfen.
+5. Backend-Änderungen nur über einen bewusst gestarteten, kontrollierten Deploymentprozess ausrollen. Der Workflow `deploy-sftp.yml` ist ein **manueller Fallback**, kein automatischer Produktivdeploy.
+6. Berechtigungsgrenzen zwischen verschiedenen Konten testen. Keine Änderungen an Login, Session oder CSRF-Schutz ohne gesondertes Security-Review.
+
+## Neue Installation (nicht für bestehende Produktionsdatenbanken ausführen)
+
+Die SQL-Dateien unter `server/` dokumentieren Basisschema und nachfolgende Migrationen. Eine Neuinstallation benötigt eine zum aktuellen API-Code passende Schema-Version. Die SQL-Dateien dürfen **nicht** ungeprüft erneut auf einer bestehenden Datenbank eingespielt werden.
+
+## Offene Sicherheitsaufgaben
+
+Vor einer breiteren öffentlichen Nutzung Rate-Limiting, Wiederherstellung von Konten, Backup-/Restore-Prozess und Berechtigungsprüfungen erneut bewerten. Diese Hinweise sind keine Bestätigung, dass alle Maßnahmen bereits implementiert wurden.
