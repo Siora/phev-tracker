@@ -1,6 +1,6 @@
 # PHEV Tracker – Entwicklerhandbuch
 
-Stand: Version 86 · Branch `main`
+Stand: Version 87 · Branch `main`
 
 ## 1. Systemüberblick
 
@@ -125,3 +125,7 @@ CSV-Parser (`csvRows`, `date`) und automatische lokale Backup-Funktionen wurden 
 ## 9. Refactoring-Etappe v86
 
 Die Verbrauchs- und Energiebilanzfunktionen (`fuelEnergyFactor`, `energyBalance`, `consumptionTrendRows`, `renderConsumptionTrend`, `renderEnergyBalance`, `getCostComparison`, `renderCostComparison` und Ladearten-Helfer) wurden aus `app.js` nach `consumption-analysis.js` verschoben. Die Funktionen verwenden weiterhin dieselben globalen App-Zustände und LocalStorage-Schlüssel; der Datenfluss und die Cloud-API bleiben unverändert. Das Modul wird vor `app.js` geladen und im Offline-Cache sowie Hetzner-Deployment berücksichtigt. Fahrzeugausgaben und TCO verbleiben vorerst in `app.js` und sollten als eigenständige nächste Etappe mit UI-Regressionstests ausgelagert werden.
+
+## 10. Dashboard-Stabilisierung v87
+
+Nach v86 meldete ein iPhone-Test leere Diagramme, Timeline und Fahrzeugübersicht. Zur Risikobegrenzung wurde die v86-Auslagerung der Verbrauchsanalysen rückgängig gemacht: Die unveränderten Funktionen stehen wieder in `app.js`. `consumption-analysis.js` bleibt vorerst nur als ungenutzte Datei im Repository und wird **nicht** in HTML, Service Worker oder Hetzner-Upload eingebunden. Dies ist ein gezielter Rollback des letzten Refactorings, kein Löschen von Nutzerdaten. Vor einem erneuten Auslagern sind Browser-Konsole, Ladefehler und ein Dashboard-Regressionstest zu prüfen.
