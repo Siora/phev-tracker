@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'i18n/**'
       - 'app.js'
       - 'intelligent-analytics.js'
       - 'pagination.js'
@@ -168,12 +169,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+          for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js i18n/de.js i18n/en.js i18n/core.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
             test -f "$file"
           done
           {
             printf 'cd "%s"\n' "$SFTP_DIR"
-            for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+            printf '%s\n' '-mkdir i18n'
+            for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js i18n/de.js i18n/en.js i18n/core.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
               printf 'put "%s"\n' "$file"
             done
           } > /tmp/upload.batch
