@@ -24,6 +24,13 @@ test('Familien-API erzwingt Besitz, Mitgliedschaft und Widerruf',async()=>{
  assert.equal((await request('family-vehicle-share-save',stranger,'POST',{family_id:1,vehicle_id:2,access_level:'view'})).status,404);
  assert.equal((await request('family-vehicle-share-save',owner,'POST',{family_id:1,vehicle_id:1,access_level:'view'})).status,200);
  let result=await request('family-shared-vehicles',member);assert.equal(result.status,200);assert.deepEqual(result.data.vehicles.map(v=>Number(v.id)),[1]);
+ sql("INSERT INTO records(id,user_id,type,date,amount,cost,currency,vehicle_id) VALUES ('shared-charge',1,'charge','2026-10-01',10,5,'CHF',1),('private-charge',3,'charge','2026-10-01',20,10,'CHF',2)");
+ result=await request('family-shared-records',member);
+ assert.equal(result.status,200);
+ assert.deepEqual(result.data.records.map(record=>record.id),['shared-charge']);
+ result=await request('family-shared-records',stranger);
+ assert.equal(result.status,200);
+ assert.equal(result.data.records.length,0);
  result=await request('family-shared-vehicles',stranger);assert.equal(result.status,200);assert.equal(result.data.vehicles.length,0);
  result=await request('vehicles',member);assert.equal(result.status,200);assert.equal(result.data.vehicles.length,0);
  assert.equal((await request('family-vehicle-share-delete',member,'POST',{family_id:1,vehicle_id:1})).status,404);
