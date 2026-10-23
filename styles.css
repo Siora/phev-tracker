@@ -1155,3 +1155,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 /* Interne OCR-Elemente trotz spezifischer Formularregeln zuverlässig ausblenden. */
 #receipt-assistant #receipt-raw-text[hidden],#receipt-assistant #receipt-extract[hidden],#receipt-assistant #receipt-extract-preview[hidden]{display:none!important}
+
+/* Kompakte, touchfreundliche Administrator-Aktionen auf kleinen Displays. */
+.admin-user-actions{white-space:nowrap;min-width:104px}
+.admin-icon-action{display:inline-flex;align-items:center;justify-content:center;width:42px;min-width:42px;height:42px;padding:8px;margin:2px;border-radius:10px;vertical-align:middle}
+.admin-users-table{table-layout:auto;width:100%}
+.admin-users-table td:first-child{overflow-wrap:anywhere;word-break:normal}
+.admin-users-table th:last-child,.admin-users-table td:last-child{width:108px;white-space:nowrap}
+@media(max-width:600px){.admin-users-table th,.admin-users-table td{padding:8px 5px;font-size:0.85rem}.admin-users-table th:last-child{font-size:0.72rem}.admin-icon-action{width:40px;min-width:40px;height:40px;padding:7px}}
