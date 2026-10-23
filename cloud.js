@@ -401,6 +401,26 @@ ce('family-accept-form').onsubmit=async event=>{
  catch(error){ce('family-status').textContent='Einladung konnte nicht angenommen werden: '+error.message;}
  finally{button.disabled=false;}
 };
+// Die Sprache kommt ausschließlich aus dem angemeldeten MySQL-Konto.
+function applyAccountLanguage(account){
+ const select=ce('account-language'),status=ce('account-language-status');
+ if(!select)return;
+ const available=account.language_available===true;
+ select.disabled=!available;
+ select.value=account.language==='en'?'en':'de';
+ window.PhevI18n?.setLanguage(select.value);
+ status.textContent=available?'':'Datenbankmigration für die Sprachauswahl steht noch aus.';
+}
+ce('account-language')?.addEventListener('change',async event=>{
+ const select=event.currentTarget,previous=window.PhevI18n?.getLanguage()||'de';
+ select.disabled=true;
+ try{
+  const result=await cloudCall('account-language',{language:select.value});
+  window.PhevI18n?.setLanguage(result.language);
+  ce('account-language-status').textContent='Gespeichert.';
+ }catch(error){select.value=previous;ce('account-language-status').textContent=error.message;}
+ finally{select.disabled=false;}
+});
 function showAccount(email,role){void loadFamilies();
  const admin=role==='admin';
  const adminNav=ce('admin-nav');if(adminNav)adminNav.hidden=!admin;
@@ -523,6 +543,7 @@ ce('cloud-login').onsubmit=async event=>{
   cloudToken='cookie';updateSyncIndicator();
   localStorage.setItem(sessionKey,JSON.stringify({email:result.email,role:result.role}));
   showAccount(result.email,result.role);
+  try{applyAccountLanguage(await cloudCall('session'));}catch(error){ce('account-language-status').textContent=error.message;}
   await loadCloudOverview();
   form.elements.password.value='';
   cs('Angemeldet. Lokale Einträge bleiben unverändert.');
@@ -643,6 +664,7 @@ ce('cloud-upload').onclick=async()=>{
   const email=account.email,role=account.role;
   localStorage.setItem(sessionKey,JSON.stringify(cloudToken==='cookie'?{email,role}:{token:cloudToken,email,role}));
   showAccount(email,role);
+  applyAccountLanguage(account);
   try{
    const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+email)||'null');
    if(Array.isArray(cachedVehicles)){window.setVehicles(cachedVehicles);ce('vehicle-status').textContent=cachedVehicles.length+' gespeicherte Fahrzeuge (Cloud wird aktualisiert).';}

@@ -176,12 +176,30 @@ $stmt=$db->prepare('SELECT user_id FROM sessions WHERE token_hash=? AND expires_
 $stmt->execute([$hash]); $uid=$stmt->fetchColumn();
 if (!$uid) fail(401,'Sitzung abgelaufen');
 $uid=(int)$uid;
+// Optional während der Migration: alte Datenbanken liefern weiter eine gültige Sitzung.
+$hasAccountLanguage=(bool)$db->query("SHOW COLUMNS FROM users LIKE 'language'")->fetch();
+if ($action === 'account-language') {
+ if (!$hasAccountLanguage) fail(503,'Sprachauswahl benötigt zuerst die Datenbankmigration');
+ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  $stmt=$db->prepare('SELECT language FROM users WHERE id=?');
+  $stmt->execute([$uid]);
+  $language=$stmt->fetchColumn();
+  if ($language===false) fail(401,'Anmeldung erforderlich');
+  respond(200,['language'=>$language]);
+ }
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'Methode nicht erlaubt');
+ $language=$body['language']??null;
+ if (!is_string($language) || !in_array($language,['de','en'],true)) fail(400,'Ungültige Sprache');
+ $stmt=$db->prepare('UPDATE users SET language=? WHERE id=?');
+ $stmt->execute([$language,$uid]);
+ respond(200,['language'=>$language]);
+}
 if ($action === 'session') {
  if ($_SERVER['REQUEST_METHOD'] !== 'GET') fail(405,'GET erforderlich');
  $stmt=$db->prepare('SELECT email,role FROM users WHERE id=?');
  $stmt->execute([$uid]);$account=$stmt->fetch();
  if (!$account) fail(401,'Anmeldung erforderlich');
- respond(200,['email'=>$account['email'],'role'=>$account['role']]);
+ respond(200,['email'=>$account['email'],'role'=>$account['role'],'language'=>$hasAccountLanguage ? ($db->query('SELECT language FROM users WHERE id='.(int)$uid)->fetchColumn() ?: 'de') : 'de','language_available'=>$hasAccountLanguage]);
 }
 // 3.0: Passwortwechsel nur nach Prüfung des bisherigen Passworts.
 // Nach Erfolg werden alle Sitzungen widerrufen; die Anmeldung ist erneut nötig.
