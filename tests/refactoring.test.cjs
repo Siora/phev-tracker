@@ -137,7 +137,7 @@ test('Intelligentes Dashboard besitzt eigenen Menüpunkt, sichere DOM-Ausgabe un
  assert.match(html,/tab\('intelligence'\)/);
  assert.match(html,/<section id="intelligence"/);
  assert.match(html,/intelligent-analytics\.js\?v=204/);
- assert.match(sw,/intelligent-analytics\.js\?v=203/);
+ assert.match(sw,/intelligent-analytics\.js\?v=204/);
  assert.match(app,/window\.renderIntelligence=renderIntelligence/);
  assert.match(app,/td\.textContent=value/);
  assert.match(analytics,/window\.PhevIntelligence/);
