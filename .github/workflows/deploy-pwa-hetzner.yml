@@ -12,6 +12,9 @@ on:
       - 'csv-import-utils.js'
       - 'auto-backup.js'
       - 'vehicle-costs.js'
+      - 'receipt-ocr.js'
+      - 'receipt-parser.js'
+      - 'receipt-preview.js'
       - 'cloud.js'
       - 'charts.js'
       - 'styles.css'
@@ -136,6 +139,26 @@ jobs:
           cp /tmp/package/dist/jspdf.umd.min.js ./jspdf.umd.min.js
           test "$(wc -c < jspdf.umd.min.js)" -gt 100000
 
+      - name: Prepare self-hosted OCR assets
+        if: ${{ github.event_name == 'push' || inputs.upload == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/phev-ocr/js /tmp/phev-ocr/core
+          npm pack tesseract.js@5.1.1 --pack-destination /tmp/phev-ocr/js
+          npm pack tesseract.js-core@5.1.1 --pack-destination /tmp/phev-ocr/core
+          tar -xzf /tmp/phev-ocr/js/tesseract.js-5.1.1.tgz -C /tmp/phev-ocr/js
+          tar -xzf /tmp/phev-ocr/core/tesseract.js-core-5.1.1.tgz -C /tmp/phev-ocr/core
+          cp /tmp/phev-ocr/js/package/dist/tesseract.min.js ./tesseract.min.js
+          cp /tmp/phev-ocr/js/package/dist/worker.min.js ./tesseract-worker.min.js
+          cp /tmp/phev-ocr/core/package/tesseract-core*.wasm* .
+          curl --fail --location --retry 3 --silent --show-error https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/deu.traineddata -o /tmp/phev-deu.traineddata
+          gzip -n -c /tmp/phev-deu.traineddata > ./deu.traineddata.gz
+          test -s tesseract.min.js
+          test -s tesseract-worker.min.js
+          test -s deu.traineddata.gz
+          test -s tesseract-core-simd-lstm.wasm.js
+
       - name: Upload only PWA files (never api/)
         if: ${{ github.event_name == 'push' || inputs.upload == true }}
         env:
@@ -145,12 +168,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+          for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
             test -f "$file"
           done
           {
             printf 'cd "%s"\n' "$SFTP_DIR"
-            for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
+            for file in index.html app.js intelligent-analytics.js cloud.js charts.js pagination.js pdf-report.js csv-import-utils.js auto-backup.js vehicle-costs.js receipt-parser.js receipt-preview.js receipt-ocr.js tesseract.min.js tesseract-worker.min.js tesseract-core*.wasm* deu.traineddata.gz styles.css sw.js manifest.webmanifest jspdf.umd.min.js; do
               printf 'put "%s"\n' "$file"
             done
           } > /tmp/upload.batch
