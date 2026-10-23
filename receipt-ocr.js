@@ -17,14 +17,20 @@
   if(running)return;
   const file=fileInput.files&&fileInput.files[0];
   if(!file){status.textContent='Bitte zuerst ein Belegfoto auswählen.';return;}
-  if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function'){
-   status.textContent='OCR-Bibliothek nicht verfügbar. Bitte Belegtext manuell eingeben.';
-   return;
-  }
   running=true;
   button.disabled=true;
   status.textContent='Texterkennung wird vorbereitet. Das Foto bleibt auf diesem Gerät.';
   try{
+   if(!window.Tesseract){
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement('script');
+     script.src=local('tesseract.min.js?v=218');
+     script.onload=resolve;
+     script.onerror=()=>reject(new Error('ocr-library-unavailable'));
+     document.head.append(script);
+    });
+   }
+   if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function')throw new Error('ocr-library-unavailable');
    worker=await window.Tesseract.createWorker('deu',1,{
     workerPath:local('tesseract-worker.min.js'),
     corePath:local(''),
