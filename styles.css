@@ -1189,3 +1189,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
 #charging-management>.dashboard-actions{margin-top:16px}
 #charging-management>.dashboard-actions>.managed-charging-card{box-sizing:border-box;padding:clamp(16px,1.5vw,24px)}
 @media(max-width:600px){#charging-management{padding:16px 12px}#charging-management>.dashboard-actions>.managed-charging-card{padding:14px 12px}}
+
+/* Einheitliche Bearbeiten-/Löschen-Icons in allen Verwaltungslisten. */
+.action-icon-button,.managed-icon-action,.admin-icon-action{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;min-width:38px;width:38px;height:38px;padding:7px;margin:2px;border-radius:10px;font-size:21px;line-height:1;cursor:pointer}
+.action-icon-button.action-edit,.managed-icon-action:first-child,.admin-icon-action:first-child{background:#5c421c;color:#ffd38a;border:1px solid #b78135}
+.action-icon-button.action-delete,.managed-icon-action:nth-child(2),.admin-icon-action:nth-child(2){background:#542b34;color:#ffabb7;border:1px solid #a64e61}
+.action-icon-button:hover,.managed-icon-action:hover,.admin-icon-action:hover{filter:brightness(1.18)}
+.action-icon-button:focus-visible,.managed-icon-action:focus-visible,.admin-icon-action:focus-visible{outline:2px solid #8ce5e7;outline-offset:2px}
