@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=215">
+<link rel="stylesheet" href="styles.css?v=216">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -36,7 +36,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.15</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.16</small>
 </div>
 </aside>
 <main class="main">
@@ -153,6 +153,15 @@
 <section id="charging-management" class="hide"><h2>Ladeorte & Anbieter</h2><p>Getrennte Verwaltung. Anbieterpreis hat Vorrang. Preise in Basiswährung.</p><div class="dashboard-actions"><article class="quick-card"><h3>Ladeorte</h3><form id="managed-location-form"><label>Name<input name="name" required maxlength="100"></label><label>Typ<select name="kind"><option value="">Nicht angegeben</option><option>Zuhause</option><option>Öffentlich</option><option>Arbeitsplatz</option><option>Kostenlos</option></select></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-locations-list"></div></article><article class="quick-card"><h3>Anbieter</h3><form id="managed-provider-form"><label>Name<input name="name" required maxlength="100"></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form><div id="managed-providers-list"></div></article></div><p id="managed-charging-status" role="status"></p></section><!-- Ausführliches Formular für Lade- und Tankvorgänge -->
 <section id="add" class="hide">
 <h2>Neuer Eintrag</h2>
+<details class="quick-card" id="receipt-assistant">
+<summary>📷 Beleg als Foto öffnen (Vorschau)</summary>
+<p>Wähle ein Foto deiner Lade- oder Tankquittung. Das Bild wird nur auf diesem Gerät angezeigt und weder hochgeladen noch gespeichert. Übertrage die Werte anschließend selbst in das Formular. Eine automatische Texterkennung folgt in einem späteren Schritt.</p>
+<label for="receipt-photo">Belegfoto auswählen</label>
+<input id="receipt-photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" aria-describedby="receipt-photo-status">
+<p id="receipt-photo-status" role="status" aria-live="polite">Noch kein Beleg ausgewählt.</p>
+<img id="receipt-photo-preview" alt="Vorschau des ausgewählten Belegfotos" style="max-width:100%;max-height:480px;object-fit:contain" hidden>
+<button type="button" id="receipt-photo-clear" hidden>Belegvorschau entfernen</button>
+</details>
 <form id="form">
 <label>Art</label>
 <select name="type">
@@ -357,16 +366,17 @@
 </details>
 </section>
 </section>
-<script src="jspdf.umd.min.js?v=215" defer></script>
-<script src="charts.js?v=215" defer></script>
-<script src="pagination.js?v=215" defer></script>
-<script src="pdf-report.js?v=215" defer></script>
-<script src="csv-import-utils.js?v=215" defer></script>
-<script src="auto-backup.js?v=215" defer></script>
-<script src="vehicle-costs.js?v=215" defer></script>
-<script src="cloud.js?v=215" defer></script>
-<script src="intelligent-analytics.js?v=215" defer></script>
-<script src="app.js?v=215" defer>
+<script src="jspdf.umd.min.js?v=216" defer></script>
+<script src="charts.js?v=216" defer></script>
+<script src="pagination.js?v=216" defer></script>
+<script src="pdf-report.js?v=216" defer></script>
+<script src="csv-import-utils.js?v=216" defer></script>
+<script src="auto-backup.js?v=216" defer></script>
+<script src="vehicle-costs.js?v=216" defer></script>
+<script src="cloud.js?v=216" defer></script>
+<script src="intelligent-analytics.js?v=216" defer></script>
+<script src="receipt-preview.js?v=216" defer></script>
+<script src="app.js?v=216" defer>
 </script>
 </main>
 </div>
