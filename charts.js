@@ -8,6 +8,7 @@ const AnalyticsCharts = (() => {
   const money = (value, currency) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: 2}).format(value) + ' ' + currency;
   const num = (value, digits = 1) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: digits}).format(value);
   const clean = (node) => node.replaceChildren();
+  const quantity = (value) => { const n = Number(String(value ?? 0).replace(',', '.')); return Number.isFinite(n) ? n : 0; };
   const empty = (node, message = 'Für diese Auswahl sind keine Daten vorhanden.') => {
     const p = document.createElement('p');
     p.className = 'chart-empty';
@@ -33,8 +34,8 @@ const AnalyticsCharts = (() => {
       const month = entry.date.slice(0, 7);
       if (!groups.has(month)) groups.set(month, {energy: 0, cost: 0, fuel: 0});
       const value = groups.get(month);
-      if (entry.type === 'charge') value.energy += entry.amount;
-      if (entry.type === 'fuel') value.fuel += entry.amount;
+      if (entry.type === 'charge') value.energy += quantity(entry.amount);
+      if (entry.type === 'fuel') value.fuel += quantity(entry.amount);
       value.cost += convert(entry);
     });
     const months = [...groups.keys()].sort();
@@ -86,21 +87,23 @@ const AnalyticsCharts = (() => {
   function price(node, entries, currency, convert) {
     clean(node);
     const groups = new Map();
-    entries.filter(e => e.type === 'charge' && e.amount > 0).forEach(e => {
+    entries.filter(e => e.type === 'charge' && quantity(e.amount) > 0).forEach(e => {
       const month = e.date.slice(0, 7);
       if (!groups.has(month)) groups.set(month, {energy: 0, cost: 0});
       const v = groups.get(month);
-      v.energy += e.amount;
+      v.energy += quantity(e.amount);
       v.cost += convert(e);
     });
     const months = [...groups.keys()].sort();
     if (!months.length) return empty(node, 'Noch keine Ladungen für diese Auswahl.');
     const values = months.map(m => groups.get(m).cost / groups.get(m).energy);
     const width = 600, height = 180, pad = 24;
-    const max = Math.max(0.01, ...values) * 1.12;
+    const low = Math.min(...values), high = Math.max(...values);
+    const margin = Math.max(0.015, (high - low) * 0.2);
+    const min = Math.max(0, low - margin), max = high + margin;
     const point = (v, i) => ({
       x: months.length === 1 ? width / 2 : pad + i * (width - pad * 2) / (months.length - 1),
-      y: height - pad - v / max * (height - pad * 2)
+      y: height - pad - (v - min) / (max - min) * (height - pad * 2)
     });
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 600 180');
@@ -139,7 +142,7 @@ const AnalyticsCharts = (() => {
     const groups = new Map();
     entries.filter(e => e.type === 'charge').forEach(e => {
       const provider = (e.place || 'Unbekannt').trim() || 'Unbekannt';
-      groups.set(provider, (groups.get(provider) || 0) + e.amount);
+      groups.set(provider, (groups.get(provider) || 0) + quantity(e.amount));
     });
     const rows = [...groups].sort((a, b) => b[1] - a[1]);
     if (!rows.length) return empty(node, 'Keine Ladevorgänge für diese Auswahl.');
