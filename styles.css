@@ -1134,3 +1134,17 @@ button:disabled{opacity:.55;cursor:not-allowed}
  #cloud-users .management-table{font-size:12px}
  #cloud-users .management-table th,#cloud-users .management-table td{padding:12px 9px}
 }
+
+/* Mehrjährige Kostenentwicklung: gemeinsame Skala, gestapelte Kategorien. */
+.yearly-cost-chart{display:grid;gap:13px;margin:16px 0;min-width:0}
+.yearly-cost-row{display:grid;grid-template-columns:70px minmax(0,1fr) 120px;align-items:center;gap:10px;min-width:0}
+.yearly-cost-row>strong{font-variant-numeric:tabular-nums}
+.yearly-cost-track{height:24px;min-width:0;border-radius:6px;background:#ffffff12;overflow:hidden}
+.yearly-cost-stack{height:100%;display:flex;overflow:hidden;border-radius:6px}
+.yearly-cost-segment{display:block;height:100%;min-width:0}
+.yearly-cost-electric{background:#45b6f0}
+.yearly-cost-fuel{background:#e9a44e}
+.yearly-cost-other{background:#ad8bea}
+.yearly-cost-total{text-align:right;font-size:.9em;font-variant-numeric:tabular-nums}
+.yearly-cost-legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.85em}
+@media(max-width:700px){.yearly-cost-row{grid-template-columns:46px minmax(0,1fr);gap:6px 9px}.yearly-cost-total{grid-column:2;text-align:left;font-size:.82em}}

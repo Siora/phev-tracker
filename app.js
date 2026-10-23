@@ -180,6 +180,45 @@ function rememberPage(page){
  * Die Auswertung nutzt ausschliesslich vorhandene Cloud-/Lokal-Datensätze.
  * DOM-Inhalte werden über textContent erstellt (kein ungeprüftes HTML).
  */
+/**
+ * Gestapelter Kostenverlauf für die erfassten Kalenderjahre.
+ * Die Skala ist über alle Jahre identisch; ein laufendes Jahr ist kein
+ * vollständiges Vergleichsjahr. Die Tabelle bleibt als zugängliche Alternative.
+ */
+function renderYearlyCostChart(data,money,currentYear){
+ const container=document.getElementById('intelligence-yearly-chart');
+ if(!container)return;
+ container.replaceChildren();
+ if(!data.length){
+  const empty=document.createElement('p');
+  empty.textContent='Noch keine Jahresdaten für die grafische Darstellung vorhanden.';
+  container.append(empty);return;
+ }
+ const max=Math.max(1,...data.map(item=>item.totals.total));
+ for(const {year,totals} of [...data].reverse()){
+  const row=document.createElement('div');row.className='yearly-cost-row';
+  const heading=document.createElement('strong');
+  heading.textContent=String(year)+(year===currentYear?' *':'');
+  const track=document.createElement('div');track.className='yearly-cost-track';
+  const stack=document.createElement('div');stack.className='yearly-cost-stack';
+  stack.style.width=Math.max(0,Math.min(100,totals.total/max*100))+'%';
+  for(const [key,kind] of [['energyCost','electric'],['fuelCost','fuel'],['otherCost','other']]){
+   const value=Math.max(0,totals[key]);
+   if(value===0||totals.total<=0)continue;
+   const segment=document.createElement('span');segment.className='yearly-cost-segment yearly-cost-'+kind;
+   segment.style.width=(value/totals.total*100)+'%';
+   stack.append(segment);
+  }
+  const description=String(year)+': Strom '+money(totals.energyCost)+', Benzin '+money(totals.fuelCost)+', Weitere '+money(totals.otherCost)+', Gesamt '+money(totals.total)+(year===currentYear?'. Laufendes, unvollständiges Jahr.':'');
+  track.title=description;track.setAttribute('aria-label',description);
+  track.append(stack);
+  const total=document.createElement('span');total.className='yearly-cost-total';total.textContent=money(totals.total);
+  row.append(heading,track,total);container.append(row);
+ }
+ const footnote=document.createElement('small');
+ footnote.textContent='* Laufendes Jahr (unvollständig). Jahre ohne Einträge sind keine nachgewiesenen Nullkosten.';
+ container.append(footnote);
+}
 function renderIntelligence(){
  const panel=$('intelligence');
  if(!panel||panel.classList.contains('hide')||!window.PhevIntelligence)return;
@@ -236,8 +275,12 @@ function renderIntelligence(){
    const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;
    td.textContent='Noch keine erfassten Jahreskosten vorhanden.';tr.append(td);yearlyBody.append(tr);
   }
-  for(const year of yearSet){
-   const totals=window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,year,conv,e=>expenseCurrency(Number(e.amount),e.currency));
+  const annualData=yearSet.map(year=>({
+   year,
+   totals:window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,year,conv,e=>expenseCurrency(Number(e.amount),e.currency))
+  }));
+  renderYearlyCostChart(annualData,money,currentYear);
+  for(const {year,totals} of annualData){
    const tr=document.createElement('tr');
    [String(year)+(year===currentYear?' (laufend)':''),money(totals.energyCost),money(totals.fuelCost),money(totals.otherCost),money(totals.total)].forEach((value,index)=>{
     const cell=document.createElement(index===0?'th':'td');if(index===0)cell.scope='row';cell.textContent=value;tr.append(cell);
