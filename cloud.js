@@ -397,16 +397,44 @@ async function cloudUsers(){
  const container=ce('cloud-users');container.replaceChildren();
  const table=document.createElement('table');table.className='management-table';
  const thead=document.createElement('thead'),heading=document.createElement('tr');
- for(const label of ['E-Mail-Adresse','Rolle']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
+ for(const label of ['E-Mail-Adresse','Rolle','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
  thead.append(heading);table.append(thead);
  const tbody=document.createElement('tbody');
- if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=2;cell.textContent='Noch keine Benutzer vorhanden.';row.append(cell);tbody.append(row);}
+ if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=3;cell.textContent='Noch keine Benutzer vorhanden.';row.append(cell);tbody.append(row);}
  const makeUserRow=user=>{
   const row=document.createElement('tr');
-  for(const value of [user.email,user.role==='admin'?'Administrator':'Benutzer']){
-   const cell=document.createElement('td');cell.textContent=value;row.append(cell);
-  }
-  return row;
+  const emailCell=document.createElement('td');emailCell.textContent=user.email;
+  const roleCell=document.createElement('td');roleCell.textContent=user.role==='admin'?'Administrator':'Benutzer';
+  const actions=document.createElement('td');
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
+  edit.addEventListener('click',()=>{
+   const form=document.createElement('form');
+   const emailLabel=document.createElement('label');emailLabel.textContent='E-Mail';
+   const emailInput=document.createElement('input');emailInput.type='email';emailInput.required=true;emailInput.maxLength=254;emailInput.value=user.email;emailLabel.append(emailInput);
+   const roleLabel=document.createElement('label');roleLabel.textContent='Rolle';
+   const roleSelect=document.createElement('select');
+   for(const [value,label] of [['user','Benutzer'],['admin','Administrator']]){const option=new Option(label,value);roleSelect.add(option);}
+   roleSelect.value=user.role;roleLabel.append(roleSelect);
+   const save=document.createElement('button');save.type='submit';save.textContent='Änderungen speichern';
+   const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Abbrechen';cancel.onclick=()=>cloudUsers().catch(e=>cs(e.message));
+   form.append(emailLabel,roleLabel,save,cancel);
+   form.addEventListener('submit',async event=>{
+    event.preventDefault();save.disabled=true;
+    try{await cloudCall('admin-update-user',{id:user.id,email:emailInput.value,role:roleSelect.value});cs('Benutzer aktualisiert.');await cloudUsers();}
+    catch(error){cs(error.message);save.disabled=false;}
+   });
+   actions.replaceChildren(form);
+  });
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
+  remove.addEventListener('click',async()=>{
+   if(!confirm('Benutzer '+user.email+' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.'))return;
+   const confirmation=prompt('Zur Bestätigung LÖSCHEN eingeben:');
+   if(confirmation!=='LÖSCHEN')return;
+   remove.disabled=true;
+   try{await cloudCall('admin-delete-user',{id:user.id});cs('Benutzer gelöscht.');await cloudUsers();}
+   catch(error){cs(error.message);remove.disabled=false;}
+  });
+  actions.append(edit,remove);row.append(emailCell,roleCell,actions);return row;
  };
  table.append(tbody);window.paginateTable(container,table,tbody,result.users,20,'users',makeUserRow);
 }

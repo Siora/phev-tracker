@@ -414,6 +414,54 @@ if ($action === 'admin-create-user') {
  } catch (PDOException $e) { fail(409,'Konto konnte nicht erstellt werden'); }
  respond(201,['ok'=>true]);
 }
+// Administratoraktionen: Rollen- und Zielkonto-Prüfung erfolgen immer serverseitig.
+if (in_array($action,['admin-update-user','admin-delete-user'],true)) {
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail(405,'POST erforderlich');
+ $target=filter_var($body['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$target) fail(400,'Ungültige Benutzer-ID');
+ $db->beginTransaction();
+ try {
+  // Alle Administratoren sperren, damit parallele Änderungen den letzten Admin nicht entfernen.
+  $admins=$db->query("SELECT id FROM users WHERE role='admin' FOR UPDATE")->fetchAll(PDO::FETCH_COLUMN);
+  if (!in_array((string)$uid,array_map('strval',$admins),true)) { $db->rollBack();fail(403,'Nur Administratoren'); }
+  $stmt=$db->prepare('SELECT id,email,role FROM users WHERE id=? FOR UPDATE');
+  $stmt->execute([$target]);$account=$stmt->fetch();
+  if (!$account) { $db->rollBack();fail(404,'Benutzer nicht gefunden'); }
+  if ($action==='admin-update-user') {
+   $mail=email((string)($body['email']??''));
+   $role=(string)($body['role']??'');
+   if (!filter_var($mail,FILTER_VALIDATE_EMAIL) || strlen($mail)>254 || !in_array($role,['admin','user'],true)) { $db->rollBack();fail(400,'Ungültige E-Mail oder Rolle'); }
+   if ($target===$uid && $role!=='admin') { $db->rollBack();fail(409,'Eigene Administratorrolle kann hier nicht entfernt werden'); }
+   if ($account['role']==='admin' && $role!=='admin' && count($admins)<=1) { $db->rollBack();fail(409,'Letzter Administrator muss erhalten bleiben'); }
+   $stmt=$db->prepare('UPDATE users SET email=?,role=? WHERE id=?');
+   $stmt->execute([$mail,$role,$target]);
+   // Bei Rollenwechsel bestehende Sitzungen des Zielkontos widerrufen.
+   if ($account['role']!==$role) {
+    $stmt=$db->prepare('DELETE FROM sessions WHERE user_id=?');$stmt->execute([$target]);
+   }
+  } else {
+   if ($target===$uid) { $db->rollBack();fail(409,'Eigenes Konto bitte über die Kontoverwaltung löschen'); }
+   if ($account['role']==='admin' && count($admins)<=1) { $db->rollBack();fail(409,'Letzter Administrator muss erhalten bleiben'); }
+   if ($db->query("SHOW TABLES LIKE 'family_groups'")->fetchColumn()) {
+    $stmt=$db->prepare('SELECT id FROM family_groups WHERE created_by=? LIMIT 1');
+    $stmt->execute([$target]);
+    if ($stmt->fetchColumn()) { $db->rollBack();fail(409,'Benutzer hat eine Familie gegründet. Zuerst Familienbesitz klären'); }
+   }
+   $stmt=$db->prepare('DELETE FROM users WHERE id=?');$stmt->execute([$target]);
+   // Fremdschlüssel und ihre ON DELETE-Regeln entscheiden über abhängige Daten.
+   // Bei RESTRICT wird die gesamte Transaktion zurückgerollt.
+  }
+  $db->commit();
+ } catch (PDOException $e) {
+  if ($db->inTransaction()) $db->rollBack();
+  if ($e->getCode()==='23000') fail(409,'Änderung nicht möglich: E-Mail bereits vergeben oder abhängige Daten vorhanden');
+  error_log('PHEV admin user action failed: '.get_class($e));fail(500,'Benutzeraktion fehlgeschlagen');
+ } catch (Throwable $e) {
+  if ($db->inTransaction()) $db->rollBack();
+  error_log('PHEV admin user action failed: '.get_class($e));fail(500,'Benutzeraktion fehlgeschlagen');
+ }
+ respond(200,['ok'=>true]);
+}
 if ($action === 'admin-users') {
  if ($_SERVER['REQUEST_METHOD'] !== 'GET') fail(405,'GET erforderlich');
  $stmt=$db->prepare('SELECT role FROM users WHERE id=?'); $stmt->execute([$uid]);
