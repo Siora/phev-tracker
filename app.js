@@ -556,7 +556,7 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  * einmal den bestehenden Speicherweg auf. Kein direktes Cloud-API.
  */
 function deleteEntryWithConfirmation(id){
-  if(confirm('Eintrag löschen?')){
+  if(confirm((typeof window!=='undefined'&&window.PhevI18n?.t('entries.confirmDelete')||'Eintrag löschen?'))){
     records=records.filter(r=>r.id!==id);
     save();
   }
@@ -580,7 +580,7 @@ function beginEntryEdit(x){
   f.elements.charge_mode.value=getChargeMode(x.id);
   f.elements.vehicle_id.value=x.vehicle_id||'';
   f.dataset.editId=x.id;
-  f.querySelector('button').textContent='Änderungen speichern';
+  f.querySelector('button').textContent=(typeof window!=='undefined'&&window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
   tab('add');
   if(typeof entryFormView==='function')entryFormView(true);
 }
@@ -592,7 +592,7 @@ function renderEntryHistory(){
   const table=document.createElement('table');
   table.className='entry-history-table';
   const head=document.createElement('thead'),heading=document.createElement('tr');
-  for(const label of ['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen']){
+  for(const label of (typeof window!=='undefined'&&window.PhevI18n?.getLanguage?.()==='en'?['Date / time','Type','Vehicle','Quantity','Cost','Location','Actions']:['Datum / Zeit','Art','Fahrzeug','Menge','Kosten','Ort','Aktionen'])){
   const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);
   }
   head.append(heading);table.append(head);
@@ -600,15 +600,15 @@ function renderEntryHistory(){
   const ordered=records.slice().sort(compareRecordDateTime);
   if(!ordered.length){
   const tr=document.createElement('tr'),td=document.createElement('td');
-  td.colSpan=7;td.textContent='Noch keine Einträge vorhanden.';tr.append(td);tbody.append(tr);
+  td.colSpan=7;td.textContent=(typeof window!=='undefined'&&window.PhevI18n?.t('entries.empty')||'Noch keine Einträge vorhanden.');tr.append(td);tbody.append(tr);
   }
   const makeEntryRow=x=>{
   const tr=document.createElement('tr');
   const vehicle=vehicles.find(v=>String(v.id)===String(x.vehicle_id));
   const values=[
   recordDateTime(x),
-  x.type==='charge'?'⚡ Ladung':'⛽ Tankung',
-  vehicle?vehicleName(vehicle):'Ohne Fahrzeug',
+  x.type==='charge'?(typeof window!=='undefined'&&window.PhevI18n?.t('entries.charge')||'⚡ Ladung'):(typeof window!=='undefined'&&window.PhevI18n?.t('entries.fuel')||'⛽ Tankung'),
+  vehicle?vehicleName(vehicle):(typeof window!=='undefined'&&window.PhevI18n?.t('entries.noVehicle')||'Ohne Fahrzeug'),
   String(x.amount)+(x.type==='charge'?' kWh':' l'),
   fmt(x.cost,x.currency),
   x.place||'–'
@@ -617,7 +617,7 @@ function renderEntryHistory(){
   const actions=document.createElement('td');actions.className='entry-table-actions';
   const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel=window.PhevI18n?.t('expenses.edit')||'Bearbeiten';edit.title=edit.ariaLabel;
   edit.onclick=()=>beginEntryEdit(x);
-  const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.className='action-icon-button action-delete';remove.ariaLabel='Löschen';remove.title='Löschen';
+  const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.className='action-icon-button action-delete';remove.ariaLabel=typeof window!=='undefined'&&window.PhevI18n?.t('expenses.delete')||'Löschen';remove.title=remove.ariaLabel;
   remove.onclick=()=>deleteEntryWithConfirmation(x.id);
   actions.append(edit,remove);tr.append(actions);return tr;
   };
