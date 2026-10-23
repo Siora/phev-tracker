@@ -263,6 +263,7 @@
 <p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
 <form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
 <div id="family-list"></div>
+<div id="family-shares"><h4>Fahrzeugfreigaben</h4><label>Familie <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh">Freigaben laden</button><div id="family-shares-list"></div><form id="family-share-form"><label>Eigenes Fahrzeug <select name="vehicle_id" id="family-share-vehicle" required></select></label><label>Berechtigung <select name="access_level"><option value="view">Lesen</option><option value="edit">Bearbeiten (zukünftig)</option></select></label><button type="submit">Fahrzeug freigeben</button></form></div>
 <form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
 <form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
 <p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
