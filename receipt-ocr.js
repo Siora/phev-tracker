@@ -24,7 +24,7 @@
    if(!window.Tesseract){
     await new Promise((resolve,reject)=>{
      const script=document.createElement('script');
-     script.src=local('tesseract.min.js?v=218');
+     script.src=local('tesseract.min.js?v=219');
      script.onload=resolve;
      script.onerror=()=>reject(new Error('ocr-library-unavailable'));
      document.head.append(script);
@@ -46,8 +46,10 @@
    if(!recognized.trim())throw new Error('empty-result');
    text.value=recognized;
    text.dispatchEvent(new Event('input',{bubbles:true}));
-   status.textContent='Text erkannt und zur Kontrolle eingefügt. Bitte prüfen und anschließend „Werte aus Text vorschlagen“ wählen.';
-   if(extract)extract.focus();
+   if(extract){extract.click();}
+   status.textContent='Text erkannt. Die Werte stehen unten zur Prüfung bereit; bitte erst nach Kontrolle ins Formular übernehmen.';
+   const review=document.getElementById('receipt-extract-preview');
+   if(review&&!review.hidden)review.scrollIntoView({block:'nearest',behavior:'smooth'});
   }catch(error){
    status.textContent=error&&error.message==='empty-result'
     ?'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden oder den Text manuell eingeben.'
