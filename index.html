@@ -258,7 +258,15 @@
 <label>Passwort bestätigen<input name="confirm_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
 <button type="submit">Passwort zurücksetzen</button>
 </form>
-<div id="cloud-account" class="hide">\n<section id="family-management" aria-labelledby="family-title">\n<h3 id="family-title">Familienverwaltung</h3>\n<p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>\n<form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>\n<div id="family-list"></div>\n<form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>\n<form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>\n<p><small>Einladungslink erhalten? Den 64-stelligen Code nach #family-invite= aus dem Link hier einfügen. Eine Einladung gilt sieben Tage.</small></p>\n</section>
+<div id="cloud-account" class="hide">\n<section id="family-management" aria-labelledby="family-title">
+<h3 id="family-title">Familienverwaltung</h3>
+<p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
+<form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
+<div id="family-list"></div>
+<form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
+<form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
+<p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
+</section>
 <p id="cloud-identity"></p>
 <h3>Passwort ändern</h3>
 <form id="cloud-change-password">
