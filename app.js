@@ -1129,7 +1129,7 @@ function renderVehicleExpenses(){
     const row=document.createElement('p');row.className='insight-item';
     const vehicle=vehicles.find(v=>String(v.id)===String(item.vehicle_id));
     const label=vehicle?vehicleName(vehicle)+' · ':'';
-    row.textContent=label+item.category+' · '+item.next_service_date+' · '+(item.days<0?'Seit '+Math.abs(item.days)+' Tagen überfällig':item.days===0?'Heute fällig':'In '+item.days+' Tagen fällig');
+    row.textContent=label+item.category+' · '+item.next_service_date+' · '+(item.days<0?(window.PhevI18n?.t('expenses.overduePrefix')||'Seit ')+Math.abs(item.days)+(window.PhevI18n?.t('expenses.overdueSuffix')||' Tagen überfällig'):item.days===0?(window.PhevI18n?.t('expenses.dueToday')||'Heute fällig'):(window.PhevI18n?.t('expenses.duePrefix')||'In ')+item.days+(window.PhevI18n?.t('expenses.dueSuffix')||' Tagen fällig'));
     reminders.append(row);
    }
   }
@@ -1142,7 +1142,7 @@ function renderVehicleExpenses(){
   */
  const breakdown=window.PhevTco.breakdown(vehicleExpenses,records,selected,settings,conv);
  if(breakdown.length){
-  const heading=document.createElement('h4');heading.textContent='Kosten nach Kategorie';
+  const heading=document.createElement('h4');heading.textContent=window.PhevI18n?.t('expenses.byCategory')||'Kosten nach Kategorie';
   const breakdownList=document.createElement('div');breakdownList.className='expense-breakdown';
   const total=breakdown.reduce((sum,item)=>sum+item.amount,0);
   for(const item of breakdown){
@@ -1161,10 +1161,10 @@ function renderVehicleExpenses(){
   */
  const table=document.createElement('table');
  table.className='expense-table';
- table.setAttribute('aria-label','Wartungs- und Fahrzeugkosten');
+ table.setAttribute('aria-label',window.PhevI18n?.t('expenses.tableLabel')||'Wartungs- und Fahrzeugkosten');
  const thead=document.createElement('thead');
  const headRow=document.createElement('tr');
- for(const heading of ['Datum','Kategorie','Betrag','Kilometerstand','Nächste Wartung','Notiz','Aktionen']){
+ for(const heading of (window.PhevI18n?.getLanguage?.()==='en'?['Date','Category','Amount','Mileage','Next service','Note','Actions']:['Datum','Kategorie','Betrag','Kilometerstand','Nächste Wartung','Notiz','Aktionen'])){
   const th=document.createElement('th');th.scope='col';th.textContent=heading;headRow.append(th);
  }
  thead.append(headRow);table.append(thead);
