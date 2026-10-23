@@ -230,7 +230,7 @@ function renderIntelligence(){
  const yearlyBody=$('intelligence-years');
  if(yearlyBody){
   yearlyBody.replaceChildren();
-  const yearSet=[...new Set([...analysisRecords,...(isFamily?[]:vehicleExpenses)].map(r=>Number(String(r.date||'').slice(0,4))))]
+  const yearSet=[...new Set([...analysisRecords,...(isFamily?[]:vehicleExpenses)].filter(r=>!vehicleSelect.value||String(r.vehicle_id)===vehicleSelect.value).map(r=>Number(String(r.date||'').slice(0,4))))]
    .filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
   if(!yearSet.length){
    const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;
