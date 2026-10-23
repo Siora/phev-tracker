@@ -298,7 +298,7 @@ function tab(t){
   if(t==='administration'&&document.getElementById('admin-nav')?.hidden)t='cloud';
   if(t==='cloud-settings'&&document.getElementById('open-cloud-page')?.hidden)t='cloud';
   navigationPages.forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',navigationPages[i]===t || ((t==='family'||t==='cloud-settings') && navigationPages[i]==='cloud')));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',(i===8?t==='administration':navigationPages[i]===t || ((t==='family'||t==='cloud-settings') && navigationPages[i]==='cloud'))));
   rememberPage(t);
   render();
   renderIntelligence();
