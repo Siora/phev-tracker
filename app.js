@@ -631,6 +631,10 @@ function render(){
     from=new Date(chosenYear,chosenMonth,1);
     to=new Date(chosenYear,chosenMonth+1,1)
   }
+  else if(period==='all'){
+    from=new Date(1900,0,1);
+    to=new Date(2200,0,1);
+  }
   else{
     from=new Date(y,m-months+1,1);
     to=new Date(y,m+1,1)
@@ -651,6 +655,14 @@ function render(){
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   renderVehicleExpenses();
   renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost);
+  // Bei Familienfreigaben zeigt diese Diagnose, ob Daten am Zeitraum- oder Ortsfilter scheitern.
+  if(shared){
+    const summary=$('vehicle-summary');
+    const info=document.createElement('p');
+    const dates=dashboardRecords.map(r=>String(r.date||'').slice(0,10)).filter(Boolean).sort();
+    info.textContent='Familienfreigabe: '+dashboardRecords.length+' Einträge insgesamt, '+all.length+' im Zeitraum, '+filtered.length+' nach Ortsfilter'+(dates.length?' · Erfasster Zeitraum: '+dates[0]+' bis '+dates[dates.length-1]:'')+'.';
+    summary.append(info);
+  }
   // Die Werte beziehen sich auf die Kilometerstandsspanne im gewählten Zeitraum.
   // Geladene/getankte Mengen sind Näherungen, kein gemessener Antriebsverbrauch.
   const consumption=$('consumption-stats');
