@@ -1,5 +1,5 @@
 /*
- * PHEV Tracker – Service Worker (v216)
+ * PHEV Tracker – Service Worker (v217)
  *
  * Aufgabe:
  * - Statische PWA-Dateien für Offline-Nutzung zwischenspeichern.
@@ -12,7 +12,7 @@
  * Cache-Version und Versionsparameter in index.html gemeinsam erhöhen.
  */
 
-const CACHE = 'phev-tracker-v216';
+const CACHE = 'phev-tracker-v217';
 
 // Diese Dateien müssen beim Installieren erreichbar sein. Die PDF-Bibliothek
 // wird vom eigenen Hetzner-Server ausgeliefert, nicht von einem fremden CDN.
@@ -20,18 +20,19 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './styles.css?v=216',
-  './app.js?v=216',
-  './receipt-preview.js?v=216',
-  './intelligent-analytics.js?v=216',
-  './charts.js?v=216',
-  './pagination.js?v=216',
-  './pdf-report.js?v=216',
-  './csv-import-utils.js?v=216',
-  './auto-backup.js?v=216',
-  './vehicle-costs.js?v=216',
-  './cloud.js?v=216',
-  './jspdf.umd.min.js?v=216'
+  './styles.css?v=217',
+  './app.js?v=217',
+  './receipt-parser.js?v=217',
+  './receipt-preview.js?v=217',
+  './intelligent-analytics.js?v=217',
+  './charts.js?v=217',
+  './pagination.js?v=217',
+  './pdf-report.js?v=217',
+  './csv-import-utils.js?v=217',
+  './auto-backup.js?v=217',
+  './vehicle-costs.js?v=217',
+  './cloud.js?v=217',
+  './jspdf.umd.min.js?v=217'
 ];
 
 self.addEventListener('install', event => {

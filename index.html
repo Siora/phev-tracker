@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=216">
+<link rel="stylesheet" href="styles.css?v=217">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -36,7 +36,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.16</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.17</small>
 </div>
 </aside>
 <main class="main">
@@ -161,6 +161,17 @@
 <p id="receipt-photo-status" role="status" aria-live="polite">Noch kein Beleg ausgewählt.</p>
 <img id="receipt-photo-preview" alt="Vorschau des ausgewählten Belegfotos" style="max-width:100%;max-height:480px;object-fit:contain" hidden>
 <button type="button" id="receipt-photo-clear" hidden>Belegvorschau entfernen</button>
+<div class="receipt-text-tools">
+<label for="receipt-raw-text">Belegtext (optional)</label>
+<textarea id="receipt-raw-text" rows="5" placeholder="Erkannten oder abgetippten Belegtext hier einfügen, z. B. 23.10.2026, 24.5 kWh, CHF 12.80"></textarea>
+<button type="button" id="receipt-extract">Werte aus Text vorschlagen</button>
+<p id="receipt-extract-status" role="status" aria-live="polite">Die Texterkennung aus Fotos ist noch nicht verfügbar. Du kannst vorhandenen Belegtext einfügen.</p>
+<div id="receipt-extract-preview" hidden>
+<p>Bitte die vorgeschlagenen Werte mit dem Beleg vergleichen. Es wird nichts automatisch gespeichert.</p>
+<div id="receipt-extract-fields"></div>
+<button type="button" id="receipt-apply">Geprüfte Werte ins Formular übernehmen</button>
+</div>
+</div>
 </details>
 <form id="form">
 <label>Art</label>
@@ -366,17 +377,18 @@
 </details>
 </section>
 </section>
-<script src="jspdf.umd.min.js?v=216" defer></script>
-<script src="charts.js?v=216" defer></script>
-<script src="pagination.js?v=216" defer></script>
-<script src="pdf-report.js?v=216" defer></script>
-<script src="csv-import-utils.js?v=216" defer></script>
-<script src="auto-backup.js?v=216" defer></script>
-<script src="vehicle-costs.js?v=216" defer></script>
-<script src="cloud.js?v=216" defer></script>
-<script src="intelligent-analytics.js?v=216" defer></script>
-<script src="receipt-preview.js?v=216" defer></script>
-<script src="app.js?v=216" defer>
+<script src="jspdf.umd.min.js?v=217" defer></script>
+<script src="charts.js?v=217" defer></script>
+<script src="pagination.js?v=217" defer></script>
+<script src="pdf-report.js?v=217" defer></script>
+<script src="csv-import-utils.js?v=217" defer></script>
+<script src="auto-backup.js?v=217" defer></script>
+<script src="vehicle-costs.js?v=217" defer></script>
+<script src="cloud.js?v=217" defer></script>
+<script src="intelligent-analytics.js?v=217" defer></script>
+<script src="receipt-parser.js?v=217" defer></script>
+<script src="receipt-preview.js?v=217" defer></script>
+<script src="app.js?v=217" defer>
 </script>
 </main>
 </div>
