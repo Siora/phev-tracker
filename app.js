@@ -617,7 +617,7 @@ function renderEntryHistory(){
   const actions=document.createElement('td');actions.className='entry-table-actions';
   const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.classList.add('action-icon-button','action-edit');edit.setAttribute('aria-label','Bearbeiten');edit.title='Bearbeiten';
   edit.onclick=()=>beginEntryEdit(x);
-  const remove=document.createElement('button');remove.type='button';remove.textContent='▤';remove.classList.add('action-icon-button','action-delete');remove.setAttribute('aria-label','Löschen');remove.title='Löschen';
+  const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.classList.add('action-icon-button','action-delete');remove.setAttribute('aria-label','Löschen');remove.title='Löschen';
   remove.onclick=()=>deleteEntryWithConfirmation(x.id);
   actions.append(edit,remove);tr.append(actions);return tr;
   };
@@ -1195,7 +1195,7 @@ const edit=document.createElement('button');edit.type='button';edit.textContent=
      form.querySelector('button[type=submit]').textContent='Änderungen speichern';
      expenseFormView(true);
     };
-    const remove=document.createElement('button');remove.type='button';remove.textContent='▤';remove.classList.add('action-icon-button','action-delete');remove.setAttribute('aria-label','Löschen');remove.title='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
+    const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.classList.add('action-icon-button','action-delete');remove.setAttribute('aria-label','Löschen');remove.title='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
     remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
   
   actionCell.append(edit,remove);row.append(actionCell);
