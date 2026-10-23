@@ -7,7 +7,7 @@ Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme si
 Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Kontoverwaltung allein schließt Version 3.0 nicht ab.
 
 - [ ] **3.0 – Familienverwaltung:** Mitglieder einladen und verwalten, Fahrzeuge mit expliziten Rollen/Berechtigungen teilen, Ausgaben einzelnen Fahrern zuordnen. Vor Umsetzung: Eigentümerschaft, Zugriff auf Historie, Austritt und Löschung sicher modellieren.
-- [ ] **3.0 – Erweiterte Auswertungen:** Langfristige Kostenentwicklung, Vergleiche zwischen Fahrzeugen und individuell einstellbare Wirtschaftlichkeitsanalysen mit nachvollziehbaren Annahmen.
+- [ ] **3.0 – Erweiterte Auswertungen:** Langfristige Kostenentwicklung und individuell einstellbare Wirtschaftlichkeitsanalysen je Fahrzeug mit nachvollziehbaren Annahmen. Der direkte Wirtschaftlichkeitsvergleich zwischen Fahrzeugen ist ausdrücklich auf Version 4.0 verschoben.
 - [ ] **3.0 – Belegerkennung:** Fotos von Tank- und Laderechnungen erfassen, relevante Werte auslesen, Vorschau und manuelle Korrektur vor dem Speichern. Datenschutz und Aufbewahrung klären.
 - [ ] **3.0 – Automatische Fahrzeugdaten:** Kilometerstand und Ladezustand über geeignete Hersteller- oder Drittanbieter-Schnittstellen einlesen, nur sofern für das Fahrzeug unterstützt. Manuelle Eingabe bleibt möglich; Zugangsdaten und Tokens geschützt speichern.
 
@@ -35,6 +35,10 @@ sie ersetzt weder einen produktiven Berechtigungstest noch ein Backend-Deploymen
 
 Die vorhandene Familienoberfläche und die Endpunkte sind keine Belege dafür,
 dass alle Rollen- und Historienfälle produktiv getestet wurden.
+
+## Für Version 4.0 vorgemerkt
+
+- [ ] **Direkter Wirtschaftlichkeitsvergleich verschiedener Fahrzeuge:** normierte Kosten je Kilometer, vergleichbare Fahrprofile und transparente Annahmen. Die bestehende einfache Kostenübersicht nach Fahrzeug bleibt in 3.0 erhalten.
 
 ## In GitHub integriert
 
