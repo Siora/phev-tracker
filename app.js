@@ -288,6 +288,32 @@ function renderIntelligence(){
    yearlyBody.append(tr);
   }
  }
+ // Vorjahresvergleich auf gleicher Monatsbasis: das laufende Jahr wird nie
+ // gegen ein vollständiges Vorjahr gestellt.
+ const yoyPanel=$('intelligence-year-over-year');
+ if(yoyPanel){
+  yoyPanel.replaceChildren();
+  const year=Number(yearSelect.value);
+  const prior=window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,year-1,conv,e=>expenseCurrency(Number(e.amount),e.currency));
+  const comparison=window.PhevIntelligence.compareYears(result.months,prior.months,year);
+  const headline=document.createElement('p');
+  if(!comparison.available){
+   headline.textContent=comparison.reason;
+   yoyPanel.append(headline);
+  }else{
+   const prefix=comparison.difference>0?'+':'';
+   headline.textContent='Kostenänderung: '+prefix+money(comparison.difference)+' ('+prefix+comparison.percent.toFixed(1)+' %)';
+   const period=document.createElement('p');
+   period.textContent=(comparison.partial?'Januar–'+String(comparison.months).padStart(2,'0'):'Gesamtes Jahr')+
+    ': '+money(comparison.currentTotal)+' gegenüber '+money(comparison.previousTotal)+' im Vorjahr.';
+   const breakdown=document.createElement('p');
+   const names={charge:'Strom',fuel:'Benzin',extra:'Weitere'};
+   breakdown.textContent=comparison.breakdown.map(item=>names[item.key]+': '+money(item.current-item.previous)).join(' · ');
+   const note=document.createElement('small');
+   note.textContent='Nur erfasste Kosten. Unterschiedliche Fahrleistung und fehlende Buchungen beeinflussen den Vergleich; dies ist keine Wirtschaftlichkeitsbewertung.';
+   yoyPanel.append(headline,period,breakdown,note);
+  }
+ }
  // Prognose bewusst separat anzeigen: eine Hochrechnung ist keine Ist-Ausgabe.
  const forecastPanel=$('intelligence-forecast');
  if(forecastPanel){
