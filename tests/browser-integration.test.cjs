@@ -41,7 +41,8 @@ async function openFixture(browser){
       'vehicle-expenses':{expenses:[]},
       data:{records,preferences:null,preferences_available:false},
       'charging-catalog':{locations,providers},
-      'admin-users':{users}
+      'admin-users':{users},
+      'family-list':{families:[]}
     }[action];
     if(payload===undefined)throw new Error('Unexpected API action: '+action);
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
