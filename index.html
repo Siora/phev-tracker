@@ -299,7 +299,8 @@
 <label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
 <label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button>Benutzer erstellen</button>
 </form>
-<h2>Benutzer</h2><div id="cloud-users"></div>
+<h2>Benutzer</h2><div id="cloud-users" role="region" aria-label="Benutzerliste" tabindex="0"></div>
+</div>
 </section>
 <!-- Cloud-Funktionen separat vom Konto, bestehende IDs bleiben für cloud.js erhalten. -->
 <section id="cloud-settings" class="hide" aria-labelledby="cloud-settings-title">
