@@ -1102,7 +1102,7 @@ window.getVehicleExpenses=()=>[...vehicleExpenses];
 function renderVehicleExpenses(){
  const form=$('expense-form'),list=$('expense-list'),summary=$('expense-summary');if(!form||!list||!summary)return;
  const select=form.elements.vehicle_id,previous=select.value;
- select.replaceChildren(new Option('Fahrzeug wählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ select.replaceChildren(new Option(window.PhevI18n?.t('expenses.chooseVehicle')||'Fahrzeug wählen',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  if(vehicles.some(v=>String(v.id)===previous))select.value=previous;
  else if(vehicles.length===1)select.value=String(vehicles[0].id);
  list.replaceChildren();summary.replaceChildren();
@@ -1111,8 +1111,8 @@ function renderVehicleExpenses(){
  const {expenses,extra,running,distance}=window.PhevTco.summarize(
   vehicleExpenses,records,selected,settings,conv
  );
- const caption=document.createElement('p');caption.className='expense-total';caption.textContent='Gesamtkosten aller erfassten Zeiträume: '+fmt(extra+running,settings.base);
- const detail=document.createElement('small');detail.textContent='Strom & Benzin: '+fmt(running,settings.base)+' · Weitere Ausgaben: '+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+' / km (Näherung)':' · Für Kosten/km fehlen Kilometerstände.');
+ const caption=document.createElement('p');caption.className='expense-total';caption.textContent=(window.PhevI18n?.t('expenses.allPeriods')||'Gesamtkosten aller erfassten Zeiträume: ')+fmt(extra+running,settings.base);
+ const detail=document.createElement('small');detail.textContent=(window.PhevI18n?.t('expenses.energyCosts')||'Strom & Benzin: ')+fmt(running,settings.base)+(window.PhevI18n?.t('expenses.otherCosts')||' · Weitere Ausgaben: ')+fmt(extra,settings.base)+(distance>0?' · '+fmt((extra+running)/distance,settings.base)+(window.PhevI18n?.t('expenses.perKm')||' / km (Näherung)'):(window.PhevI18n?.t('expenses.noMileage')||' · Für Kosten/km fehlen Kilometerstände.'));
  summary.append(caption,detail);
  /**
   * Wartungserinnerungen verwenden vorhandene SQL-Ausgaben und deren
@@ -1123,7 +1123,7 @@ function renderVehicleExpenses(){
   reminders.replaceChildren();
   const due=window.PhevTco.reminders(vehicleExpenses,selected);
   if(due.length){
-   const heading=document.createElement('h4');heading.textContent='Anstehende Wartungen (30 Tage)';
+   const heading=document.createElement('h4');heading.textContent=window.PhevI18n?.t('expenses.reminders')||'Anstehende Wartungen (30 Tage)';
    reminders.append(heading);
    for(const item of due){
     const row=document.createElement('p');row.className='insight-item';
