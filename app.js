@@ -163,7 +163,7 @@ const conv=x=>{const cost=Number(x.cost||0);return x.currency===settings.base?co
  * zu einer leeren Ansicht führen. Auch die Konto-Seite verwendet diesen Weg.
  */
 const navigationStorageKey='phev-active-page-v1';
-const navigationPages=['home','intelligence','add','csv','vehicles','charging-management','options','cloud','family','cloud-settings'];
+const navigationPages=['home','intelligence','add','csv','vehicles','charging-management','options','cloud','family','cloud-settings','administration'];
 function restoredPage(){
  try{
   const page=sessionStorage.getItem(navigationStorageKey);
@@ -293,6 +293,10 @@ window.renderIntelligence=renderIntelligence;
 
 function tab(t){
   if(!navigationPages.includes(t))t='home';
+  // UI-Schutz gegen direkte Navigation per URL, Konsole oder gespeicherter Seite.
+  // Die API erzwingt Administratorrechte unabhängig von dieser Anzeige.
+  if(t==='administration'&&document.getElementById('admin-nav')?.hidden)t='cloud';
+  if(t==='cloud-settings'&&document.getElementById('open-cloud-page')?.hidden)t='cloud';
   navigationPages.forEach(x=>$(x).classList.toggle('hide',x!==t));
   document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',navigationPages[i]===t || ((t==='family'||t==='cloud-settings') && navigationPages[i]==='cloud')));
   rememberPage(t);
