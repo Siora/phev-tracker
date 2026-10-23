@@ -20,6 +20,7 @@
   running=true;
   button.disabled=true;
   status.textContent='Texterkennung wird vorbereitet. Das Foto bleibt auf diesem Gerät.';
+  let stage='Bibliothek laden';
   try{
    if(!window.Tesseract){
     await new Promise((resolve,reject)=>{
@@ -31,6 +32,7 @@
     });
    }
    if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function')throw new Error('ocr-library-unavailable');
+   stage='OCR-Sprachdaten/Worker laden';
    worker=await window.Tesseract.createWorker('deu',1,{
     workerPath:local('tesseract-worker.min.js'),
     corePath:local(''),
@@ -41,9 +43,11 @@
       status.textContent='Texterkennung: '+Math.round(message.progress*100)+' %';
     }
    });
+   stage='Foto auswerten';
    const result=await worker.recognize(file);
    const recognized=result&&result.data&&result.data.text||'';
    if(!recognized.trim())throw new Error('empty-result');
+   stage='Erkannte Werte anzeigen';
    text.value=recognized;
    text.dispatchEvent(new Event('input',{bubbles:true}));
    if(extract){extract.click();}
@@ -51,9 +55,11 @@
    const review=document.getElementById('receipt-extract-preview');
    if(review&&!review.hidden)review.scrollIntoView({block:'nearest',behavior:'smooth'});
   }catch(error){
+   const detail=error&&error.message?String(error.message).slice(0,160):'Unbekannter Fehler';
+   console.error('Lokale Beleg-OCR fehlgeschlagen bei '+stage,error);
    status.textContent=error&&error.message==='empty-result'
-    ?'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden oder den Text manuell eingeben.'
-    :'Texterkennung fehlgeschlagen. Prüfe die Verbindung und das Bildformat oder gib den Text manuell ein.';
+    ?'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden.'
+    :'Texterkennung fehlgeschlagen ('+stage+'). Technischer Hinweis: '+detail+'. Bitte Seite neu laden und erneut versuchen.';
   }finally{
    if(worker){try{await worker.terminate();}catch(_error){}worker=null;}
    running=false;
