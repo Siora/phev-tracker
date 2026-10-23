@@ -12,6 +12,27 @@ window.PhevIntelligence=Object.freeze({
   * Aktueller und zukünftige Monate werden nicht als Nullkosten interpretiert.
   * Bei weniger als drei beobachteten Monaten wird keine Zahl prognostiziert.
   */
+ /**
+  * Wirtschaftlichkeitsszenario mit frei wählbarer jährlicher Fahrleistung,
+  * Verbrauchswerten und Energiepreisen. Keine Nutzerdaten, keine Seiteneffekte.
+  * Preis- und Kostenwerte müssen bereits in derselben Basiswährung vorliegen.
+  * Es handelt sich um einen hypothetischen Vergleich, nicht um Ist-Kosten.
+  */
+ economicsScenario(input){
+  const n=key=>Number(input[key]);
+  const fields=['annualKm','electricShare','kwhPer100','litersPer100','priceKwh','priceLiter','fixedAnnual'];
+  if(!input||fields.some(key=>!Number.isFinite(n(key))))return {available:false,reason:'Bitte alle Annahmen als gültige Zahlen eingeben.'};
+  if(n('annualKm')<=0||n('annualKm')>150000||n('electricShare')<0||n('electricShare')>100||
+   n('kwhPer100')<0||n('kwhPer100')>100||n('litersPer100')<0||n('litersPer100')>100||
+   n('priceKwh')<0||n('priceLiter')<0||n('fixedAnnual')<0)return {available:false,reason:'Die Annahmen liegen außerhalb des zulässigen Bereichs.'};
+  const electricKm=n('annualKm')*n('electricShare')/100;
+  const fuelKm=n('annualKm')-electricKm;
+  const electricity=electricKm/100*n('kwhPer100')*n('priceKwh');
+  const fuel=fuelKm/100*n('litersPer100')*n('priceLiter');
+  const fixed=n('fixedAnnual');
+  const annual=electricity+fuel+fixed;
+  return {available:true,electricKm,fuelKm,electricity,fuel,fixed,annual,costPer100:annual/n('annualKm')*100};
+ },
  forecast(months,year,today=new Date()){
   const currentYear=today.getFullYear();
   const completed=year<currentYear?12:year===currentYear?today.getMonth():0;
