@@ -15,9 +15,35 @@ Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Ko
 
 ## Ergänzungen für Version 3.0 (23. Oktober 2026)
 
-- [ ] Administratoren können Benutzer bearbeiten und löschen; serverseitige Rechteprüfung, Schutz des letzten Administrators und kontrollierte Bereinigung abhängiger Daten sind verpflichtend.
-- [ ] Import / Export sowie Optionen & Backup als eigene, über Konto erreichbare Unterseiten statt Hauptnavigation.
+- [x] Administratoren können Benutzer bearbeiten und löschen (PR #116); serverseitige Rechteprüfung, Schutz des letzten Administrators und Familiengründer-Sperre implementiert. **Produktive Abnahme ausstehend:** Datenbank-Backup, Fremdschlüssel-/Löschfolgen und Funktionstest.
+- [x] Import / Export sowie Optionen & Backup als eigene, über Konto erreichbare Unterseiten statt Hauptnavigation (PR #115; produktive Sichtprüfung ausstehend).
 - [x] Belegerkennung auf dem iPhone mit lokalem OCR-Worker funktionsfähig; weitere Praxistests mit echten Belegen werden nach Verfügbarkeit durchgeführt.
+
+## Weitere verbindliche Erweiterungen für Version 3.0 (23. Oktober 2026)
+
+### Deutsch und Englisch mit Kontoeinstellung
+
+- [ ] Anwendungsoberfläche und Meldungen zunächst auf **Deutsch und Englisch** übersetzen; Deutsch als Standardsprache.
+- [ ] Sprachwahl im Benutzerkonto anbieten. Auswahl **dauerhaft serverseitig in MySQL am Benutzerkonto** speichern und beim Login auf allen Geräten laden; nicht nur im Browser speichern.
+- [ ] Übersetzungsschlüssel und Sprachdateien zentral verwalten; Datums-/Zahlenformate beachten, bestehende Nutzerdaten unverändert lassen.
+- [ ] Für die Datenbankerweiterung eine überprüfbare Migration vorbereiten; Ausführung erst nach Backup und Freigabe. Weitere OCR-Sprachen sind ein separater Ausbauschritt.
+
+### Selbstregistrierung unter Kontrolle des Administrators
+
+- [ ] Öffentliche Registrierung per Administrator-Schalter **aktivieren/deaktivieren**; standardmäßig deaktiviert.
+- [ ] Einstellung zentral in MySQL speichern und bei jedem Registrierungsversuch **serverseitig** prüfen; bei deaktivierter Registrierung keine öffentlichen Kontoanlagen zulassen.
+- [ ] Bei Aktivierung Registrierungsformular auf der Anmeldeseite anbieten; neue Konten erhalten immer Rolle `user`, niemals `admin`.
+- [ ] Eingabevalidierung, Passwortregeln, Schutz gegen automatisierte Registrierungen und aussagekräftige Fehlermeldungen testen; Migration und Backup gesondert abnehmen.
+
+### Einheitliche Verwaltungsformulare als Unterseiten
+
+- [ ] Erstellen und Bearbeiten auf **eigenen Unterseiten** analog zu „Konto → Cloud“, nicht als dauerhaft eingeblendete Formulare über der Liste.
+- [ ] In den Übersichten jeweils oben rechts eine Aktion: **Neuen Benutzer**, **Neuer Eintrag**, **Neuer Ladeort**, **Neuer Anbieter**, **Neues Fahrzeug** und **Neue Fahrzeugkosten**.
+- [ ] Nach **erfolgreichem Speichern** automatisch zur vorherigen Übersicht zurückkehren; bei **Abbrechen** ohne Speichern zurück, bei **Fehlern** mit erhaltenen Eingaben im Formular bleiben.
+- [ ] Vor dem Verlassen mit ungespeicherten Änderungen warnen; Filter, Paginierung und möglichst Scrollposition der vorherigen Übersicht erhalten.
+- [ ] Dieselben Unterseiten für die Bearbeitung vorhandener Daten mit vorausgefüllten Werten verwenden; iPhone-/Safari- und Regressionstests für sämtliche sechs Bereiche.
+
+**Vorgesehene Reihenfolge nach PR #116:** eigenständige Formularseiten → Deutsch/Englisch mit MySQL-Sprachpräferenz → administrativ steuerbare Selbstregistrierung. Alle drei Erweiterungen gehören zum Umfang von 3.0; die bisherigen vier Kernbereiche bleiben bestehen.
 
 ## Planung Fahrzeuganbindung (23. Oktober 2026)
 
