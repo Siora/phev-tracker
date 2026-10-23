@@ -72,6 +72,12 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.equal(await page.locator('#vehicleFilter option').count(),9);
     assert.equal(await page.locator('#vehicleFilter option[value="family:987"]').count(),1);
     assert.equal(await page.locator('#entryVehicle option[value="family:987"]').count(),0);
+    // Jahresvergleich nutzt die vorhandene Analyse und funktioniert auch mit Familienfahrzeugen.
+    await page.evaluate(()=>tab('intelligence'));
+    await page.locator('#intelligence-vehicle').selectOption('family:987');
+    assert.match(await page.locator('#intelligence-years').innerText(),/2026/);
+    assert.match(await page.locator('#intelligence-years').innerText(),/12[.,]50/);
+    await page.evaluate(()=>tab('home'));
     await page.locator('#vehicleFilter').selectOption('family:987');
     await page.waitForFunction(()=>document.querySelector('#vehicle-summary')?.textContent.includes('1 Einträge'));
     assert.match(await page.locator('#vehicle-summary').innerText(),/12\.50 CHF/,'Freigegebene Energiekosten müssen im Dashboard erscheinen');
