@@ -1148,3 +1148,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .yearly-cost-total{text-align:right;font-size:.9em;font-variant-numeric:tabular-nums}
 .yearly-cost-legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.85em}
 @media(max-width:700px){.yearly-cost-row{grid-template-columns:46px minmax(0,1fr);gap:6px 9px}.yearly-cost-total{grid-column:2;text-align:left;font-size:.82em}}
+
+/* OCR-Belegtext: volle Breite auch auf iPhone, bequem korrigierbar. */
+#receipt-assistant .receipt-text-tools{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+#receipt-raw-text{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:190px;resize:vertical;line-height:1.5;font:inherit}
