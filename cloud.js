@@ -175,6 +175,15 @@ ce('vehicle-form').onsubmit=async e=>{
 
 
 /** Familienverwaltung: ausschließlich serverseitig autorisierte Daten anzeigen. */
+function prepareFamilyInviteLink(){
+ const match=/^#family-invite=([a-f0-9]{64})$/.exec(location.hash);
+ if(!match)return;
+ ce('family-accept-form').elements.token.value=match[1];
+ history.replaceState(null,'',location.pathname+location.search);
+ ce('family-status').textContent='Einladung erkannt. Bitte anmelden und Annahme bestätigen.';
+}
+prepareFamilyInviteLink();
+window.addEventListener('hashchange',prepareFamilyInviteLink);
 async function loadFamilies(){
  if(!cloudToken)return;
  const status=ce('family-status'),list=ce('family-list'),select=ce('family-invite-group');
