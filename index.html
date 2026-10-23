@@ -52,6 +52,7 @@
 <p>Regelbasierte Analyse deiner erfassten Daten, ohne externe KI.</p>
 <div class="grid"><label>Analysejahr<select id="intelligence-year" onchange="renderIntelligence()"></select></label><label>Fahrzeug<select id="intelligence-vehicle" onchange="renderIntelligence()"><option value="">Alle Fahrzeuge</option></select></label></div>
 <div id="intelligence-summary" class="grid" aria-live="polite"></div>
+<article class="quick-card"><h2>🚘 Fahrzeugvergleich im Analysejahr</h2><p><small>Vergleich der erfassten Kosten je Fahrzeug. Ohne Fahrleistung sind die Werte nicht direkt als Wirtschaftlichkeit vergleichbar.</small></p><div class="intelligence-table-scroll" role="region" tabindex="0" aria-label="Fahrzeugkostenvergleich"><table class="intelligence-table"><thead><tr><th scope="col">Fahrzeug</th><th scope="col">Strom</th><th scope="col">Benzin</th><th scope="col">Weitere</th><th scope="col">Gesamt</th></tr></thead><tbody id="intelligence-vehicles"></tbody></table></div></article>
 <article class="quick-card"><h2>📈 Kostenprognose</h2><div id="intelligence-forecast" aria-live="polite"></div></article>
 <article class="quick-card"><h2>Monatliche Kostenentwicklung</h2><div id="intelligence-chart" class="intelligence-chart"></div></article>
 <article class="quick-card"><h2>Automatische Erkenntnisse</h2><div id="intelligence-insights" aria-live="polite"></div></article>

@@ -187,6 +187,26 @@ function renderIntelligence(){
   const number=document.createElement('p');number.textContent=value;
   card.append(title,number);summary.append(card);
  }
+ // Gleiche Analysefunktion pro eigenem Fahrzeug verwenden, damit Währungen und
+ // Ausgaben identisch zum bestehenden Analyse-Dashboard behandelt werden.
+ const vehicleComparison=$('intelligence-vehicles');
+ if(vehicleComparison){
+  vehicleComparison.replaceChildren();
+  const comparison=vehicles.map(vehicle=>({
+   vehicle,
+   totals:window.PhevIntelligence.analyze(records,vehicleExpenses,String(vehicle.id),Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency))
+  })).sort((a,b)=>b.totals.total-a.totals.total);
+  if(!comparison.length){
+   const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='Noch keine eigenen Fahrzeuge vorhanden.';tr.append(td);vehicleComparison.append(tr);
+  }
+  for(const {vehicle,totals} of comparison){
+   const tr=document.createElement('tr');
+   [vehicleName(vehicle),money(totals.energyCost),money(totals.fuelCost),money(totals.otherCost),money(totals.total)].forEach((value,index)=>{
+    const cell=document.createElement(index===0?'th':'td');if(index===0)cell.scope='row';cell.textContent=value;tr.append(cell);
+   });
+   vehicleComparison.append(tr);
+  }
+ }
  // Prognose bewusst separat anzeigen: eine Hochrechnung ist keine Ist-Ausgabe.
  const forecastPanel=$('intelligence-forecast');
  if(forecastPanel){
