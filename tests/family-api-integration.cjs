@@ -15,7 +15,7 @@ function seed(){
  tokens.forEach((token,i)=>sql("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES ('"+crypto.createHash('sha256').update(token).digest('hex')+"',"+(i+1)+",DATE_ADD(UTC_TIMESTAMP(),INTERVAL 1 DAY))"));
  return tokens;
 }
-async function request(action,token,method='GET',body){const url=base+'?action='+action;const response=await fetch(url,{method,headers:{Authorization:'Bearer '+token,'X-Forwarded-Proto':'https',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});return {status:response.status,data:await response.json()};}
+async function request(action,token,method='GET',body){const url=base+'?action='+action;const response=await fetch(url,{method,headers:{Authorization:'Bearer '+token,'X-Forwarded-Proto':'https',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});return {status:response.status,data:JSON.parse((await response.text())||'null')};}
 test('Familien-API erzwingt Besitz, Mitgliedschaft und Widerruf',async()=>{
  const [owner,member,stranger]=seed();
  assert.equal((await request('family-members&family_id=1',stranger)).status,404);
