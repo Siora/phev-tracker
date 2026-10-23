@@ -76,6 +76,10 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     await page.waitForFunction(()=>document.querySelector('#vehicle-summary')?.textContent.includes('1 Einträge'));
     assert.match(await page.locator('#vehicle-summary').innerText(),/12\.50 CHF/,'Freigegebene Energiekosten müssen im Dashboard erscheinen');
     assert.match(await page.locator('#vehicle-summary').innerText(),/25\.00 kWh/,'Freigegebene Lademenge muss im Dashboard erscheinen');
+    assert.match(await page.locator('#vehicle-summary').innerText(),/1 Einträge insgesamt, 1 im Zeitraum/);
+    await page.locator('#period').selectOption('all');
+    assert.match(await page.locator('#vehicle-summary').innerText(),/1 Einträge insgesamt, 1 im Zeitraum/);
+    await page.locator('#period').selectOption('month');
     await page.locator('#vehicleFilter').selectOption('');
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
