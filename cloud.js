@@ -205,6 +205,20 @@ async function loadFamilyShares(){
   const response=await cloudCall('family-vehicle-shares&family_id='+encodeURIComponent(familyId));
   for(const share of response.shares||[]){
    const line=document.createElement('p');line.textContent=[share.brand,share.model,'('+share.access_level+')'].join(' ');
+   // Nur der tatsächliche Fahrzeugeigentümer darf eine Freigabe widerrufen.
+   // Die API prüft den Besitz unabhängig von dieser Anzeige erneut.
+   if(Number(share.can_manage)===1){
+    const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Freigabe widerrufen';
+    revoke.onclick=async()=>{
+     if(!confirm('Freigabe für '+share.brand+' '+share.model+' wirklich widerrufen?'))return;
+     revoke.disabled=true;
+     try{
+      await cloudCall('family-vehicle-share-delete',{family_id:familyId,vehicle_id:Number(share.vehicle_id)});
+      await loadFamilyShares();await loadSharedVehicles();
+     }catch(error){revoke.disabled=false;list.textContent='Widerruf fehlgeschlagen: '+error.message;}
+    };
+    line.append(' ',revoke);
+   }
    list.append(line);
   }
  }catch(error){list.textContent='Freigaben konnten nicht geladen werden: '+error.message;}
