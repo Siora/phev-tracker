@@ -22,16 +22,16 @@
 </div>
 </div>
 <div class="sidebar-car"><img id="sidebarVehicleImage" class="vehicle-photo" alt="Fahrzeugbild" hidden><div class="vehicle-photo-fallback">🚘</div></div>
-<button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" onclick="toggleMobileMenu()">☰ Menü öffnen</button>
+<button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" onclick="toggleMobileMenu()" data-i18n="nav.menu">☰ Menü öffnen</button>
 <nav id="primary-nav">
-<button onclick="tab('home')">Übersicht</button>
-<button onclick="tab('intelligence')">🧠 Analyse-Dashboard</button>
-<button onclick="tab('add')">⚡ Ladungen / ⛽ Tankungen</button>
+<button onclick="tab('home')" data-i18n="nav.home">Übersicht</button>
+<button onclick="tab('intelligence')" data-i18n="nav.analysis">🧠 Analyse-Dashboard</button>
+<button onclick="tab('add')" data-i18n="nav.entries">⚡ Ladungen / ⛽ Tankungen</button>
 
-<button onclick="tab('vehicles')">🚘 Fahrzeuge</button><button onclick="tab('charging-management')">⚡ Ladeorte & Anbieter</button>
+<button onclick="tab('vehicles')" data-i18n="nav.vehicles">🚘 Fahrzeuge</button><button onclick="tab('charging-management')" data-i18n="nav.charging">⚡ Ladeorte & Anbieter</button>
 
-<button onclick="tab('cloud')">Konto</button>
-<button id="admin-nav" type="button" hidden onclick="tab('administration')">Administration</button>
+<button onclick="tab('cloud')" data-i18n="nav.account">Konto</button>
+<button id="admin-nav" type="button" hidden onclick="tab('administration')" data-i18n="nav.administration">Administration</button>
 </nav>
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
@@ -43,7 +43,7 @@
 <header class="topbar">
 <div>
 <small>FAHRZEUG-DASHBOARD</small>
-<h1>Übersicht</h1>
+<h1 data-i18n="nav.home">Übersicht</h1>
 </div>
 <div class="topbar-badge" id="topVehicle">⚡ Alle Fahrzeuge</div>
 </header>
