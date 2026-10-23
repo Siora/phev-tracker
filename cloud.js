@@ -403,7 +403,11 @@ function adminView(view){
  window.scrollTo(0,0);
 }
 ce('admin-new-user').onclick=()=>{ce('cloud-create').reset();adminView('create');};
-ce('admin-create-cancel').onclick=()=>adminView('list');
+ce('admin-create-cancel').onclick=()=>{
+ const form=ce('cloud-create');
+ if((form.elements.email.value||form.elements.password.value||form.elements.role.value!=='user')&&!confirm('Ungespeicherte Eingaben verwerfen?'))return;
+ form.reset();adminView('list');
+};
 ce('admin-edit-cancel').onclick=()=>adminView('list');
 ce('admin-edit-form').onsubmit=async event=>{
  event.preventDefault();
