@@ -285,6 +285,34 @@ if (in_array($action,['family-invite','family-invite-accept'],true)) {
 // Mitgliedschaften: Lesezugriff nur für Mitglieder, Aufnahme nur durch Eigentümer.
 // Bereits registrierte Konten müssen vorab selbst zugestimmt haben; deshalb wird
 // hier bewusst KEIN direkter Hinzufügen-Endpunkt ohne Einladungsbestätigung angeboten.
+// Fahrzeugfreigaben: nur der Eigentümer darf seine Fahrzeuge für eine Familie freigeben.
+// Diese Endpunkte ändern keine Eigentümerschaft und keine vorhandenen Fahrzeugdaten.
+if (in_array($action,['family-vehicle-shares','family-vehicle-share-save','family-vehicle-share-delete'],true)) {
+ if (!$db->query("SHOW TABLES LIKE 'family_vehicle_shares'")->fetchColumn()) fail(503,'Fahrzeugfreigaben sind noch nicht eingerichtet');
+ $familyId=filter_var(($action==='family-vehicle-shares'?($_GET['family_id']??null):($body['family_id']??null)),FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$familyId) fail(400,'Ungültige Familien-ID');
+ $stmt=$db->prepare('SELECT 1 FROM family_members WHERE family_id=? AND user_id=?');
+ $stmt->execute([$familyId,$uid]);if (!$stmt->fetchColumn()) fail(404,'Familie nicht gefunden');
+ if ($action==='family-vehicle-shares') {
+  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
+  $stmt=$db->prepare('SELECT s.vehicle_id,s.access_level,v.brand,v.model,v.plate FROM family_vehicle_shares s JOIN vehicles v ON v.id=s.vehicle_id AND v.user_id=s.owner_user_id WHERE s.family_id=? ORDER BY v.brand,v.model,v.id');
+  $stmt->execute([$familyId]);respond(200,['shares'=>$stmt->fetchAll()]);
+ }
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ $vehicleId=filter_var($body['vehicle_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$vehicleId) fail(400,'Ungültige Fahrzeug-ID');
+ $stmt=$db->prepare('SELECT 1 FROM vehicles WHERE id=? AND user_id=?');
+ $stmt->execute([$vehicleId,$uid]);if (!$stmt->fetchColumn()) fail(404,'Eigenes Fahrzeug nicht gefunden');
+ if ($action==='family-vehicle-share-delete') {
+  $stmt=$db->prepare('DELETE FROM family_vehicle_shares WHERE family_id=? AND vehicle_id=? AND owner_user_id=?');
+  $stmt->execute([$familyId,$vehicleId,$uid]);respond(200,['ok'=>true]);
+ }
+ $access=(string)($body['access_level']??'view');
+ if (!in_array($access,['view','edit'],true)) fail(400,'Ungültige Freigabestufe');
+ $stmt=$db->prepare('INSERT INTO family_vehicle_shares(family_id,vehicle_id,owner_user_id,access_level) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE access_level=VALUES(access_level)');
+ $stmt->execute([$familyId,$vehicleId,$uid,$access]);respond(200,['ok'=>true]);
+}
+
 if ($action==='family-members') {
  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
  if (!$db->query("SHOW TABLES LIKE 'family_members'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
