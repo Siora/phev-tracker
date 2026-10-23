@@ -190,6 +190,40 @@ window.addEventListener('hashchange',prepareFamilyInviteLink);
 /** Freigaben sind Metadaten; gemeinsame Fahrzeugdatensätze bleiben vorerst gesperrt. */
 /** Geteilte Fahrzeuge in der Fahrzeugübersicht bleiben vollständig getrennt von
  * eigenen Fahrzeugen, Editierformularen, Synchronisation und lokalen Caches. */
+/** Familienstatistik bleibt bewusst von eigenen Datensätzen und Caches getrennt.
+ * Die API prüft Mitgliedschaft und Freigabe bei jedem Aufruf erneut. */
+window.loadSharedAnalytics=async function(){
+ const targets=['shared-analytics-home','shared-analytics-intelligence'].map(ce).filter(Boolean);
+ if(!targets.length)return;
+ if(!cloudToken){targets.forEach(target=>target.textContent='Bitte anmelden.');return;}
+ try{
+  const [vehiclesResponse,recordsResponse]=await Promise.all([cloudCall('family-shared-vehicles'),cloudCall('family-shared-records')]);
+  const vehicles=[...new Map((vehiclesResponse.vehicles||[]).map(v=>[String(v.id),v])).values()];
+  const records=recordsResponse.records||[];
+  for(const target of targets){
+   target.replaceChildren();
+   if(!vehicles.length){target.textContent='Keine Fahrzeuge für dich freigegeben.';continue;}
+   const note=document.createElement('p');note.textContent='Nur freigegebene Lade- und Tankvorgänge; persönliche Ausgaben des Besitzers sind ausgeschlossen. Währungen werden getrennt ausgewiesen.';target.append(note);
+   const table=document.createElement('table');table.className='intelligence-table';
+   const head=document.createElement('tr');
+   for(const name of ['Fahrzeug','Ladungen','Tankungen','Erfasste Energiekosten']){const th=document.createElement('th');th.scope='col';th.textContent=name;head.append(th);}
+   const thead=document.createElement('thead');thead.append(head);table.append(thead);
+   const tbody=document.createElement('tbody');
+   for(const vehicle of vehicles){
+    const own=records.filter(record=>String(record.vehicle_id)===String(vehicle.id));
+    const amounts=new Map();
+    for(const record of own){const currency=String(record.currency||'');amounts.set(currency,(amounts.get(currency)||0)+Number(record.cost||0));}
+    const totals=[...amounts].map(([currency,cost])=>cost.toFixed(2)+' '+currency).join(' / ')||'–';
+    const tr=document.createElement('tr');
+    for(const [index,value] of [vehicle.brand+' '+vehicle.model,own.filter(x=>x.type==='charge').length,own.filter(x=>x.type==='fuel').length,totals].entries()){
+     const cell=document.createElement(index===0?'th':'td');if(index===0)cell.scope='row';cell.textContent=String(value);tr.append(cell);
+    }
+    tbody.append(tr);
+   }
+   table.append(tbody);const wrap=document.createElement('div');wrap.className='intelligence-table-scroll';wrap.append(table);target.append(wrap);
+  }
+ }catch(error){targets.forEach(target=>target.textContent='Familienauswertung derzeit nicht verfügbar: '+error.message);}
+};
 async function loadSharedVehicleOverview(){
  const status=ce('shared-vehicle-overview-status'),list=ce('shared-vehicle-overview-list');
  if(!cloudToken){status.textContent='Bitte anmelden, um Familienfahrzeuge zu sehen.';list.replaceChildren();return;}
