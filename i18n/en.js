@@ -1,6 +1,17 @@
 /* English translations: same keys as the German source. */
 window.PhevTranslations=window.PhevTranslations||{};
 window.PhevTranslations.en=Object.freeze({
+ 'vehicles.title':'My vehicles',
+ 'vehicles.formTitle':'Add / edit vehicle',
+ 'vehicles.brand':'Brand',
+ 'vehicles.model':'Model',
+ 'vehicles.year':'Model year',
+ 'vehicles.plate':'License plate',
+ 'vehicles.drivetrain':'Drivetrain',
+ 'vehicles.battery':'Battery capacity (kWh)',
+ 'vehicles.tank':'Fuel tank capacity (litres)',
+ 'vehicles.notes':'Notes',
+ 'vehicles.save':'Save vehicle',
  'nav.home':'Overview','nav.analysis':'🧠 Analytics dashboard','nav.entries':'⚡ Charging / ⛽ Refuelling',
  'nav.vehicles':'🚘 Vehicles','nav.charging':'⚡ Charging locations & providers','nav.account':'Account',
  'nav.administration':'Administration',
