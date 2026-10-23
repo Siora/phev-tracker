@@ -36,6 +36,7 @@ test('Familien-API erzwingt Besitz, Mitgliedschaft und Widerruf',async()=>{
  assert.equal((await request('family-vehicle-share-delete',member,'POST',{family_id:1,vehicle_id:1})).status,404);
  assert.equal((await request('family-vehicle-share-delete',owner,'POST',{family_id:1,vehicle_id:1})).status,200);
  result=await request('family-shared-vehicles',member);assert.equal(result.data.vehicles.length,0);
+ result=await request('family-shared-records',member);assert.equal(result.data.records.length,0);
  assert.equal((await request('family-vehicle-share-save',owner,'POST',{family_id:2,vehicle_id:1,access_level:'view'})).status,404);
 });
 
