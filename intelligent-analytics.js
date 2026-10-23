@@ -18,6 +18,20 @@ window.PhevIntelligence=Object.freeze({
   * Preis- und Kostenwerte müssen bereits in derselben Basiswährung vorliegen.
   * Es handelt sich um einen hypothetischen Vergleich, nicht um Ist-Kosten.
   */
+ /**
+  * Vergleicht identische abgeschlossene Kalendermonate zweier aufeinanderfolgender
+  * Jahre. Fehlende Buchungen sind keine nachgewiesenen Nullkosten.
+  */
+ compareYears(current,previous,year,today=new Date()){
+  const count=year===today.getFullYear()?today.getMonth():year<today.getFullYear()?12:0;
+  if(count===0)return {available:false,reason:'Noch keine abgeschlossenen Vergleichsmonate.'};
+  const sum=(months,key)=>months.slice(0,count).reduce((n,m)=>n+(Number(m[key])||0),0);
+  const currentTotal=sum(current,'total'),previousTotal=sum(previous,'total');
+  if(previousTotal<=0)return {available:false,reason:'Im Vorjahreszeitraum sind keine Vergleichskosten erfasst.'};
+  const difference=currentTotal-previousTotal;
+  return {available:true,months:count,currentTotal,previousTotal,difference,percent:difference/previousTotal*100,
+   partial:count<12,breakdown:['charge','fuel','extra'].map(key=>({key,current:sum(current,key),previous:sum(previous,key)}))};
+ },
  economicsScenario(input){
   const n=key=>Number(input[key]);
   const fields=['annualKm','electricShare','kwhPer100','litersPer100','priceKwh','priceLiter','fixedAnnual'];
