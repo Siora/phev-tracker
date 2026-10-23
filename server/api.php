@@ -565,7 +565,7 @@ if ($action === 'family-shared-vehicles') {
 if ($action === 'family-shared-records') {
  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
  if (!$db->query("SHOW TABLES LIKE 'family_vehicle_shares'")->fetchColumn()) fail(503,'Fahrzeugfreigaben sind noch nicht eingerichtet');
- $stmt=$db->prepare('SELECT DISTINCT r.* FROM records r JOIN family_vehicle_shares s ON s.vehicle_id=r.vehicle_id AND s.owner_user_id=r.user_id JOIN family_members m ON m.family_id=s.family_id AND m.user_id=? WHERE r.user_id<>? ORDER BY r.date DESC,r.id');
+ $stmt=$db->prepare('SELECT DISTINCT r.id,r.type,r.date,r.amount,r.cost,r.currency,r.km,r.place,r.vehicle_id FROM records r JOIN family_vehicle_shares s ON s.vehicle_id=r.vehicle_id AND s.owner_user_id=r.user_id JOIN family_members m ON m.family_id=s.family_id AND m.user_id=? WHERE r.user_id<>? ORDER BY r.date DESC,r.id');
  $stmt->execute([$uid,$uid]);respond(200,['records'=>$stmt->fetchAll()]);
 }
 if ($action === 'vehicle-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
