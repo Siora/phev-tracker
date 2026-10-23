@@ -2,7 +2,7 @@
 
 Deutschsprachige Progressive Web App zur Verwaltung von Plug-in-Hybrid-Fahrzeugen: Ladevorgänge, Tankungen, Kilometerstände, Energie- und Fahrzeugkosten, Wartungserinnerungen sowie Auswertungen in CHF/EUR.
 
-**Aktueller Stand:** Version 3.0 in Entwicklung, auf Basis von Version 2.3. Die Kontofunktionen sind im Quellcode integriert; produktive Abnahme und Backend-Bereitstellung sind separat zu prüfen. Siehe [Roadmap 3.0](ROADMAP-3.0.md).
+**Aktueller Stand:** Version 3.0 in Entwicklung; Frontend-Stand 2.14. Die Kontofunktionen sind im Quellcode integriert; produktive Abnahme und Backend-Bereitstellung sind separat zu prüfen. Siehe [Roadmap 3.0](ROADMAP-3.0.md).
 
 ## Betrieb und Veröffentlichung
 
@@ -14,7 +14,9 @@ GitHub Pages ist **nicht** der produktive Veröffentlichungsweg. Das Repository 
 
 - Fahrzeuge und zugehörige Lade-/Tankvorgänge verwalten.
 - Fahrzeug-Gesamtkosten einschließlich SQL-gespeicherter Ausgaben und Wartungserinnerungen anzeigen.
-- Verbrauch, Energiebilanz, Kostenentwicklung und Jahreskostenprognose auswerten.
+- Verbrauch, Energiebilanz, mehrjährige Kostenentwicklung und Jahreskostenprognose auswerten.
+- Vorjahreskosten nach gleichen abgeschlossenen Monaten vergleichen und auffällige Strom-/Benzin-Einheitspreise erkennen.
+- Hypothetische Jahreskosten für ein frei einstellbares Fahrprofil berechnen (kein direkter Wirtschaftlichkeitsvergleich zwischen Fahrzeugen).
 - Dashboard-Kacheln ausblenden und anordnen; Layout lokal und über vorhandene Cloud-Preferences synchronisieren.
 - CSV-Import, PDF-Berichte, lokale Sicherungen und PWA-Offline-Cache.
 
