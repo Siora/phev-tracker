@@ -655,12 +655,14 @@ function render(){
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   renderVehicleExpenses();
   renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost);
-  // Bei Familienfreigaben zeigt diese Diagnose, ob Daten am Zeitraum- oder Ortsfilter scheitern.
-  if(shared){
+  // Diagnose bewusst auch dann anzeigen, wenn eine Familienoption zwar gewählt ist,
+  // ihre Metadaten aber noch nicht geladen wurden. So bleibt ein Lade-/Sync-Fehler sichtbar.
+  if(familySelection(selectedVehicle)){
     const summary=$('vehicle-summary');
     const info=document.createElement('p');
-    const dates=dashboardRecords.map(r=>String(r.date||'').slice(0,10)).filter(Boolean).sort();
-    info.textContent='Familienfreigabe: '+dashboardRecords.length+' Einträge insgesamt, '+all.length+' im Zeitraum, '+filtered.length+' nach Ortsfilter'+(dates.length?' · Erfasster Zeitraum: '+dates[0]+' bis '+dates[dates.length-1]:'')+'.';
+    const sharedEntries=shared?dashboardRecords:[];
+    const dates=sharedEntries.map(r=>String(r.date||'').slice(0,10)).filter(Boolean).sort();
+    info.textContent=(shared?'Familienfreigabe: ':'Familienfreigabe noch nicht geladen: ')+sharedEntries.length+' Einträge insgesamt, '+all.length+' im Zeitraum, '+filtered.length+' nach Ortsfilter'+(dates.length?' · Erfasster Zeitraum: '+dates[0]+' bis '+dates[dates.length-1]:'')+'.';
     summary.append(info);
   }
   // Die Werte beziehen sich auf die Kilometerstandsspanne im gewählten Zeitraum.
