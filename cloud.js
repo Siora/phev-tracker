@@ -21,6 +21,8 @@ function pendingCount(){
  try{return JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]').length;}catch{return 0;}
 }
 function updateSyncIndicator(){
+ const cloudButton=ce('open-cloud-page');
+ if(cloudButton)cloudButton.hidden=!cloudToken;
  const familyButton=ce('open-family-page');
  if(familyButton)familyButton.hidden=!cloudToken;
  const el=ce('cloud-sync-indicator');if(!el)return;
@@ -382,7 +384,10 @@ ce('family-accept-form').onsubmit=async event=>{
  catch(error){ce('family-status').textContent='Einladung konnte nicht angenommen werden: '+error.message;}
  finally{button.disabled=false;}
 };
-function showAccount(email,role){void loadFamilies();document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
+function showAccount(email,role){void loadFamilies();
+ const admin=role==='admin';
+ const adminNav=ce('admin-nav');if(adminNav)adminNav.hidden=!admin;
+ if(!admin&&ce('administration')&&!ce('administration').classList.contains('hide'))window.tab?.('cloud');document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',!admin);if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
 /**
  * Lädt die Benutzerliste für Administratoren und zeigt 20 Benutzer je Seite.
  * Die Benutzerobjekte werden ausschließlich dargestellt, nicht geändert.
@@ -513,7 +518,10 @@ ce('cloud-check').onclick=async()=>{
 };
 ce('cloud-logout').onclick=async()=>{
  try{await cloudCall('logout',{});}catch(error){}
- cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';updateSyncIndicator();
+ cloudToken=null;cloudPreferencesReady=false;cloudPreferences=null;syncError='';
+ if(ce('admin-nav'))ce('admin-nav').hidden=true;
+ if(ce('cloud-admin'))ce('cloud-admin').classList.add('hide');
+ updateSyncIndicator();
  document.body.classList.add('login-locked');
  localStorage.removeItem(sessionKey);
  window.showLocalRecords();

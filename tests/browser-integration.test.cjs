@@ -78,6 +78,13 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.match(await page.locator('#intelligence-years').innerText(),/2026/);
     assert.match(await page.locator('#intelligence-years').innerText(),/12[.,]50/);
     await page.evaluate(()=>tab('home'));
+    // Anmeldung schaltet Cloud frei; nur Admins dürfen die Benutzerverwaltung öffnen.
+    assert.equal(await page.locator('#open-cloud-page').evaluate(el=>el.hidden),false);
+    assert.equal(await page.locator('#admin-nav').isHidden(),false);
+    await page.evaluate(()=>tab('administration'));
+    assert.equal(await page.locator('#administration').isVisible(),true);
+    assert.equal(await page.locator('#cloud-admin').isVisible(),true);
+    await page.evaluate(()=>tab('home'));
     await page.locator('#vehicleFilter').selectOption('family:987');
     await page.waitForFunction(()=>document.querySelector('#vehicle-summary')?.textContent.includes('1 Einträge'));
     assert.match(await page.locator('#vehicle-summary').innerText(),/12\.50 CHF/,'Freigegebene Energiekosten müssen im Dashboard erscheinen');
