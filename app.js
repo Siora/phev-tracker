@@ -31,6 +31,18 @@ document.addEventListener('click',event=>{if(event.target.closest('#primary-nav 
 function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
 window.updateLoginNotice=updateLoginNotice;
 let vehicles=[];
+// Geteilte Fahrzeugdaten sind ausschließlich für die lesenden Dashboards bestimmt.
+let familyVehicles=[],familyRecords=[];
+const familySelection=value=>String(value||'').startsWith('family:');
+const familyVehicle=value=>familyVehicles.find(v=>'family:'+v.id===value);
+window.setFamilyAnalyticsData=function(shared,entries){
+ familyVehicles=shared||[];familyRecords=entries||[];
+ refreshVehicles();render();
+};
+function appendFamilyOptions(select){
+ for(const vehicle of familyVehicles)select.add(new Option('Familie · '+vehicleName(vehicle),'family:'+vehicle.id));
+}
+
 window.setVehicles=function(items){vehicles=items;refreshVehicles();scheduleAutomaticBackup();render();};
 // Lokale Bildwahl: Die Cloud-Fahrzeugdaten bleiben unverändert.
 window.setVehiclePhoto=function(vehicleId,url){
@@ -99,6 +111,8 @@ function refreshVehicles(){
   const entry=$('entryVehicle');
   const chosen=entry.value;
   replaceVehicleOptions(filter,'Alle Fahrzeuge',selected,false);
+  appendFamilyOptions(filter);
+  if(familySelection(selected))filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
   const reportVehicle=$('report-vehicle');
   if(reportVehicle)replaceVehicleOptions(reportVehicle,'Alle Fahrzeuge',reportVehicle.value,false);
   replaceVehicleOptions(entry,'Bitte Fahrzeug auswählen',chosen,true);
@@ -170,14 +184,17 @@ function renderIntelligence(){
  if(!panel||panel.classList.contains('hide')||!window.PhevIntelligence)return;
  const yearSelect=$('intelligence-year'),vehicleSelect=$('intelligence-vehicle');
  const currentYear=new Date().getFullYear();
- const years=[...new Set([currentYear,...records.map(r=>Number(String(r.date||'').slice(0,4))),...vehicleExpenses.map(r=>Number(String(r.date||'').slice(0,4)))])].filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
+ const years=[...new Set([currentYear,...familyRecords.map(r=>Number(String(r.date||'').slice(0,4))),...records.map(r=>Number(String(r.date||'').slice(0,4))),...vehicleExpenses.map(r=>Number(String(r.date||'').slice(0,4)))])].filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
  const selectedYear=yearSelect.value||String(currentYear);
  yearSelect.replaceChildren(...years.map(y=>new Option(String(y),String(y))));
  yearSelect.value=years.includes(Number(selectedYear))?selectedYear:String(currentYear);
  const selectedVehicle=vehicleSelect.value;
  vehicleSelect.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ appendFamilyOptions(vehicleSelect);
  vehicleSelect.value=selectedVehicle;
- const result=window.PhevIntelligence.analyze(records,vehicleExpenses,vehicleSelect.value,Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency));
+ const isFamily=familySelection(vehicleSelect.value);
+ const analysisRecords=isFamily?familyRecords.filter(r=>'family:'+r.vehicle_id===vehicleSelect.value).map(r=>({...r,vehicle_id:vehicleSelect.value})):records;
+ const result=window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency));
  const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
  summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
  const money=v=>new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
@@ -617,7 +634,8 @@ function render(){
     to=new Date(y,m+1,1)
   }
   let selectedVehicle=$('vehicleFilter').value;
-  const active=vehicles.find(v=>String(v.id)===selectedVehicle);
+  const shared=familyVehicle(selectedVehicle);
+  const active=shared||vehicles.find(v=>String(v.id)===selectedVehicle);
   if(window.currentPhotoVehicle!==String(active?.id||'')){window.currentPhotoVehicle=String(active?.id||'');updateVehiclePhoto(active);}
   const title=active?vehicleName(active):(selectedVehicle==='none'?'Ohne Fahrzeugzuordnung':'Alle Fahrzeuge');
   $('brandVehicle').textContent=title;
@@ -625,8 +643,9 @@ function render(){
   $('topVehicle').textContent='⚡ '+title;
   $('heroVehicle').textContent=title;
   $('heroVehicleDetails').textContent=active?(active.drivetrain||'Fahrzeug')+' · Energie & Kosten':'Energie & Kosten';
-  let all=records.filter(x=>{
-    let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
+  const dashboardRecords=shared?familyRecords.filter(r=>String(r.vehicle_id)===String(shared.id)):records;
+  let all=dashboardRecords.filter(x=>{
+    let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(shared||!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))
   }),filtered=all.filter(x=>!provider.value||(x.place||'Unbekannt')===provider.value),charges=filtered.filter(x=>x.type==='charge'),fuel=filtered.filter(x=>x.type==='fuel'),km=filtered.map(x=>x.km).filter(x=>x>0),distance=km.length>1?Math.max(...km)-Math.min(...km):0,cost=filtered.reduce((v,x)=>v+conv(x),0),electric=charges.reduce((v,x)=>v+conv(x),0),petrol=fuel.reduce((v,x)=>v+conv(x),0);
   renderVehicleExpenses();
   renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cost);
