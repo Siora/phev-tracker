@@ -1072,3 +1072,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:900px){
   #charging-management>.dashboard-actions{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Eigenständige Familienseite und kompakte Kopfzeile im Konto. */
+#family{background:linear-gradient(155deg,#172637,#112237);border:1px solid #ffffff1c;border-radius:22px;padding:clamp(16px,2.5vw,28px)}
+.account-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.account-heading h2{margin:0}
+.account-heading button{width:auto;max-width:100%}
