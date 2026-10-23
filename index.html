@@ -237,7 +237,7 @@
 </section>
 <!-- Cloud-Konto, Synchronisierung und Administration -->
 <section id="cloud" class="hide">
-<h2>Mein Konto</h2>
+<div class="account-heading"><h2>Mein Konto</h2><button id="open-family-page" type="button" onclick="tab('family')">Familie →</button></div>
 <p id="cloud-sync-indicator" role="status" aria-live="polite" style="font-weight:600">Nicht angemeldet</p>
 <p id="cloud-status" role="status">Nicht angemeldet.</p>
 <form id="cloud-login">
@@ -258,16 +258,7 @@
 <label>Passwort bestätigen<input name="confirm_password" type="password" minlength="12" maxlength="1024" autocomplete="new-password" required></label>
 <button type="submit">Passwort zurücksetzen</button>
 </form>
-<div id="cloud-account" class="hide">\n<section id="family-management" aria-labelledby="family-title">
-<h3 id="family-title">Familienverwaltung</h3>
-<p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
-<form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
-<div id="family-list"></div><h4>Familienmitglieder</h4><label>Familie <select id="family-members-group"></select></label><button type="button" id="family-members-refresh">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
-<div id="family-shares"><h4>Fahrzeugfreigaben</h4><label>Familie <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh">Freigaben laden</button><div id="family-shares-list"></div><h4>Mit mir geteilte Fahrzeuge</h4><div id="family-shared-vehicles" role="status" aria-live="polite"></div><form id="family-share-form"><label>Eigenes Fahrzeug <select name="vehicle_id" id="family-share-vehicle" required></select></label><label>Berechtigung <select name="access_level"><option value="view">Lesen</option><option value="edit">Bearbeiten (zukünftig)</option></select></label><button type="submit">Fahrzeug freigeben</button></form></div>
-<form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
-<form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
-<p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
-</section>
+<div id="cloud-account" class="hide">
 <p id="cloud-identity"></p>
 <h3>Passwort ändern</h3>
 <form id="cloud-change-password">
@@ -304,6 +295,20 @@
 </div>
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
+</section>
+<!-- Familienverwaltung ist eine eigene, über das Konto erreichbare Ansicht. -->
+<section id="family" class="hide" aria-labelledby="family-page-title">
+<div class="account-heading"><h2 id="family-page-title">Familie</h2><button type="button" onclick="tab('cloud')">← Zurück zum Konto</button></div>
+<section id="family-management" aria-labelledby="family-title">
+<h3 id="family-title">Familienverwaltung</h3>
+<p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
+<form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
+<div id="family-list"></div><h4>Familienmitglieder</h4><label>Familie <select id="family-members-group"></select></label><button type="button" id="family-members-refresh">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
+<div id="family-shares"><h4>Fahrzeugfreigaben</h4><label>Familie <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh">Freigaben laden</button><div id="family-shares-list"></div><h4>Mit mir geteilte Fahrzeuge</h4><div id="family-shared-vehicles" role="status" aria-live="polite"></div><form id="family-share-form"><label>Eigenes Fahrzeug <select name="vehicle_id" id="family-share-vehicle" required></select></label><label>Berechtigung <select name="access_level"><option value="view">Lesen</option><option value="edit">Bearbeiten (zukünftig)</option></select></label><button type="submit">Fahrzeug freigeben</button></form></div>
+<form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
+<form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
+<p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
+</section>
 </section>
 <script src="jspdf.umd.min.js?v=203" defer></script>
 <script src="charts.js" defer></script>
