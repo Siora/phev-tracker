@@ -33,7 +33,7 @@ window.PhevIntelligence=Object.freeze({
   const items=scoped.map(r=>{
    const amount=Number(r.amount),cost=Number(convertRecord(r));
    return {date:String(r.date||''),type:r.type,price:cost/amount};
-  }).filter(r=>/^\\d{4}-\\d{2}-\\d{2}$/.test(r.date)&&r.date.slice(0,4)<=String(year)&&
+  }).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&r.date.slice(0,4)<=String(year)&&
    Number.isFinite(r.price)&&r.price>0);
   const median=values=>{
    const sorted=values.slice().sort((a,b)=>a-b),mid=Math.floor(sorted.length/2);
