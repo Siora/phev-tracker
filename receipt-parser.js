@@ -47,6 +47,12 @@
  if(!extract||!source||!preview||!fields||!status||!apply||!form)return;
  const labels={type:'Art',date:'Datum',amount:'Menge',unit_price:'Einzelpreis',cost:'Gesamtkosten',currency:'Währung'};
  let proposal={};
+ source.addEventListener('input',()=>{
+  proposal={};
+  preview.hidden=true;
+  fields.replaceChildren();
+  status.textContent='Belegtext geändert. Bitte Werte erneut prüfen.';
+ });
  extract.addEventListener('click',()=>{
   proposal=parse(source.value);
   fields.replaceChildren();
