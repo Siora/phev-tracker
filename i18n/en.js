@@ -1,6 +1,15 @@
 /* English translations: same keys as the German source. */
 window.PhevTranslations=window.PhevTranslations||{};
 window.PhevTranslations.en=Object.freeze({
+ 'charging.confirmDelete':'Delete this managed item? Existing charging entries will remain.',
+ 'charging.emptyLocations':'No charging locations added yet.',
+ 'charging.emptyProviders':'No providers added yet.',
+ 'charging.editPrefix':'Edit: ',
+ 'charging.deletePrefix':'Delete: ',
+ 'charging.noLocation':'No saved charging location',
+ 'charging.noProvider':'No provider',
+ 'charging.invalid':'Invalid name or price.',
+ 'charging.saved':'Saved. Cloud synchronization is starting.',
  'nav.home':'Overview','nav.analysis':'🧠 Analytics dashboard','nav.entries':'⚡ Charging / ⛽ Refuelling',
  'nav.vehicles':'🚘 Vehicles','nav.charging':'⚡ Charging locations & providers','nav.account':'Account',
  'nav.administration':'Administration',
