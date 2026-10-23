@@ -41,17 +41,24 @@
     if(/text\/html/i.test(type))throw new Error(asset+': HTML statt OCR-Datei geliefert');
    }
    stage='OCR-Sprachdaten/Worker laden';
-   worker=await window.Tesseract.createWorker('deu',1,{
+   // Safari kann mit der automatisch gewählten SIMD-WASM-Variante scheitern.
+   // Den nicht-SIMD-Kern gezielt verwenden und Worker-Fehler als Promise sichtbar machen.
+   const workerFailure={};
+   workerFailure.promise=new Promise((_,reject)=>{workerFailure.reject=reject;});
+   workerFailure.promise.catch(()=>{});
+   worker=await Promise.race([window.Tesseract.createWorker('deu',1,{
     workerPath:local('tesseract-worker.min.js?v=220'),
     workerBlobURL:false,
-    corePath:local(''),
+    corePath:local('tesseract-core-lstm.wasm.js'),
     langPath:local(''),
     gzip:true,
+    errorHandler:(error)=>workerFailure.reject(error instanceof Error?error:new Error(String(error||'Worker-Fehler'))),
     logger:(message)=>{
+     if(message&&message.status)status.textContent='OCR wird vorbereitet: '+message.status;
      if(message.status==='recognizing text'&&typeof message.progress==='number')
       status.textContent='Texterkennung: '+Math.round(message.progress*100)+' %';
     }
-   });
+   }),workerFailure.promise]);
    stage='Foto auswerten';
    const result=await worker.recognize(file);
    const recognized=result&&result.data&&result.data.text||'';
