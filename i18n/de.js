@@ -1,6 +1,15 @@
 /* Zentrales deutsches Wörterbuch. Schlüssel bleiben über Releases stabil. */
 window.PhevTranslations=window.PhevTranslations||{};
 window.PhevTranslations.de=Object.freeze({
+ 'charging.confirmDelete':'Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.',
+ 'charging.emptyLocations':'Noch keine Ladeorte angelegt.',
+ 'charging.emptyProviders':'Noch keine Anbieter angelegt.',
+ 'charging.editPrefix':'Bearbeiten: ',
+ 'charging.deletePrefix':'Löschen: ',
+ 'charging.noLocation':'Kein gespeicherter Ladeort',
+ 'charging.noProvider':'Kein Anbieter',
+ 'charging.invalid':'Name oder Preis ungültig.',
+ 'charging.saved':'Gespeichert. Cloud-Synchronisierung wird gestartet.',
  'nav.home':'Übersicht','nav.analysis':'🧠 Analyse-Dashboard','nav.entries':'⚡ Ladungen / ⛽ Tankungen',
  'nav.vehicles':'🚘 Fahrzeuge','nav.charging':'⚡ Ladeorte & Anbieter','nav.account':'Konto',
  'nav.administration':'Administration',
