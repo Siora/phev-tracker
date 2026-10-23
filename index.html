@@ -89,7 +89,7 @@
 </div>
 <h2 class="dashboard-label">Dashboard</h2>
 <details class="quick-card" id="dashboard-layout-settings"><summary>⚙ Dashboard anpassen</summary><p><small>Kacheln ein- oder ausblenden und ihre Reihenfolge ändern. Die Auswahl wird auf diesem Gerät gespeichert.</small></p><div id="dashboard-layout-controls"></div><button type="button" id="dashboard-layout-reset">Standardansicht wiederherstellen</button></details>
-<label>Zeitraum</label>
+<label data-i18n="filter.period">Zeitraum</label>
 <select id="period" onchange="render()">
 <option value="month">Letzter Monat</option>
 <option value="3">Letzte 3 Monate</option>
@@ -100,18 +100,18 @@
 </select>
 <div id="customdates" class="grid hide">
 <div>
-<label>Monat</label>
+<label data-i18n="filter.month">Monat</label>
 <select id="chosenMonth" onchange="render()">
 </select>
 </div>
 <div>
-<label>Jahr</label>
+<label data-i18n="filter.year">Jahr</label>
 <select id="chosenYear" onchange="render()">
 </select>
 </div>
 </div>
-<label>Fahrzeug</label><select id="vehicleFilter" onchange="render()"><option value="">Alle Fahrzeuge</option></select>
-<label>Ladeort / Tankstelle</label>
+<label data-i18n="filter.vehicle">Fahrzeug</label><select id="vehicleFilter" onchange="render()"><option value="">Alle Fahrzeuge</option></select>
+<label data-i18n="filter.location">Ladeort / Tankstelle</label>
 <select id="provider" onchange="render()">
 <option value="">Alle Orte / Tankstellen</option>
 </select>
