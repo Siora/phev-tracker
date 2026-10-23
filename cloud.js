@@ -95,6 +95,8 @@ async function loadVehicles(){
  try {
   const data=await cloudCall('vehicles');
   window.setVehicles(data.vehicles);
+  // Geteilte Fahrzeuge nie in die Liste der eigenen Fahrzeuge mischen.
+  void loadSharedVehicleOverview();
   const accountEmail=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
   if(accountEmail)localStorage.setItem('phev-vehicles-cache-'+accountEmail,JSON.stringify(data.vehicles));
   ce('vehicle-status').textContent=data.vehicles.length+' Fahrzeuge in deinem Konto.';
@@ -186,6 +188,18 @@ function prepareFamilyInviteLink(){
 prepareFamilyInviteLink();
 window.addEventListener('hashchange',prepareFamilyInviteLink);
 /** Freigaben sind Metadaten; gemeinsame Fahrzeugdatensätze bleiben vorerst gesperrt. */
+/** Geteilte Fahrzeuge in der Fahrzeugübersicht bleiben vollständig getrennt von
+ * eigenen Fahrzeugen, Editierformularen, Synchronisation und lokalen Caches. */
+async function loadSharedVehicleOverview(){
+ const status=ce('shared-vehicle-overview-status'),list=ce('shared-vehicle-overview-list');
+ if(!cloudToken){status.textContent='Bitte anmelden, um Familienfahrzeuge zu sehen.';list.replaceChildren();return;}
+ try{
+  const result=await cloudCall('family-shared-vehicles');
+  const shared=result.vehicles||[];
+  status.textContent=shared.length?shared.length+' Familienfahrzeug(e) für dich freigegeben.':'Noch keine Familienfahrzeuge für dich freigegeben.';
+  familyTable(list,['Fahrzeug','Baujahr','Antrieb','Berechtigung'],shared.map(v=>[v.brand+' '+v.model,v.model_year||'–',v.drivetrain||'–',v.access_level==='edit'?'Bearbeiten (noch nicht aktiv)':'Nur lesen']));
+ }catch(error){status.textContent='Familienfahrzeuge konnten nicht geladen werden: '+error.message;list.replaceChildren();}
+}
 /** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
 /** Tabellen verwenden ausschließlich textContent; API-Daten werden nie als HTML interpretiert. */
 function familyTable(target,columns,rows){
