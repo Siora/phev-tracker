@@ -22,6 +22,34 @@ window.PhevIntelligence=Object.freeze({
   * Vergleicht identische abgeschlossene Kalendermonate zweier aufeinanderfolgender
   * Jahre. Fehlende Buchungen sind keine nachgewiesenen Nullkosten.
   */
+ /**
+  * Auffällige Einheitspreise gegenüber dem Median der übrigen Buchungen.
+  * Mindestens vier Vergleichswerte je Energieart; Ausreißer werden nicht
+  * als Fehler behauptet. Mengen und Kosten müssen positiv und endlich sein.
+  */
+ priceAnomalies(records,vehicleId,year,convertRecord){
+  const scoped=records.filter(r=>(!vehicleId||String(r.vehicle_id)===String(vehicleId))&&
+   (r.type==='charge'||r.type==='fuel')&&String(r.date||'').slice(0,4)<=String(year));
+  const items=scoped.map(r=>{
+   const amount=Number(r.amount),cost=Number(convertRecord(r));
+   return {date:String(r.date||''),type:r.type,price:cost/amount};
+  }).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&r.date.slice(0,4)<=String(year)&&
+   Number.isFinite(r.price)&&r.price>0);
+  const median=values=>{
+   const sorted=values.slice().sort((a,b)=>a-b),mid=Math.floor(sorted.length/2);
+   return sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;
+  };
+  const alerts=[];
+  for(const item of items.filter(r=>r.date.startsWith(String(year)+'-'))){
+   const peers=items.filter(r=>r!==item&&r.type===item.type&&r.date<=item.date).map(r=>r.price);
+   if(peers.length<4)continue;
+   const baseline=median(peers);
+   const deviation=(item.price/baseline-1)*100;
+   if(Math.abs(deviation)<35)continue;
+   alerts.push({type:item.type,date:item.date,price:item.price,baseline,deviation});
+  }
+  return alerts.sort((a,b)=>Math.abs(b.deviation)-Math.abs(a.deviation)).slice(0,5);
+ },
  compareYears(current,previous,year,today=new Date()){
   const count=year===today.getFullYear()?today.getMonth():year<today.getFullYear()?12:0;
   if(count===0)return {available:false,reason:'Noch keine abgeschlossenen Vergleichsmonate.'};

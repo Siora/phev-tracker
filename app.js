@@ -351,6 +351,20 @@ function renderIntelligence(){
   if(month.total>0)tr.classList.add('intelligence-month-active');
   body.append(tr);
  }
+ // Auffällige Einheitspreise sind Hinweise, keine Verbrauchsdiagnosen.
+ // Für Verbrauch pro 100 km fehlen ohne Fahrstrecke belastbare Daten.
+ const anomalies=window.PhevIntelligence.priceAnomalies(analysisRecords,vehicleSelect.value,Number(yearSelect.value),conv);
+ for(const item of anomalies){
+  const kind=item.type==='charge'?'Strompreis':'Benzinpreis';
+  const unit=item.type==='charge'?'kWh':'l';
+  const sign=item.deviation>0?'+':'';
+  const card=document.createElement('article');card.className='insight-item';
+  const heading=document.createElement('strong');heading.textContent='Auffälliger '+kind+' am '+item.date;
+  const detail=document.createElement('p');
+  detail.textContent=money(item.price)+'/'+unit+' statt üblicher '+money(item.baseline)+'/'+unit+
+   ' ('+sign+item.deviation.toFixed(0)+' %). Vergleich mit mindestens vier früheren Einträgen; Tarifwechsel, Ladeort oder Buchungsfehler können die Abweichung erklären.';
+  card.append(heading,detail);insights.append(card);
+ }
  for(const insight of result.messages){
   const card=document.createElement('article');card.className='insight-item';
   const heading=document.createElement('strong');heading.textContent=insight.title;
