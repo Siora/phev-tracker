@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=214">
+<link rel="stylesheet" href="styles.css?v=215">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -36,7 +36,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.14</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.15</small>
 </div>
 </aside>
 <main class="main">
@@ -203,6 +203,18 @@
 <button type="submit">Fahrzeug speichern</button>
 <button type="button" id="vehicle-cancel">Abbrechen</button>
 </form>
+<article class="quick-card" id="vehicle-connectivity-preview" aria-labelledby="vehicle-connectivity-title">
+<h3 id="vehicle-connectivity-title">🔌 Fahrzeuganbindung (in Vorbereitung)</h3>
+<p>Geplant ist eine sichere, lesende Verbindung zu unterstützten Fahrzeugen. Der BYD SEAL U DM-i ist das erste Pilotfahrzeug; weitere Hersteller können später ergänzt werden.</p>
+<p><strong>Verbindungsstatus:</strong> Nicht verbunden – die Anbieterfreigabe wird geprüft.</p>
+<div class="grid">
+<div><strong>Kilometerstand</strong><p>Noch keine Fahrzeugdaten</p></div>
+<div><strong>Batterieladestand</strong><p>Noch keine Fahrzeugdaten</p></div>
+<div><strong>Ladestatus</strong><p>Noch keine Fahrzeugdaten</p></div>
+<div><strong>Letzte Synchronisierung</strong><p>Noch nie synchronisiert</p></div>
+</div>
+<p><small>Die automatische Synchronisierung ist noch nicht verfügbar. Bestehende Fahrzeuge, Kilometerstände und Lade-/Tankbuchungen bleiben unverändert. Die manuelle Eingabe funktioniert weiterhin.</small></p>
+</article>
 <h3>Gespeicherte Fahrzeuge</h3>
 <div id="vehicle-list"></div>
 <!-- Familienfahrzeuge werden separat und strikt lesend angezeigt. -->
@@ -345,16 +357,16 @@
 </details>
 </section>
 </section>
-<script src="jspdf.umd.min.js?v=214" defer></script>
-<script src="charts.js?v=214" defer></script>
-<script src="pagination.js?v=214" defer></script>
-<script src="pdf-report.js?v=214" defer></script>
-<script src="csv-import-utils.js?v=214" defer></script>
-<script src="auto-backup.js?v=214" defer></script>
-<script src="vehicle-costs.js?v=214" defer></script>
-<script src="cloud.js?v=214" defer></script>
-<script src="intelligent-analytics.js?v=214" defer></script>
-<script src="app.js?v=214" defer>
+<script src="jspdf.umd.min.js?v=215" defer></script>
+<script src="charts.js?v=215" defer></script>
+<script src="pagination.js?v=215" defer></script>
+<script src="pdf-report.js?v=215" defer></script>
+<script src="csv-import-utils.js?v=215" defer></script>
+<script src="auto-backup.js?v=215" defer></script>
+<script src="vehicle-costs.js?v=215" defer></script>
+<script src="cloud.js?v=215" defer></script>
+<script src="intelligent-analytics.js?v=215" defer></script>
+<script src="app.js?v=215" defer>
 </script>
 </main>
 </div>
