@@ -44,8 +44,10 @@ test('Tabelle hat sieben Spalten und 20 Einträge je Seite',()=>{
   assert.equal(row.children.length,7);
   assert.equal(row.children[0].textContent,'2026-10-01 12:00');
   assert.equal(row.children[3].textContent,'5 kWh');
-  assert.equal(row.children[6].children[0].textContent,'Bearbeiten');
-  assert.equal(row.children[6].children[1].textContent,'Löschen');
+  assert.equal(row.children[6].children[0].textContent,'✎');
+  assert.equal(row.children[6].children[0].ariaLabel,'Bearbeiten');
+  assert.equal(row.children[6].children[1].textContent,'🗑');
+  assert.equal(row.children[6].children[1].ariaLabel,'Löschen');
 });
 test('Eintragshistorie nutzt alle Einträge statt Dashboard-Filter',()=>{
   const input=[{id:'1',date:'2026-10-01'},{id:'2',date:'2026-10-03'}];
