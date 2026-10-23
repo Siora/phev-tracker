@@ -1,5 +1,5 @@
 /**
- * PHEV Tracker – Intelligentes Analyse-Dashboard (v93).
+ * PHEV Tracker – Intelligentes Analyse-Dashboard (Version 2.14).
  *
  * Reine Berechnungen, ohne DOM, Browser-Speicher oder Cloud-Zugriff.
  * Alle Beträge werden vom Aufrufer in die konfigurierte Basiswährung
@@ -8,24 +8,9 @@
  */
 window.PhevIntelligence=Object.freeze({
  /**
-  * Vorsichtige Jahreshochrechnung auf Basis abgeschlossener Monate.
-  * Aktueller und zukünftige Monate werden nicht als Nullkosten interpretiert.
-  * Bei weniger als drei beobachteten Monaten wird keine Zahl prognostiziert.
-  */
- /**
-  * Wirtschaftlichkeitsszenario mit frei wählbarer jährlicher Fahrleistung,
-  * Verbrauchswerten und Energiepreisen. Keine Nutzerdaten, keine Seiteneffekte.
-  * Preis- und Kostenwerte müssen bereits in derselben Basiswährung vorliegen.
-  * Es handelt sich um einen hypothetischen Vergleich, nicht um Ist-Kosten.
-  */
- /**
-  * Vergleicht identische abgeschlossene Kalendermonate zweier aufeinanderfolgender
-  * Jahre. Fehlende Buchungen sind keine nachgewiesenen Nullkosten.
-  */
- /**
-  * Auffällige Einheitspreise gegenüber dem Median der übrigen Buchungen.
-  * Mindestens vier Vergleichswerte je Energieart; Ausreißer werden nicht
-  * als Fehler behauptet. Mengen und Kosten müssen positiv und endlich sein.
+  * Meldet ungewöhnliche Strom-/Benzin-Einheitspreise relativ zum Median
+  * von mindestens vier früheren Buchungen desselben Fahrzeugs und Typs.
+  * Historische Werte sind nur Hinweise, keine Fehlerdiagnose.
   */
  priceAnomalies(records,vehicleId,year,convertRecord){
   const scoped=records.filter(r=>(!vehicleId||String(r.vehicle_id)===String(vehicleId))&&
@@ -41,7 +26,7 @@ window.PhevIntelligence=Object.freeze({
   };
   const alerts=[];
   for(const item of items.filter(r=>r.date.startsWith(String(year)+'-'))){
-   const peers=items.filter(r=>r!==item&&r.type===item.type&&r.date<=item.date).map(r=>r.price);
+   const peers=items.filter(r=>r!==item&&r.type===item.type&&r.date<item.date).map(r=>r.price);
    if(peers.length<4)continue;
    const baseline=median(peers);
    const deviation=(item.price/baseline-1)*100;
@@ -50,6 +35,7 @@ window.PhevIntelligence=Object.freeze({
   }
   return alerts.sort((a,b)=>Math.abs(b.deviation)-Math.abs(a.deviation)).slice(0,5);
  },
+ /** Vergleicht ausschließlich identische abgeschlossene Monate mit dem Vorjahr. */
  compareYears(current,previous,year,today=new Date()){
   const count=year===today.getFullYear()?today.getMonth():year<today.getFullYear()?12:0;
   if(count===0)return {available:false,reason:'Noch keine abgeschlossenen Vergleichsmonate.'};
@@ -60,6 +46,7 @@ window.PhevIntelligence=Object.freeze({
   return {available:true,months:count,currentTotal,previousTotal,difference,percent:difference/previousTotal*100,
    partial:count<12,breakdown:['charge','fuel','extra'].map(key=>({key,current:sum(current,key),previous:sum(previous,key)}))};
  },
+ /** Kalkuliert ein hypothetisches Fahrprofil ohne gespeicherte Daten zu verändern. */
  economicsScenario(input){
   const n=key=>Number(input[key]);
   const fields=['annualKm','electricShare','kwhPer100','litersPer100','priceKwh','priceLiter','fixedAnnual'];
@@ -75,6 +62,7 @@ window.PhevIntelligence=Object.freeze({
   const annual=electricity+fuel+fixed;
   return {available:true,electricKm,fuelKm,electricity,fuel,fixed,annual,costPer100:annual/n('annualKm')*100};
  },
+ /** Vorsichtige Jahreshochrechnung auf Basis abgeschlossener Monate. */
  forecast(months,year,today=new Date()){
   const currentYear=today.getFullYear();
   const completed=year<currentYear?12:year===currentYear?today.getMonth():0;
@@ -87,6 +75,7 @@ window.PhevIntelligence=Object.freeze({
   const projected=year<currentYear?actual:average*12;
   return {available:true,actual,average,projected,remaining:Math.max(0,projected-actual),completed,active:active.length,partial:active.length<completed,final:year<currentYear};
  },
+ /** Aggregiert vorhandene Buchungen nach Monat und Kostenart. */
  analyze(records,expenses,vehicleId,year,convertRecord,convertExpense){
   const valid=records.filter(r=>String(r.date||'').startsWith(String(year)+'-')&&(!vehicleId||String(r.vehicle_id)===String(vehicleId)));
   const extra=expenses.filter(r=>String(r.date||'').startsWith(String(year)+'-')&&(!vehicleId||String(r.vehicle_id)===String(vehicleId)));
