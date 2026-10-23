@@ -482,7 +482,7 @@ function renderDashboardProviderFilter(){
   const provider=$('provider');
   const current=provider.value;
   const chosen=typeof familySelection==='function'&&typeof document!=='undefined'&&document.getElementById('vehicleFilter')?$('vehicleFilter').value:'';
-  const source=familySelection(chosen)?familyRecords.filter(r=>'family:'+r.vehicle_id===chosen):records;
+  const source=chosen.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords.filter(r=>'family:'+r.vehicle_id===chosen):records;
   const providers=[...new Set(source.map(x=>x.place||'Unbekannt'))].sort();
   provider.replaceChildren(
     new Option('Alle Orte / Tankstellen',''),
