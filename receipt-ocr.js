@@ -32,9 +32,17 @@
     });
    }
    if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function')throw new Error('ocr-library-unavailable');
+   // Frühzeitig unterscheiden: fehlende Deployment-Datei, HTTP-Fehler oder Worker-Initialisierung.
+   for(const asset of ['tesseract-worker.min.js','deu.traineddata.gz','tesseract-core-simd-lstm.wasm.js']){
+    stage='OCR-Datei prüfen: '+asset;
+    const response=await fetch(local(asset+'?v=220'),{cache:'no-store'});
+    if(!response.ok)throw new Error(asset+': HTTP '+response.status);
+    const type=response.headers.get('content-type')||'';
+    if(/text\/html/i.test(type))throw new Error(asset+': HTML statt OCR-Datei geliefert');
+   }
    stage='OCR-Sprachdaten/Worker laden';
    worker=await window.Tesseract.createWorker('deu',1,{
-    workerPath:local('tesseract-worker.min.js'),
+    workerPath:local('tesseract-worker.min.js?v=220'),
     corePath:local(''),
     langPath:local(''),
     gzip:true,
