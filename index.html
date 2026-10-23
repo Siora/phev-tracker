@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1b">
 <link rel="manifest" href="manifest.webmanifest">
 <title>PHEV Tracker</title>
-<link rel="stylesheet" href="styles.css?v=210">
+<link rel="stylesheet" href="styles.css?v=211">
 <style>body.login-locked main section:not(#cloud){display:none!important}body.login-locked #cloud{display:block!important}body.login-locked .sidebar nav button:not(:last-child){opacity:.45;pointer-events:none}body.login-locked #login-required-notice{display:none!important}</style>
 </head>
 <body class="login-locked">
@@ -36,7 +36,7 @@
 <div class="sidebar-foot"><span id="footerVehicle">Alle Fahrzeuge</span><br>
 <small>Plug-in-Hybrid · CHF / EUR</small>
 <hr>
-<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.10</small>
+<small>Cloud-Synchronisierung bei Anmeldung.</small><br><small>Version 2.11</small>
 </div>
 </aside>
 <main class="main">
@@ -58,14 +58,14 @@
 <article class="quick-card" id="intelligence-economics">
 <h2>🧮 Individuelle Wirtschaftlichkeitsanalyse</h2>
 <p><small>Hypothetische Jahreskosten für ein Fahrprofil. Diese Werte sind Annahmen und werden nicht als tatsächliche Ausgaben gespeichert. Kein Fahrzeugvergleich.</small></p>
-<form id="economics-form" class="grid">
-<label>Jährliche Fahrleistung (km)<input name="annualKm" type="number" min="1" max="150000" step="100" value="12000" required></label>
-<label>Elektrischer Fahranteil (%)<input name="electricShare" type="number" min="0" max="100" step="1" value="50" required></label>
-<label>Stromverbrauch (kWh/100 km)<input name="kwhPer100" type="number" min="0" max="100" step="0.1" value="20" required></label>
-<label>Benzinverbrauch (l/100 km)<input name="litersPer100" type="number" min="0" max="100" step="0.1" value="6" required></label>
-<label>Strompreis (Basiswährung/kWh)<input name="priceKwh" type="number" min="0" step="0.01" value="0.30" required></label>
-<label>Benzinpreis (Basiswährung/l)<input name="priceLiter" type="number" min="0" step="0.01" value="1.80" required></label>
-<label>Jährliche Fixkosten (Basiswährung)<input name="fixedAnnual" type="number" min="0" step="1" value="600" required></label>
+<form id="economics-form" class="grid" novalidate>
+<label>Jährliche Fahrleistung (km)<input name="annualKm" type="text" inputmode="numeric" value="12000" required></label>
+<label>Elektrischer Fahranteil (%)<input name="electricShare" type="text" inputmode="numeric" value="50" required></label>
+<label>Stromverbrauch (kWh/100 km)<input name="kwhPer100" type="text" inputmode="decimal" value="20" required></label>
+<label>Benzinverbrauch (l/100 km)<input name="litersPer100" type="text" inputmode="decimal" value="6" required></label>
+<label>Strompreis (Basiswährung/kWh)<input name="priceKwh" type="text" inputmode="decimal" value="0.30" required></label>
+<label>Benzinpreis (Basiswährung/l)<input name="priceLiter" type="text" inputmode="decimal" value="1.80" required></label>
+<label>Jährliche Fixkosten (Basiswährung)<input name="fixedAnnual" type="text" inputmode="decimal" value="600" required></label>
 <button type="submit">Szenario berechnen</button>
 </form>
 <div id="economics-results" aria-live="polite"></div>
@@ -344,16 +344,16 @@
 </details>
 </section>
 </section>
-<script src="jspdf.umd.min.js?v=210" defer></script>
-<script src="charts.js?v=210" defer></script>
-<script src="pagination.js?v=210" defer></script>
-<script src="pdf-report.js?v=210" defer></script>
-<script src="csv-import-utils.js?v=210" defer></script>
-<script src="auto-backup.js?v=210" defer></script>
-<script src="vehicle-costs.js?v=210" defer></script>
-<script src="cloud.js?v=210" defer></script>
-<script src="intelligent-analytics.js?v=210" defer></script>
-<script src="app.js?v=210" defer>
+<script src="jspdf.umd.min.js?v=211" defer></script>
+<script src="charts.js?v=211" defer></script>
+<script src="pagination.js?v=211" defer></script>
+<script src="pdf-report.js?v=211" defer></script>
+<script src="csv-import-utils.js?v=211" defer></script>
+<script src="auto-backup.js?v=211" defer></script>
+<script src="vehicle-costs.js?v=211" defer></script>
+<script src="cloud.js?v=211" defer></script>
+<script src="intelligent-analytics.js?v=211" defer></script>
+<script src="app.js?v=211" defer>
 </script>
 </main>
 </div>

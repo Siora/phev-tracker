@@ -301,7 +301,8 @@ function renderEconomicsScenario(){
  const values={};
  for(const field of fields){
   const element=form.elements.namedItem(field);
-  values[field]=element&&element.value.trim()!==''?Number(element.value):NaN;
+  const raw=element?.value.trim().replace(/\s/g,'').replace(',','.');
+  values[field]=raw&&/^[0-9]+(?:\.[0-9]+)?$/.test(raw)?Number(raw):NaN;
  }
  const result=window.PhevIntelligence.economicsScenario(values);
  output.replaceChildren();
