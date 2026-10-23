@@ -1,0 +1,49 @@
+name: PHEV Tracker – Familien-API Integration (isolierte MySQL)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'tests/family-api-integration.cjs'
+      - '.github/workflows/test-family-api.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  family-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test-root-only
+          MYSQL_DATABASE: phev_family_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptest-root-only"
+          --health-interval=5s --health-timeout=5s --health-retries=15
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP mit MySQL-Treiber
+        run: sudo apt-get update -qq && sudo apt-get install -y php-cli php-mysql php-mbstring
+      - name: Isoliertes Schema vorbereiten
+        run: |
+          mysql -h 127.0.0.1 -uroot -ptest-root-only phev_family_test < server/schema.sql
+          mysql -h 127.0.0.1 -uroot -ptest-root-only phev_family_test -e "ALTER TABLE users ADD COLUMN role ENUM('user','admin') NOT NULL DEFAULT 'user'"
+          mysql -h 127.0.0.1 -uroot -ptest-root-only phev_family_test < server/migration-vehicles.sql
+          mysql -h 127.0.0.1 -uroot -ptest-root-only phev_family_test < server/migration-v3-family-foundation.sql
+          mysql -h 127.0.0.1 -uroot -ptest-root-only phev_family_test < server/migration-v3-family-invitations.sql
+      - name: Nur im CI-Runner gültige API-Konfiguration erzeugen
+        run: |
+          cat > server/config.php <<'PHP'
+          <?php
+          return ['dsn'=>'mysql:host=127.0.0.1;dbname=phev_family_test;charset=utf8mb4','user'=>'root','password'=>'test-root-only','allowed_origin'=>'https://tracker.web-produktion.com','registration_enabled'=>false];
+          PHP
+          php -S 127.0.0.1:8766 -t server > /tmp/phev-family-php.log 2>&1 &
+      - name: Mehrbenutzer-Berechtigungstests
+        run: node --test tests/family-api-integration.cjs
+      - name: Temporäre Konfiguration entfernen
+        if: always()
+        run: rm -f server/config.php
