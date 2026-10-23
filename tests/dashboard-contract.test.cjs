@@ -56,9 +56,9 @@ test('Eintragshistorie behält sieben Spalten und Seitengröße 20', () => {
   const helper = section(app, 'function renderEntryHistory(){', '\nfunction renderDashboardProviderFilter(');
   assert.ok(helper.includes("$('entries')"));
   assert.ok(helper.includes('window.paginateTable(entries,table,tbody,ordered,20,'));
-  assert.ok(helper.includes("edit.textContent='Bearbeiten'"));
+  assert.ok(helper.includes("edit.className='action-icon-button action-edit'"));
   assert.ok(helper.includes('edit.onclick=()=>beginEntryEdit(x);'));
-  assert.ok(helper.includes("remove.textContent='Löschen'"));
+  assert.ok(helper.includes("remove.className='action-icon-button action-delete'"));
 });
 
 test('Timeline-Helfer zeichnet weiterhin den vorgesehenen DOM-Container', () => {
