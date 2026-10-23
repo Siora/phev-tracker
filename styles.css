@@ -1097,3 +1097,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .shared-vehicle-panel{margin-top:24px;padding:16px;border:1px solid #34536b;border-radius:16px;background:#102437}
 .shared-vehicle-panel h3{margin-top:0}
 .shared-vehicle-panel .family-table-scroll{margin-bottom:0}
+
+/* Lesbare Fahrzeugstammdaten in der ausschließlich lesenden Familienansicht. */
+.shared-vehicle-details summary{cursor:pointer;font-weight:650;white-space:nowrap}
+.shared-vehicle-details dl{display:grid;grid-template-columns:minmax(90px,auto) minmax(120px,1fr);gap:7px 12px;margin:12px 0 0}
+.shared-vehicle-details dt{font-weight:650}
+.shared-vehicle-details dd{margin:0;overflow-wrap:anywhere}
