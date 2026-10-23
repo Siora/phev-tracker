@@ -560,6 +560,14 @@ if ($action === 'family-shared-vehicles') {
  $stmt=$db->prepare("SELECT v.id,v.brand,v.model,v.model_year,v.plate,v.drivetrain,v.battery_kwh,v.tank_liters,v.notes,s.family_id,s.access_level FROM family_vehicle_shares s JOIN family_members m ON m.family_id=s.family_id AND m.user_id=? JOIN vehicles v ON v.id=s.vehicle_id AND v.user_id=s.owner_user_id WHERE s.owner_user_id<>? ORDER BY v.brand,v.model,v.id");
  $stmt->execute([$uid,$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
 }
+// Lesender Zugriff auf Lade- und Tankdaten geteilter Fahrzeuge.
+// Private Fahrzeugausgaben, Einstellungen und fremde Fahrzeuge bleiben ausgeschlossen.
+if ($action === 'family-shared-records') {
+ if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
+ if (!$db->query("SHOW TABLES LIKE 'family_vehicle_shares'")->fetchColumn()) fail(503,'Fahrzeugfreigaben sind noch nicht eingerichtet');
+ $stmt=$db->prepare('SELECT DISTINCT r.id,r.type,r.date,r.time,'.($chargeKindColumn?'r.charge_kind':'NULL AS charge_kind').',r.charge_mode,r.amount,r.cost,r.currency,r.km,r.place,r.vehicle_id FROM records r JOIN family_vehicle_shares s ON s.vehicle_id=r.vehicle_id AND s.owner_user_id=r.user_id JOIN family_members m ON m.family_id=s.family_id AND m.user_id=? WHERE r.user_id<>? ORDER BY r.date DESC,r.id');
+ $stmt->execute([$uid,$uid]);respond(200,['records'=>$stmt->fetchAll()]);
+}
 if ($action === 'vehicle-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $v=$body['vehicle']??null;if (!is_array($v)) fail(400,'Fahrzeug fehlt');
  $vid=(int)($v['id']??0);
