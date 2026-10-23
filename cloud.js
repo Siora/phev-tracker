@@ -389,13 +389,48 @@ function showAccount(email,role){void loadFamilies();
  const adminNav=ce('admin-nav');if(adminNav)adminNav.hidden=!admin;
  if(!admin&&ce('administration')&&!ce('administration').classList.contains('hide'))window.tab?.('cloud');document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',!admin);if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
 /**
- * Lädt die Benutzerliste für Administratoren und zeigt 20 Benutzer je Seite.
- * Die Benutzerobjekte werden ausschließlich dargestellt, nicht geändert.
+ * Benutzerformulare sind exklusive Unteransichten der Administration.
+ * Die Listenposition bleibt erhalten, bis die Daten neu geladen werden.
  */
+let adminEditingId=null;
+let adminCurrentView='list';
+function adminView(view){
+ adminCurrentView=view;
+ ce('admin-create-panel').classList.toggle('hide',view!=='create');
+ ce('admin-edit-panel').classList.toggle('hide',view!=='edit');
+ ce('admin-users-panel').classList.toggle('hide',view!=='list');
+ ce('admin-new-user').hidden=view!=='list';
+ window.scrollTo(0,0);
+}
+ce('admin-new-user').onclick=()=>{ce('cloud-create').reset();adminView('create');};
+ce('admin-create-cancel').onclick=()=>adminView('list');
+ce('admin-edit-cancel').onclick=()=>adminView('list');
+ce('admin-edit-form').onsubmit=async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,save=form.querySelector('[type=submit]');
+ save.disabled=true;
+ try{
+  await cloudCall('admin-update-user',{id:adminEditingId,email:form.elements.email.value,role:form.elements.role.value});
+  cs('Benutzer aktualisiert.');await cloudUsers();adminView('list');
+ }catch(error){cs(error.message);}
+ finally{save.disabled=false;}
+};
+function adminActionIcon(name,label){
+ const button=document.createElement('button');button.type='button';
+ button.className='admin-icon-action';
+ button.setAttribute('aria-label',label);button.title=label;
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','19');svg.setAttribute('height','19');
+ svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
+ svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+ const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+ path.setAttribute('d',name==='edit'?'M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z':'M3 6h18 M8 6V4h8v2 M5 6l1 14h12l1-14 M10 10v7 M14 10v7');
+ svg.append(path);button.append(svg);return button;
+}
 async function cloudUsers(){
  const result=await cloudCall('admin-users');
  const container=ce('cloud-users');container.replaceChildren();
- const table=document.createElement('table');table.className='management-table';
+ const table=document.createElement('table');table.className='management-table admin-users-table';
  const thead=document.createElement('thead'),heading=document.createElement('tr');
  for(const label of ['E-Mail-Adresse','Rolle','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
  thead.append(heading);table.append(thead);
@@ -405,35 +440,22 @@ async function cloudUsers(){
   const row=document.createElement('tr');
   const emailCell=document.createElement('td');emailCell.textContent=user.email;
   const roleCell=document.createElement('td');roleCell.textContent=user.role==='admin'?'Administrator':'Benutzer';
-  const actions=document.createElement('td');
-  const edit=document.createElement('button');edit.type='button';edit.textContent='Bearbeiten';
-  edit.addEventListener('click',()=>{
-   const form=document.createElement('form');
-   const emailLabel=document.createElement('label');emailLabel.textContent='E-Mail';
-   const emailInput=document.createElement('input');emailInput.type='email';emailInput.required=true;emailInput.maxLength=254;emailInput.value=user.email;emailLabel.append(emailInput);
-   const roleLabel=document.createElement('label');roleLabel.textContent='Rolle';
-   const roleSelect=document.createElement('select');
-   for(const [value,label] of [['user','Benutzer'],['admin','Administrator']]){const option=new Option(label,value);roleSelect.add(option);}
-   roleSelect.value=user.role;roleLabel.append(roleSelect);
-   const save=document.createElement('button');save.type='submit';save.textContent='Änderungen speichern';
-   const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Abbrechen';cancel.onclick=()=>cloudUsers().catch(e=>cs(e.message));
-   form.append(emailLabel,roleLabel,save,cancel);
-   form.addEventListener('submit',async event=>{
-    event.preventDefault();save.disabled=true;
-    try{await cloudCall('admin-update-user',{id:user.id,email:emailInput.value,role:roleSelect.value});cs('Benutzer aktualisiert.');await cloudUsers();}
-    catch(error){cs(error.message);save.disabled=false;}
-   });
-   actions.replaceChildren(form);
-  });
-  const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';
-  remove.addEventListener('click',async()=>{
+  const actions=document.createElement('td');actions.className='admin-user-actions';
+  const edit=adminActionIcon('edit','Benutzer '+user.email+' bearbeiten');
+  edit.onclick=()=>{
+   adminEditingId=user.id;
+   const form=ce('admin-edit-form');
+   form.elements.email.value=user.email;form.elements.role.value=user.role;
+   adminView('edit');
+  };
+  const remove=adminActionIcon('delete','Benutzer '+user.email+' löschen');
+  remove.onclick=async()=>{
    if(!confirm('Benutzer '+user.email+' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.'))return;
-   const confirmation=prompt('Zur Bestätigung LÖSCHEN eingeben:');
-   if(confirmation!=='LÖSCHEN')return;
+   if(prompt('Zur Bestätigung LÖSCHEN eingeben:')!=='LÖSCHEN')return;
    remove.disabled=true;
    try{await cloudCall('admin-delete-user',{id:user.id});cs('Benutzer gelöscht.');await cloudUsers();}
    catch(error){cs(error.message);remove.disabled=false;}
-  });
+  };
   actions.append(edit,remove);row.append(emailCell,roleCell,actions);return row;
  };
  table.append(tbody);window.paginateTable(container,table,tbody,result.users,20,'users',makeUserRow);
@@ -534,7 +556,7 @@ ce('cloud-create').onsubmit=async event=>{
  button.disabled=true;
  try{
   await cloudCall('admin-create-user',{email:form.elements.email.value,password:form.elements.password.value,role:form.elements.role.value});
-  form.reset();cs('Benutzer erstellt.');await cloudUsers();
+  form.reset();cs('Benutzer erstellt.');await cloudUsers();adminView('list');
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
