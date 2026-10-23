@@ -1163,3 +1163,18 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .admin-users-table td:first-child{overflow-wrap:anywhere;word-break:normal}
 .admin-users-table th:last-child,.admin-users-table td:last-child{width:108px;white-space:nowrap}
 @media(max-width:600px){.admin-users-table th,.admin-users-table td{padding:8px 5px;font-size:0.85rem}.admin-users-table th:last-child{font-size:0.72rem}.admin-icon-action{width:40px;min-width:40px;height:40px;padding:7px}}
+
+/* Ladeorte und Anbieter: mobile Tabellen ohne abgeschnittene Aktionsbuttons. */
+#charging-management .dashboard-actions{min-width:0}
+#charging-management .managed-charging-card{min-width:0;overflow:hidden}
+#charging-management .managed-list-panel{min-width:0}
+#charging-management .managed-list-panel .account-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+#charging-management .managed-list-panel .account-heading h3{margin:0}
+#charging-management .managed-list-panel .account-heading button{max-width:100%;white-space:normal}
+#managed-locations-list,#managed-providers-list{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.managed-charging-table{width:100%;table-layout:auto}
+.managed-charging-table th,.managed-charging-table td{overflow-wrap:anywhere}
+.managed-charging-table td:last-child,.managed-charging-table th:last-child{white-space:nowrap;width:96px}
+.managed-charging-table .management-actions{white-space:nowrap}
+.managed-icon-action{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:40px;min-width:40px;height:40px;padding:7px;margin:1px;border-radius:10px}
+@media(max-width:600px){#charging-management .managed-charging-card{padding:14px 12px}.managed-charging-table th,.managed-charging-table td{padding:9px 5px;font-size:.82rem}.managed-charging-table th:last-child{font-size:.7rem}.managed-charging-table td:last-child,.managed-charging-table th:last-child{width:86px}.managed-icon-action{width:38px;min-width:38px;height:38px;padding:7px;margin:1px}}
