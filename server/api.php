@@ -501,6 +501,14 @@ if ($action === 'vehicles' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  $stmt=$db->prepare('SELECT id,brand,model,model_year,plate,drivetrain,battery_kwh,tank_liters,notes FROM vehicles WHERE user_id=? ORDER BY brand,model,id');
  $stmt->execute([$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
 }
+// Geteilte Fahrzeuge sind ausschließlich lesbar; private Fahrzeuge bleiben unverändert.
+// Zugriff erfordert sowohl eine aktive Familienmitgliedschaft als auch eine Freigabe.
+if ($action === 'family-shared-vehicles') {
+ if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
+ if (!$db->query("SHOW TABLES LIKE 'family_vehicle_shares'")->fetchColumn()) fail(503,'Fahrzeugfreigaben sind noch nicht eingerichtet');
+ $stmt=$db->prepare("SELECT v.id,v.brand,v.model,v.model_year,v.plate,v.drivetrain,v.battery_kwh,v.tank_liters,v.notes,s.family_id,s.access_level FROM family_vehicle_shares s JOIN family_members m ON m.family_id=s.family_id AND m.user_id=? JOIN vehicles v ON v.id=s.vehicle_id AND v.user_id=s.owner_user_id WHERE s.owner_user_id<>? ORDER BY v.brand,v.model,v.id");
+ $stmt->execute([$uid,$uid]);respond(200,['vehicles'=>$stmt->fetchAll()]);
+}
 if ($action === 'vehicle-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  $v=$body['vehicle']??null;if (!is_array($v)) fail(400,'Fahrzeug fehlt');
  $vid=(int)($v['id']??0);
