@@ -103,14 +103,14 @@ async function loadVehicles(){
   void loadSharedVehicleOverview();
   const accountEmail=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
   if(accountEmail)localStorage.setItem('phev-vehicles-cache-'+accountEmail,JSON.stringify(data.vehicles));
-  ce('vehicle-status').textContent=data.vehicles.length+' Fahrzeuge in deinem Konto.';
+  ce('vehicle-status').textContent=data.vehicles.length+(window.PhevI18n?.t('vehicles.countSuffix')||' Fahrzeuge in deinem Konto.');
   const list=ce('vehicle-list');list.replaceChildren();
   const table=document.createElement('table');table.className='management-table vehicle-management-table';
   const thead=document.createElement('thead'),heading=document.createElement('tr');
   for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
-  if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='Noch keine Fahrzeuge angelegt.';tr.append(td);tbody.append(tr);}
+  if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent=(window.PhevI18n?.t('vehicles.empty')||'Noch keine Fahrzeuge angelegt.');tr.append(td);tbody.append(tr);}
   const makeVehicleRow=v=>{
    const row=document.createElement('tr');
    for(const value of [[v.brand,v.model].filter(Boolean).join(' '),v.model_year||'–',v.plate||'–',v.drivetrain||'–',v.battery_kwh==null?'–':v.battery_kwh+' kWh',v.tank_liters==null?'–':v.tank_liters+' l']){
@@ -118,18 +118,18 @@ async function loadVehicles(){
    }
    const actions=document.createElement('td');actions.className='management-actions';
    const edit=document.createElement('button'),del=document.createElement('button');
-   edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel='Bearbeiten';edit.title='Bearbeiten';edit.onclick=()=>{
+   edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel=(window.PhevI18n?.t('expenses.edit')||'Bearbeiten');edit.title=(window.PhevI18n?.t('expenses.edit')||'Bearbeiten');edit.onclick=()=>{
     const f=ce('vehicle-form');f.dataset.id=v.id;
     for(const key of ['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'])f.elements[key].value=v[key]??'';
-    f.querySelector('button[type=submit]').textContent='Änderungen speichern';
+    f.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
     vehicleFormView(true);
    };
-   del.textContent='🗑';del.className='action-icon-button action-delete';del.ariaLabel='Löschen';del.title='Löschen';del.onclick=async()=>{
-    if(!confirm('Fahrzeug löschen? Fahrzeuge mit Einträgen können nicht gelöscht werden.'))return;
+   del.textContent='🗑';del.className='action-icon-button action-delete';del.ariaLabel=(window.PhevI18n?.t('expenses.delete')||'Löschen');del.title=(window.PhevI18n?.t('expenses.delete')||'Löschen');del.onclick=async()=>{
+    if(!confirm((window.PhevI18n?.t('vehicles.confirmDelete')||'Fahrzeug löschen? Fahrzeuge mit Einträgen können nicht gelöscht werden.')))return;
     try{await cloudCall('vehicle-delete',{id:v.id});await loadVehicles();}catch(e){ce('vehicle-status').textContent=e.message;}
    };
    const photo=document.createElement('button');
-   photo.type='button';photo.textContent='Bild hochladen';
+   photo.type='button';photo.textContent=(window.PhevI18n?.t('vehicles.uploadPhoto')||'Bild hochladen');
    photo.onclick=()=>{
     const picker=document.createElement('input');
     picker.type='file';picker.accept='image/jpeg,image/png,image/webp';picker.style.display='none';
@@ -172,21 +172,21 @@ function vehicleFormView(open){
 }
 ce('vehicle-new').onclick=()=>{
  const f=ce('vehicle-form');f.reset();delete f.dataset.id;
- f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
+ f.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('vehicles.save')||'Fahrzeug speichern');
  vehicleFormView(true);
 };
 ce('vehicle-cancel').onclick=()=>{
  const f=ce('vehicle-form');
- if((f.dataset.id||['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'].some(key=>f.elements[key].value))&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;
- f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
+ if((f.dataset.id||['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'].some(key=>f.elements[key].value))&&!confirm((window.PhevI18n?.t('expenses.confirmDiscard')||'Ungespeicherte Änderungen verwerfen?')))return;
+ f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('vehicles.save')||'Fahrzeug speichern');
  vehicleFormView(false);
 };
 function resetVehicleAfterSave(){
- const f=ce('vehicle-form');f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
+ const f=ce('vehicle-form');f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('vehicles.save')||'Fahrzeug speichern');
 };
 ce('vehicle-form').onsubmit=async e=>{
  e.preventDefault();
- if(!cloudToken)return ce('vehicle-status').textContent='Bitte zuerst anmelden.';
+ if(!cloudToken)return ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.loginRequired')||'Bitte zuerst anmelden.');
  const f=e.currentTarget,button=f.querySelector('button[type=submit]');button.disabled=true;
  try{
   const v={id:f.dataset.id?Number(f.dataset.id):null};
