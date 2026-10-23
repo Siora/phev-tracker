@@ -42,7 +42,8 @@ async function openFixture(browser){
       data:{records,preferences:null,preferences_available:false},
       'charging-catalog':{locations,providers},
       'admin-users':{users},
-      'family-list':{families:[]}
+      'family-list':{families:[]},
+      'family-shared-vehicles':{vehicles:[{id:987,brand:'Familie',model:'Testauto',model_year:2025,drivetrain:'PHEV',access_level:'view'}]}
     }[action];
     if(payload===undefined)throw new Error('Unexpected API action: '+action);
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
@@ -55,6 +56,9 @@ async function openFixture(browser){
   });
   await page.goto(base+'/index.html',{waitUntil:'load'});
   await page.waitForFunction(()=>document.querySelector('#cloud-status')?.textContent.includes('Sitzung wiederhergestellt'),{timeout:15000});
+  // Geteilte Fahrzeuge dürfen nur in der separaten Leseübersicht auftauchen.
+  await page.waitForFunction(()=>document.querySelector('#shared-vehicle-overview-list')?.textContent.includes('Familie Testauto'));
+  assert.equal(await page.locator('#vehicle-list').getByText('Familie Testauto').count(),0);
   return {page,context,calls,errors};
 }
 test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit synthetischer Cloud',async()=>{
