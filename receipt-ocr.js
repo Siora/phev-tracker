@@ -24,7 +24,7 @@
    if(!window.Tesseract){
     await new Promise((resolve,reject)=>{
      const script=document.createElement('script');
-     script.src=local('tesseract.min.js?v=219');
+     script.src=local('tesseract.min.js?v=220');
      script.onload=resolve;
      script.onerror=()=>reject(new Error('ocr-library-unavailable'));
      document.head.append(script);
