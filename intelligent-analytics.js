@@ -41,7 +41,7 @@ window.PhevIntelligence=Object.freeze({
   };
   const alerts=[];
   for(const item of items.filter(r=>r.date.startsWith(String(year)+'-'))){
-   const peers=items.filter(r=>r!==item&&r.type===item.type&&r.date<=item.date).map(r=>r.price);
+   const peers=items.filter(r=>r!==item&&r.type===item.type&&r.date<item.date).map(r=>r.price);
    if(peers.length<4)continue;
    const baseline=median(peers);
    const deviation=(item.price/baseline-1)*100;
