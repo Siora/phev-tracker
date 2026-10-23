@@ -908,6 +908,27 @@ window.setManagedCharging=d=>{if(d&&Array.isArray(d.locations)&&Array.isArray(d.
  * Füllt das Formular für einen bestehenden Ladeort oder Anbieter.
  * Übernimmt unverändert die v88-Felder und scrollt zum Bearbeitungsformular.
  */
+function managedChargingView(type,open){
+ const key=type==='locations'?'location':'provider';
+ $('managed-'+key+'-panel').classList.toggle('hide',!open);
+ $('managed-'+key+'-list-panel').classList.toggle('hide',open);
+ if(open)$('managed-'+key+'-panel').scrollIntoView({block:'start'});
+}
+for(const [key,type] of [['location','locations'],['provider','providers']]){
+ document.querySelector('[data-managed-new="'+key+'"]').addEventListener('click',()=>{
+  const form=$(key==='location'?'managed-location-form':'managed-provider-form');
+  form.reset();delete form.dataset.editId;
+  form.querySelector('button[type=submit]').textContent='Speichern';
+  managedChargingView(type,true);
+ });
+ document.querySelector('[data-managed-cancel="'+key+'"]').addEventListener('click',()=>{
+  const form=$(key==='location'?'managed-location-form':'managed-provider-form');
+  if(form.dataset.editId || [...form.elements].some(input=>input.name&&input.value&&input.value!==input.defaultValue)){
+   if(!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+  }
+  form.reset();delete form.dataset.editId;managedChargingView(type,false);
+ });
+}
 function beginManagedChargingEdit(type,item){
   const form=$(type==='locations'?'managed-location-form':'managed-provider-form');
   form.dataset.editId=item.id;
@@ -915,7 +936,7 @@ function beginManagedChargingEdit(type,item){
   form.elements.price.value=item.price??'';
   if(type==='locations')form.elements.kind.value=item.kind||'';
   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
-  form.scrollIntoView({behavior:'smooth',block:'start'});
+  managedChargingView(type,true);
 }
 
 /**
@@ -956,7 +977,7 @@ function renderChargingManagement(){
 for(const [type,id] of [['locations','managed-location-form'],['providers','managed-provider-form']]){
  const form=$(id);if(!form)continue;
  form.addEventListener('reset',()=>{delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Speichern';});
- form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert('Name oder Preis ungültig.');const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();storeChargingData(data);$('managed-charging-status').textContent='Gespeichert. Cloud-Synchronisierung wird gestartet.';});
+ form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert('Name oder Preis ungültig.');const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();delete form.dataset.editId;storeChargingData(data);managedChargingView(type,false);$('managed-charging-status').textContent='Gespeichert. Cloud-Synchronisierung wird gestartet.';});
 }
 function managedPlace(form){
  if(form.elements.type?.value==='fuel')return String(form.elements.place?.value||'').trim();
