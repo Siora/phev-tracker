@@ -1,6 +1,17 @@
 /* Zentrales deutsches Wörterbuch. Schlüssel bleiben über Releases stabil. */
 window.PhevTranslations=window.PhevTranslations||{};
 window.PhevTranslations.de=Object.freeze({
+ 'vehicles.title':'Meine Fahrzeuge',
+ 'vehicles.formTitle':'Fahrzeug hinzufügen / bearbeiten',
+ 'vehicles.brand':'Marke',
+ 'vehicles.model':'Modell',
+ 'vehicles.year':'Baujahr',
+ 'vehicles.plate':'Kennzeichen',
+ 'vehicles.drivetrain':'Antriebsart',
+ 'vehicles.battery':'Batteriekapazität (kWh)',
+ 'vehicles.tank':'Tankvolumen (Liter)',
+ 'vehicles.notes':'Notizen',
+ 'vehicles.save':'Fahrzeug speichern',
  'nav.home':'Übersicht','nav.analysis':'🧠 Analyse-Dashboard','nav.entries':'⚡ Ladungen / ⛽ Tankungen',
  'nav.vehicles':'🚘 Fahrzeuge','nav.charging':'⚡ Ladeorte & Anbieter','nav.account':'Konto',
  'nav.administration':'Administration',
