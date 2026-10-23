@@ -582,7 +582,7 @@ function beginEntryEdit(x){
   f.dataset.editId=x.id;
   f.querySelector('button').textContent='Änderungen speichern';
   tab('add');
-  entryFormView(true);
+  if(typeof entryFormView==='function')entryFormView(true);
 }
 
 function renderEntryHistory(){
