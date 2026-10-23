@@ -936,7 +936,7 @@ function beginManagedChargingEdit(type,item){
   form.elements.name.value=item.name;
   form.elements.price.value=item.price??'';
   if(type==='locations')form.elements.kind.value=item.kind||'';
-  form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+  form.querySelector('button[type=submit]').textContent=(typeof window!=='undefined'&&window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
   if(typeof managedChargingView==='function')managedChargingView(type,true);
   else form.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -947,7 +947,7 @@ function beginManagedChargingEdit(type,item){
  * übernimmt anschließend die weitere Synchronisierung.
  */
 function deleteManagedChargingItem(data,type,id){
-  if(!confirm('Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.'))return;
+  if(!confirm((typeof window!=='undefined'&&window.PhevI18n?.t('charging.confirmDelete')||'Eintrag aus der Verwaltung löschen? Bestehende Ladungen bleiben erhalten.')))return;
   data[type]=data[type].filter(x=>x.id!==id);
   storeChargingData(data);
 }
@@ -961,7 +961,7 @@ function renderChargingManagement(){
   for(const title of (type==='locations'?['Ladeort','Typ','Preis / kWh','Aktionen']:['Anbieter','Preis / kWh','Aktionen'])){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
-  if(!data[type].length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=type==='locations'?4:3;td.textContent=type==='locations'?'Noch keine Ladeorte angelegt.':'Noch keine Anbieter angelegt.';tr.append(td);tbody.append(tr);}
+  if(!data[type].length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=type==='locations'?4:3;td.textContent=type==='locations'?(typeof window!=='undefined'&&window.PhevI18n?.t('charging.emptyLocations')||'Noch keine Ladeorte angelegt.'):(typeof window!=='undefined'&&window.PhevI18n?.t('charging.emptyProviders')||'Noch keine Anbieter angelegt.');tr.append(td);tbody.append(tr);}
   const makeManagedRow=item=>{
    const row=document.createElement('tr');
    const values=type==='locations'?[item.name,item.kind||'–',item.price===null?'–':item.price+' '+settings.base]:[item.name,item.price===null?'–':item.price+' '+settings.base];
@@ -977,20 +977,20 @@ function renderChargingManagement(){
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',pathData);
     svg.append(path);button.append(svg);return button;
    };
-   const edit=actionIcon('Bearbeiten: '+item.name,'M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z');
+   const edit=actionIcon((typeof window!=='undefined'&&window.PhevI18n?.t('charging.editPrefix')||'Bearbeiten: ')+item.name,'M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z');
    edit.onclick=()=>beginManagedChargingEdit(type,item);
-   const del=actionIcon('Löschen: '+item.name,'M3 6h18 M8 6V4h8v2 M5 6l1 14h12l1-14 M10 10v7 M14 10v7');
+   const del=actionIcon((typeof window!=='undefined'&&window.PhevI18n?.t('charging.deletePrefix')||'Löschen: ')+item.name,'M3 6h18 M8 6V4h8v2 M5 6l1 14h12l1-14 M10 10v7 M14 10v7');
    del.onclick=()=>deleteManagedChargingItem(data,type,item.id);
    actions.append(edit,del);row.append(actions);return row;
   };
   table.append(tbody);window.paginateTable(list,table,tbody,data[type],5,'managed-'+type,makeManagedRow);
-  document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{const select=form.elements[field];if(!select)return;const previous=select.value;select.replaceChildren(new Option(type==='locations'?'Kein gespeicherter Ladeort':'Kein Anbieter',''),...data[type].map(x=>new Option(x.name,x.id)));select.value=data[type].some(x=>x.id===previous)?previous:'';});
+  document.querySelectorAll('form#form, form.quick-form[data-type="charge"]').forEach(form=>{const select=form.elements[field];if(!select)return;const previous=select.value;select.replaceChildren(new Option(type==='locations'?(typeof window!=='undefined'&&window.PhevI18n?.t('charging.noLocation')||'Kein gespeicherter Ladeort'):(typeof window!=='undefined'&&window.PhevI18n?.t('charging.noProvider')||'Kein Anbieter'),''),...data[type].map(x=>new Option(x.name,x.id)));select.value=data[type].some(x=>x.id===previous)?previous:'';});
  }
 }
 for(const [type,id] of [['locations','managed-location-form'],['providers','managed-provider-form']]){
  const form=$(id);if(!form)continue;
- form.addEventListener('reset',()=>{delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Speichern';});
- form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert('Name oder Preis ungültig.');const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();delete form.dataset.editId;storeChargingData(data);managedChargingView(type,false);$('managed-charging-status').textContent='Gespeichert. Cloud-Synchronisierung wird gestartet.';});
+ form.addEventListener('reset',()=>{delete form.dataset.editId;form.querySelector('button[type=submit]').textContent=(typeof window!=='undefined'&&window.PhevI18n?.t('entries.save')||'Speichern');});
+ form.addEventListener('submit',e=>{e.preventDefault();const data=chargingData(),name=form.elements.name.value.trim(),priceRaw=form.elements.price.value,price=priceRaw===''?null:Number(priceRaw);if(!name||name.length>100||price!==null&&(!Number.isFinite(price)||price<0||price>1000))return alert((typeof window!=='undefined'&&window.PhevI18n?.t('charging.invalid')||'Name oder Preis ungültig.'));const id=form.dataset.editId||crypto.randomUUID(),item={id,name,price,...(type==='locations'?{kind:form.elements.kind.value}:{})};const index=data[type].findIndex(x=>x.id===id);if(index>=0)data[type][index]=item;else data[type].push(item);form.reset();delete form.dataset.editId;storeChargingData(data);managedChargingView(type,false);$('managed-charging-status').textContent=(typeof window!=='undefined'&&window.PhevI18n?.t('charging.saved')||'Gespeichert. Cloud-Synchronisierung wird gestartet.');});
 }
 function managedPlace(form){
  if(form.elements.type?.value==='fuel')return String(form.elements.place?.value||'').trim();
