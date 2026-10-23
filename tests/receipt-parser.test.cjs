@@ -27,3 +27,14 @@ test('OCR unit price with currency prefix',()=>{
  assert.equal(r.unit_price,0.45);
  assert.equal(r.cost,11.03);
 });
+
+test('charge receipt extracts time and AC charging mode',()=>{
+ const r=parse('23.10.2026 14:35 Uhr\n24,5 kWh\nLadestrom: AC\nTotal CHF 11,03');
+ assert.equal(r.time,'14:35');
+ assert.equal(r.charge_mode,'AC');
+});
+test('fuel receipts do not receive charging mode',()=>{
+ const r=parse('23.10.2026 08:05\n40 L\nLadestrom DC');
+ assert.equal(r.time,'08:05');
+ assert.equal(r.charge_mode,undefined);
+});
