@@ -5,7 +5,7 @@
  function translate(key,variables){
   const dictionaries=window.PhevTranslations||{};
   const value=dictionaries[active]?.[key]??dictionaries.de?.[key]??key;
-  return String(value).replace(/\\{(\\w+)\\}/g,(_,name)=>String(variables?.[name]??''));
+  return String(value).replace(/\{(\w+)\}/g,(_,name)=>String(variables?.[name]??''));
  }
  function setLanguage(code){
   if(!languages.includes(code))return false;
