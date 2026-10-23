@@ -580,7 +580,7 @@ function beginEntryEdit(x){
   f.elements.charge_mode.value=getChargeMode(x.id);
   f.elements.vehicle_id.value=x.vehicle_id||'';
   f.dataset.editId=x.id;
-  f.querySelector('button').textContent='Änderungen speichern';
+  f.querySelector('button').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
   tab('add');
   if(typeof entryFormView==='function')entryFormView(true);
 }
@@ -615,7 +615,7 @@ function renderEntryHistory(){
   ];
   for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}
   const actions=document.createElement('td');actions.className='entry-table-actions';
-  const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel='Bearbeiten';edit.title='Bearbeiten';
+  const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel=window.PhevI18n?.t('expenses.edit')||'Bearbeiten';edit.title=edit.ariaLabel;
   edit.onclick=()=>beginEntryEdit(x);
   const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.className='action-icon-button action-delete';remove.ariaLabel='Löschen';remove.title='Löschen';
   remove.onclick=()=>deleteEntryWithConfirmation(x.id);
@@ -925,7 +925,7 @@ for(const [key,type] of [['location','locations'],['provider','providers']]){
  document.querySelector('[data-managed-cancel="'+key+'"]').addEventListener('click',()=>{
   const form=$(key==='location'?'managed-location-form':'managed-provider-form');
   if(form.dataset.editId || [...form.elements].some(input=>input.name&&input.value&&input.value!==input.defaultValue)){
-   if(!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+   if(!confirm((window.PhevI18n?.t('expenses.confirmDiscard')||'Ungespeicherte Änderungen verwerfen?')))return;
   }
   form.reset();delete form.dataset.editId;managedChargingView(type,false);
  });
@@ -936,7 +936,7 @@ function beginManagedChargingEdit(type,item){
   form.elements.name.value=item.name;
   form.elements.price.value=item.price??'';
   if(type==='locations')form.elements.kind.value=item.kind||'';
-  form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+  form.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
   if(typeof managedChargingView==='function')managedChargingView(type,true);
   else form.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -1181,7 +1181,7 @@ function renderVehicleExpenses(){
    const cell=document.createElement('td');cell.textContent=value;row.append(cell);
   }
   const actionCell=document.createElement('td');actionCell.className='expense-table-actions';
-const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel='Bearbeiten';edit.title='Bearbeiten';
+const edit=document.createElement('button');edit.type='button';edit.textContent='✎';edit.className='action-icon-button action-edit';edit.ariaLabel=window.PhevI18n?.t('expenses.edit')||'Bearbeiten';edit.title=edit.ariaLabel;
     edit.onclick=()=>{
      form.dataset.editId=x.id;
      form.elements.vehicle_id.value=String(x.vehicle_id);
@@ -1192,11 +1192,11 @@ const edit=document.createElement('button');edit.type='button';edit.textContent=
      form.elements.note.value=x.note||'';
      form.elements.mileage_km.value=x.mileage_km??'';
      form.elements.next_service_date.value=x.next_service_date||'';
-     form.querySelector('button[type=submit]').textContent='Änderungen speichern';
+     form.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
      expenseFormView(true);
     };
-    const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.className='action-icon-button action-delete';remove.ariaLabel='Löschen';remove.title='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
-    remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
+    const remove=document.createElement('button');remove.type='button';remove.textContent='🗑';remove.className='action-icon-button action-delete';remove.ariaLabel=window.PhevI18n?.t('expenses.delete')||'Löschen';remove.title=remove.ariaLabel;remove.setAttribute('aria-label',(window.PhevI18n?.t('expenses.deleteFrom')||'Ausgabe vom ')+x.date+(window.PhevI18n?.t('expenses.deleteSuffix')||' löschen'));
+    remove.onclick=async()=>{if(!confirm((window.PhevI18n?.t('expenses.confirmDelete')||'Diese Ausgabe wirklich löschen?')))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent=(window.PhevI18n?.t('expenses.deleted')||'Ausgabe gelöscht.');}catch(e){$('expense-status').textContent=(window.PhevI18n?.t('expenses.deleteFailed')||'Löschen fehlgeschlagen: ')+e.message;remove.disabled=false;}};
   
   actionCell.append(edit,remove);row.append(actionCell);
   return row;
@@ -1212,18 +1212,18 @@ $('expense-new').addEventListener('click',()=>{
  const form=$('expense-form'),vehicle=form.elements.vehicle_id.value;
  form.reset();delete form.dataset.editId;
  form.elements.vehicle_id.value=vehicle;
- form.querySelector('button[type=submit]').textContent='Ausgabe speichern';
+ form.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.save')||'Ausgabe speichern');
  expenseFormView(true);
 });
 $('expense-cancel').addEventListener('click',()=>{
  const form=$('expense-form');
- if((form.dataset.editId||form.elements.amount.value||form.elements.note.value||form.elements.date.value)&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+ if((form.dataset.editId||form.elements.amount.value||form.elements.note.value||form.elements.date.value)&&!confirm((window.PhevI18n?.t('expenses.confirmDiscard')||'Ungespeicherte Änderungen verwerfen?')))return;
  form.reset();delete form.dataset.editId;expenseFormView(false);
 });
 $('expense-form').elements.vehicle_id.addEventListener('change',renderVehicleExpenses);
 $('expense-form').onsubmit=async e=>{
  e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]'),el=form.elements;
- if(!el.vehicle_id.value)return $('expense-status').textContent='Bitte ein Fahrzeug wählen.';
+ if(!el.vehicle_id.value)return $('expense-status').textContent=(window.PhevI18n?.t('expenses.chooseVehicleRequired')||'Bitte ein Fahrzeug wählen.');
  const amount=Number(el.amount.value);if(!Number.isFinite(amount)||amount<=0)return;
  const item={
   id:form.dataset.editId||(crypto.randomUUID?.()||String(Date.now())+'-'+Math.random()),
@@ -1232,13 +1232,13 @@ $('expense-form').onsubmit=async e=>{
   mileage_km:el.mileage_km.value===''?null:Number(el.mileage_km.value),
   next_service_date:el.next_service_date.value||null
  };
- button.disabled=true;$('expense-status').textContent='Ausgabe wird gespeichert …';
- try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Ausgabe speichern';el.vehicle_id.value=v;expenseFormView(false);$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
- catch(error){$('expense-status').textContent='Speichern fehlgeschlagen: '+error.message;}
+ button.disabled=true;$('expense-status').textContent=(window.PhevI18n?.t('expenses.saving')||'Ausgabe wird gespeichert …');
+ try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();delete form.dataset.editId;form.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.save')||'Ausgabe speichern');el.vehicle_id.value=v;expenseFormView(false);$('expense-status').textContent=(window.PhevI18n?.t('expenses.saved')||'Ausgabe sicher in der Cloud gespeichert.');}
+ catch(error){$('expense-status').textContent=(window.PhevI18n?.t('expenses.saveFailed')||'Speichern fehlgeschlagen: ')+error.message;}
  finally{button.disabled=false;}
 };
 
-$('expense-form').addEventListener('reset',e=>{delete e.currentTarget.dataset.editId;e.currentTarget.querySelector('button[type=submit]').textContent='Ausgabe speichern';});
+$('expense-form').addEventListener('reset',e=>{delete e.currentTarget.dataset.editId;e.currentTarget.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.save')||'Ausgabe speichern');});
 
 window.collectCloudPreferences=function(){
  const photos={};
