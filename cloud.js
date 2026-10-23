@@ -118,13 +118,13 @@ async function loadVehicles(){
    }
    const actions=document.createElement('td');actions.className='management-actions';
    const edit=document.createElement('button'),del=document.createElement('button');
-   edit.textContent='✎';edit.classList.add('action-icon-button','action-edit');edit.setAttribute('aria-label','Bearbeiten');edit.title='Bearbeiten';edit.onclick=()=>{
+   edit.textContent='✎';edit.className='action-icon-button action-edit';edit.setAttribute('aria-label','Bearbeiten');edit.title='Bearbeiten';edit.onclick=()=>{
     const f=ce('vehicle-form');f.dataset.id=v.id;
     for(const key of ['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'])f.elements[key].value=v[key]??'';
     f.querySelector('button[type=submit]').textContent='Änderungen speichern';
     vehicleFormView(true);
    };
-   del.textContent='🗑';del.classList.add('action-icon-button','action-delete');del.setAttribute('aria-label','Löschen');del.title='Löschen';del.onclick=async()=>{
+   del.textContent='🗑';del.className='action-icon-button action-delete';del.setAttribute('aria-label','Löschen');del.title='Löschen';del.onclick=async()=>{
     if(!confirm('Fahrzeug löschen? Fahrzeuge mit Einträgen können nicht gelöscht werden.'))return;
     try{await cloudCall('vehicle-delete',{id:v.id});await loadVehicles();}catch(e){ce('vehicle-status').textContent=e.message;}
    };
