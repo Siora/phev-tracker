@@ -58,14 +58,14 @@
 <article class="quick-card" id="intelligence-economics">
 <h2>🧮 Individuelle Wirtschaftlichkeitsanalyse</h2>
 <p><small>Hypothetische Jahreskosten für ein Fahrprofil. Diese Werte sind Annahmen und werden nicht als tatsächliche Ausgaben gespeichert. Kein Fahrzeugvergleich.</small></p>
-<form id="economics-form" class="grid">
-<label>Jährliche Fahrleistung (km)<input name="annualKm" type="number" min="1" max="150000" step="100" value="12000" required></label>
-<label>Elektrischer Fahranteil (%)<input name="electricShare" type="number" min="0" max="100" step="1" value="50" required></label>
-<label>Stromverbrauch (kWh/100 km)<input name="kwhPer100" type="number" min="0" max="100" step="0.1" value="20" required></label>
-<label>Benzinverbrauch (l/100 km)<input name="litersPer100" type="number" min="0" max="100" step="0.1" value="6" required></label>
-<label>Strompreis (Basiswährung/kWh)<input name="priceKwh" type="number" min="0" step="0.01" value="0.30" required></label>
-<label>Benzinpreis (Basiswährung/l)<input name="priceLiter" type="number" min="0" step="0.01" value="1.80" required></label>
-<label>Jährliche Fixkosten (Basiswährung)<input name="fixedAnnual" type="number" min="0" step="1" value="600" required></label>
+<form id="economics-form" class="grid" novalidate>
+<label>Jährliche Fahrleistung (km)<input name="annualKm" type="text" inputmode="numeric" value="12000" required></label>
+<label>Elektrischer Fahranteil (%)<input name="electricShare" type="text" inputmode="numeric" value="50" required></label>
+<label>Stromverbrauch (kWh/100 km)<input name="kwhPer100" type="text" inputmode="decimal" value="20" required></label>
+<label>Benzinverbrauch (l/100 km)<input name="litersPer100" type="text" inputmode="decimal" value="6" required></label>
+<label>Strompreis (Basiswährung/kWh)<input name="priceKwh" type="text" inputmode="decimal" value="0.30" required></label>
+<label>Benzinpreis (Basiswährung/l)<input name="priceLiter" type="text" inputmode="decimal" value="1.80" required></label>
+<label>Jährliche Fixkosten (Basiswährung)<input name="fixedAnnual" type="text" inputmode="decimal" value="600" required></label>
 <button type="submit">Szenario berechnen</button>
 </form>
 <div id="economics-results" aria-live="polite"></div>
