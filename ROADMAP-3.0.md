@@ -13,6 +13,10 @@ Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Ko
 
 **Vorgeschlagene Reihenfolge:** Familienverwaltung → Auswertungen → Belegerkennung → Fahrzeugschnittstellen. Technische Machbarkeit und Anbieterabhängigkeiten vor der letzten Etappe klären. Ein Release 3.0 ist erst nach Umsetzung und Abnahme aller vier Bereiche vorgesehen; nicht unterstützte Hersteller müssen ausdrücklich als Einschränkung dokumentiert werden.
 
+## Planung Fahrzeuganbindung (23. Oktober 2026)
+
+Pilot: BYD SEAL U DM-i (2026, Schweiz), später herstellerübergreifend erweiterbar. Zunächst ausschließlich lesender Zugriff auf Kilometerstand, Ladezustand und Ladestatus, sofern der gewählte Provider diese Felder für das konkrete Fahrzeug bereitstellt. Die technische Architektur und die offenen Sicherheits- und Anbieterfragen stehen in [FAHRZEUGANBINDUNG-3.0.md](FAHRZEUGANBINDUNG-3.0.md). Noch keine produktive Verbindung, keine Provider-Tokens und keine Datenbankmigration.
+
 ## Bestandsaufnahme Familienverwaltung (23. Oktober 2026)
 
 Die Familienverwaltung ist **teilweise implementiert**, nicht vollständig abgeschlossen.
