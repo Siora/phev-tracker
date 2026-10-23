@@ -148,7 +148,7 @@ const conv=x=>x.currency===settings.base?x.cost:settings.base==='CHF'?x.cost*set
  * zu einer leeren Ansicht führen. Auch die Konto-Seite verwendet diesen Weg.
  */
 const navigationStorageKey='phev-active-page-v1';
-const navigationPages=['home','intelligence','add','csv','vehicles','charging-management','options','cloud','family'];
+const navigationPages=['home','intelligence','add','csv','vehicles','charging-management','options','cloud','family','cloud-settings'];
 function restoredPage(){
  try{
   const page=sessionStorage.getItem(navigationStorageKey);
@@ -236,7 +236,7 @@ window.renderIntelligence=renderIntelligence;
 function tab(t){
   if(!navigationPages.includes(t))t='home';
   navigationPages.forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',navigationPages[i]===t || (t==='family' && navigationPages[i]==='cloud')));
+  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',navigationPages[i]===t || ((t==='family'||t==='cloud-settings') && navigationPages[i]==='cloud')));
   rememberPage(t);
   render();
   renderIntelligence();

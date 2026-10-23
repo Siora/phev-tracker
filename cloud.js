@@ -187,16 +187,25 @@ prepareFamilyInviteLink();
 window.addEventListener('hashchange',prepareFamilyInviteLink);
 /** Freigaben sind Metadaten; gemeinsame Fahrzeugdatensätze bleiben vorerst gesperrt. */
 /** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
+/** Tabellen verwenden ausschließlich textContent; API-Daten werden nie als HTML interpretiert. */
+function familyTable(target,columns,rows){
+ target.replaceChildren();
+ if(!rows.length){target.textContent='Keine Einträge vorhanden.';return null;}
+ const wrapper=document.createElement('div');wrapper.className='family-table-scroll';
+ const table=document.createElement('table');table.className='management-table family-table';
+ const thead=document.createElement('thead'),head=document.createElement('tr');
+ for(const label of columns){const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);}
+ thead.append(head);table.append(thead);
+ const tbody=document.createElement('tbody');
+ for(const cells of rows){const tr=document.createElement('tr');for(const cell of cells){const td=document.createElement('td');if(cell instanceof Node)td.append(cell);else td.textContent=String(cell??'');tr.append(td);}tbody.append(tr);}
+ table.append(tbody);wrapper.append(table);target.append(wrapper);return table;
+}
+/** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
 async function loadSharedVehicles(){
  const list=ce('family-shared-vehicles');if(!cloudToken)return;
  try{
-  const result=await cloudCall('family-shared-vehicles');list.replaceChildren();
-  if(!(result.vehicles||[]).length){list.textContent='Noch keine Fahrzeuge für dich freigegeben.';return;}
-  for(const vehicle of result.vehicles){
-   const line=document.createElement('p');
-   line.textContent=vehicle.brand+' '+vehicle.model+' – '+(vehicle.access_level==='edit'?'Bearbeitungsfreigabe (noch nicht aktiviert)':'Lesefreigabe');
-   list.append(line);
-  }
+  const result=await cloudCall('family-shared-vehicles');
+  familyTable(list,['Fahrzeug','Berechtigung'],(result.vehicles||[]).map(v=>[v.brand+' '+v.model,v.access_level==='edit'?'Bearbeiten (noch nicht aktiv)':'Lesen']));
  }catch(error){list.textContent='Geteilte Fahrzeuge derzeit nicht verfügbar: '+error.message;}
 }
 async function loadFamilyShares(){
@@ -204,24 +213,21 @@ async function loadFamilyShares(){
  list.replaceChildren();if(!familyId||!cloudToken)return;
  try{
   const response=await cloudCall('family-vehicle-shares',undefined,{family_id:String(familyId)});
-  for(const share of response.shares||[]){
-   const line=document.createElement('p');line.textContent=[share.brand,share.model,'('+share.access_level+')'].join(' ');
-   // Nur der tatsächliche Fahrzeugeigentümer darf eine Freigabe widerrufen.
-   // Die API prüft den Besitz unabhängig von dieser Anzeige erneut.
+  const rows=(response.shares||[]).map(share=>{
+   let action='—';
+   // Der Server prüft den Fahrzeugbesitz erneut; die UI allein vergibt keine Rechte.
    if(Number(share.can_manage)===1){
-    const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Freigabe widerrufen';
+    const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Widerrufen';
     revoke.onclick=async()=>{
      if(!confirm('Freigabe für '+share.brand+' '+share.model+' wirklich widerrufen?'))return;
      revoke.disabled=true;
-     try{
-      await cloudCall('family-vehicle-share-delete',{family_id:familyId,vehicle_id:Number(share.vehicle_id)});
-      await loadFamilyShares();await loadSharedVehicles();
-     }catch(error){revoke.disabled=false;list.textContent='Widerruf fehlgeschlagen: '+error.message;}
-    };
-    line.append(' ',revoke);
+     try{await cloudCall('family-vehicle-share-delete',{family_id:familyId,vehicle_id:Number(share.vehicle_id)});await loadFamilyShares();await loadSharedVehicles();}
+     catch(error){revoke.disabled=false;list.textContent='Widerruf fehlgeschlagen: '+error.message;}
+    };action=revoke;
    }
-   list.append(line);
-  }
+   return [share.brand+' '+share.model,share.access_level==='edit'?'Bearbeiten (noch nicht aktiv)':'Lesen',action];
+  });
+  familyTable(list,['Fahrzeug','Berechtigung','Aktion'],rows);
  }catch(error){list.textContent='Freigaben konnten nicht geladen werden: '+error.message;}
 }
 ce('family-shares-refresh').onclick=loadFamilyShares;
@@ -242,9 +248,7 @@ async function loadFamilyMembers(){
  try{
   const result=await cloudCall('family-members',undefined,{family_id:String(familyId)});
   if(!(result.members||[]).length){list.textContent='Keine Mitglieder vorhanden.';return;}
-  const ul=document.createElement('ul');
-  for(const member of result.members){const li=document.createElement('li');li.textContent=member.email+' ('+(member.role==='owner'?'Besitzer':'Mitglied')+')';ul.append(li);}
-  list.append(ul);
+  familyTable(list,['E-Mail','Rolle'],result.members.map(member=>[member.email,member.role==='owner'?'Besitzer':'Mitglied']));
  }catch(error){list.textContent='Mitglieder konnten nicht geladen werden: '+error.message;}
 }
 ce('family-members-refresh').onclick=loadFamilyMembers;
@@ -260,7 +264,7 @@ async function loadFamilies(){
   for(const family of result.families||[]){
    const shareOption=document.createElement('option');shareOption.value=String(family.id);shareOption.textContent=family.name;shareSelect.append(shareOption);
    const memberOption=document.createElement('option');memberOption.value=String(family.id);memberOption.textContent=family.name;membersSelect.append(memberOption);
-   const item=document.createElement('p');item.textContent=family.name+' ('+(family.role==='owner'?'Besitzer':'Mitglied')+')';list.append(item);
+   const item=document.createElement('div');item.className='family-summary-item';const name=document.createElement('strong');name.textContent=family.name;const role=document.createElement('span');role.textContent=family.role==='owner'?'Besitzer':'Mitglied';item.append(name,role);list.append(item);
    if(family.role==='owner'){
     const option=document.createElement('option');option.value=String(family.id);option.textContent=family.name;select.append(option);
    }

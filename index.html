@@ -237,7 +237,7 @@
 </section>
 <!-- Cloud-Konto, Synchronisierung und Administration -->
 <section id="cloud" class="hide">
-<div class="account-heading"><h2>Mein Konto</h2><button id="open-family-page" type="button" onclick="tab('family')">Familie →</button></div>
+<div class="account-heading"><h2>Mein Konto</h2><div class="account-actions"><button id="open-family-page" type="button" onclick="tab('family')">Familie →</button><button id="open-cloud-page" type="button" onclick="tab('cloud-settings')">Cloud →</button></div></div>
 <p id="cloud-sync-indicator" role="status" aria-live="polite" style="font-weight:600">Nicht angemeldet</p>
 <p id="cloud-status" role="status">Nicht angemeldet.</p>
 <form id="cloud-login">
@@ -268,13 +268,7 @@
 <button type="submit">Passwort ändern</button>
 <p><small>Danach werden alle Sitzungen beendet. Bitte erneut anmelden.</small></p>
 </form>
-<button id="cloud-check" type="button">Cloud-Einträge zählen</button>
-<button type="button" id="cloud-preferences-upload">Lokale Einstellungen und Fahrzeugfotos in die Cloud übernehmen</button>
-<p><small>Einmalige Übernahme nach der Datenbank-Erweiterung. Danach werden Änderungen an diesen Einstellungen automatisch synchronisiert.</small></p>
-<button id="cloud-upload" type="button">Lokale Einträge in die Cloud übertragen</button>
-<p id="cloud-upload-info"></p>
 <button id="cloud-logout" type="button">Abmelden</button>
-<p id="cloud-count"></p>
 <details id="cloud-delete-section">
 <summary>Konto dauerhaft löschen</summary>
 <p><strong>Achtung:</strong> Dein Konto und die zugehörigen Cloud-Daten werden dauerhaft gelöscht. Lokale Daten auf diesem Gerät bleiben erhalten. Dieser Vorgang kann nicht rückgängig gemacht werden.</p>
@@ -296,6 +290,18 @@
 </div>
 <p><small>Cloud-Änderungen werden bei bestehender Verbindung synchronisiert. Bitte Backup aufbewahren.</small></p>
 </section>
+<!-- Cloud-Funktionen separat vom Konto, bestehende IDs bleiben für cloud.js erhalten. -->
+<section id="cloud-settings" class="hide" aria-labelledby="cloud-settings-title">
+<div class="account-heading"><h2 id="cloud-settings-title">Cloud & Synchronisierung</h2><button type="button" onclick="tab('cloud')">← Zurück zum Konto</button></div>
+<p>Verwalte hier die Übertragung und Prüfung deiner Cloud-Daten.</p>
+<button id="cloud-check" type="button">Cloud-Einträge zählen</button>
+<button type="button" id="cloud-preferences-upload">Lokale Einstellungen und Fahrzeugfotos in die Cloud übernehmen</button>
+<p><small>Einmalige Übernahme nach der Datenbank-Erweiterung. Danach werden Änderungen an diesen Einstellungen automatisch synchronisiert.</small></p>
+<button id="cloud-upload" type="button">Lokale Einträge in die Cloud übertragen</button>
+<p id="cloud-upload-info"></p>
+
+<p id="cloud-count"></p>
+</section>
 <!-- Familienverwaltung ist eine eigene, über das Konto erreichbare Ansicht. -->
 <section id="family" class="hide" aria-labelledby="family-page-title">
 <div class="account-heading"><h2 id="family-page-title">Familie</h2><button type="button" onclick="tab('cloud')">← Zurück zum Konto</button></div>
@@ -303,11 +309,13 @@
 <h3 id="family-title">Familienverwaltung</h3>
 <p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
 <form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
-<div id="family-list"></div><h4>Familienmitglieder</h4><label>Familie <select id="family-members-group"></select></label><button type="button" id="family-members-refresh">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
+<div id="family-list" class="family-summary"></div><h4>Familienmitglieder</h4><label>Familie <select id="family-members-group"></select></label><button type="button" id="family-members-refresh">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
 <div id="family-shares"><h4>Fahrzeugfreigaben</h4><label>Familie <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh">Freigaben laden</button><div id="family-shares-list"></div><h4>Mit mir geteilte Fahrzeuge</h4><div id="family-shared-vehicles" role="status" aria-live="polite"></div><form id="family-share-form"><label>Eigenes Fahrzeug <select name="vehicle_id" id="family-share-vehicle" required></select></label><label>Berechtigung <select name="access_level"><option value="view">Lesen</option><option value="edit">Bearbeiten (zukünftig)</option></select></label><button type="submit">Fahrzeug freigeben</button></form></div>
+<details class="family-invitations"><summary>Einladungen verwalten</summary>
 <form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
 <form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
 <p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
+</details>
 </section>
 </section>
 <script src="jspdf.umd.min.js?v=203" defer></script>
