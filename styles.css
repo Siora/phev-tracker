@@ -1092,3 +1092,8 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .family-invitations{margin-top:24px;padding:14px;border:1px solid #34536b;border-radius:12px}
 .family-invitations summary{cursor:pointer;font-weight:650}
 .family-invitations[open] summary{margin-bottom:16px}
+
+/* Familienfahrzeuge sind von bearbeitbaren eigenen Fahrzeugen getrennt. */
+.shared-vehicle-panel{margin-top:24px;padding:16px;border:1px solid #34536b;border-radius:16px;background:#102437}
+.shared-vehicle-panel h3{margin-top:0}
+.shared-vehicle-panel .family-table-scroll{margin-bottom:0}
