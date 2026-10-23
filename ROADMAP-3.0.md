@@ -13,6 +13,29 @@ Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Ko
 
 **Vorgeschlagene Reihenfolge:** Familienverwaltung → Auswertungen → Belegerkennung → Fahrzeugschnittstellen. Technische Machbarkeit und Anbieterabhängigkeiten vor der letzten Etappe klären. Ein Release 3.0 ist erst nach Umsetzung und Abnahme aller vier Bereiche vorgesehen; nicht unterstützte Hersteller müssen ausdrücklich als Einschränkung dokumentiert werden.
 
+## Bestandsaufnahme Familienverwaltung (23. Oktober 2026)
+
+Die Familienverwaltung ist **teilweise implementiert**, nicht vollständig abgeschlossen.
+Diese Bestandsaufnahme vergleicht den vorhandenen Code mit den bisherigen Projektabnahmen;
+sie ersetzt weder einen produktiven Berechtigungstest noch ein Backend-Deployment.
+
+- **Vorhanden:** Familieneinladungen und Annahme, Familien-/Mitgliederverwaltung,
+  Fahrzeugfreigaben und deren Entzug, Austritt und Auflösung.
+- **Vorhanden:** `family-shared-vehicles` und `family-shared-records` liefern
+  geteilte Fahrzeuge und Lade-/Tankhistorie lesend. Die Abfragen prüfen
+  Familienmitgliedschaft und Fahrzeugfreigabe. Private Fahrzeugausgaben
+  werden über diese Endpunkte nicht bereitgestellt.
+- **Offen:** Ausgaben und Einträge einzelnen Fahrern zuordnen;
+  dafür sind Datenmodell, API-Berechtigungen, Migration und UI festzulegen.
+- **Vor Freigabe prüfen:** Einladungsablauf, Eigentümerwechsel/Austritt,
+  Widerruf einer Freigabe, Zugriff nach Mitgliedsentfernung und Kontolöschung
+  sowie unterschiedliche Rollen mit mindestens zwei Testkonten.
+- **Sicherheit:** Bestehende Cloud-Daten und Offline-Warteschlangen nicht
+  zurücksetzen. Datenbankänderungen nur nach Backup und gesonderter Abnahme.
+
+Die vorhandene Familienoberfläche und die Endpunkte sind keine Belege dafür,
+dass alle Rollen- und Historienfälle produktiv getestet wurden.
+
 ## In GitHub integriert
 
 - [x] Passwortänderung mit erneuter Authentifizierung und Sitzungswiderruf (PR #41)
