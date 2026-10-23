@@ -235,6 +235,53 @@ if ($action === 'account-delete') {
  sessionCookie('',time()-3600);
  respond(200,['ok'=>true]);
 }
+// Einladungen werden ausschließlich per E-Mail zugestellt; die API gibt nie Tokens zurück.
+// Der Empfänger muss mit der eingeladenen E-Mail-Adresse angemeldet sein.
+if (in_array($action,['family-invite','family-invite-accept'],true)) {
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ if (!$db->query("SHOW TABLES LIKE 'family_invitations'")->fetchColumn()) fail(503,'Familieneinladungen sind noch nicht eingerichtet');
+ if ($action==='family-invite') {
+  $familyId=filter_var($body['family_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+  $mail=email((string)($body['email']??''));
+  if (!$familyId || !filter_var($mail,FILTER_VALIDATE_EMAIL) || strlen($mail)>254) fail(400,'Ungültige Einladung');
+  $stmt=$db->prepare("SELECT 1 FROM family_members WHERE family_id=? AND user_id=? AND role='owner'");
+  $stmt->execute([$familyId,$uid]);if (!$stmt->fetchColumn()) fail(404,'Familie nicht gefunden');
+  $stmt=$db->prepare('SELECT COUNT(*) FROM family_invitations WHERE family_id=? AND invited_by=? AND created_at>DATE_SUB(UTC_TIMESTAMP(),INTERVAL 1 HOUR)');
+  $stmt->execute([$familyId,$uid]);if ((int)$stmt->fetchColumn()>=10) fail(429,'Zu viele Einladungen. Bitte später erneut versuchen');
+  $stmt=$db->prepare('SELECT 1 FROM users u JOIN family_members m ON m.user_id=u.id WHERE m.family_id=? AND u.email=?');
+  $stmt->execute([$familyId,$mail]);if ($stmt->fetchColumn()) fail(409,'Dieses Mitglied gehört bereits zur Familie');
+  $token=bin2hex(random_bytes(32));$hash=hash('sha256',$token);
+  $stmt=$db->prepare('INSERT INTO family_invitations(family_id,invited_email,invited_by,token_hash,expires_at) VALUES (?,?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 7 DAY))');
+  $stmt->execute([$familyId,$mail,$uid,$hash]);
+  $link='https://tracker.web-produktion.com/#family-invite='.$token;
+  $message="Du wurdest zu einer Familie im PHEV Tracker eingeladen.\nMelde dich mit dieser E-Mail-Adresse an und öffne den Link innerhalb von 7 Tagen:\n".$link."\nWenn du nicht teilnehmen möchtest, ignoriere diese Nachricht.\n";
+  if (!sendResetMail($config,$mail,'PHEV Tracker - Familieneinladung',$message)) {
+   $stmt=$db->prepare('DELETE FROM family_invitations WHERE token_hash=?');$stmt->execute([$hash]);
+   fail(503,'Einladung konnte nicht zugestellt werden');
+  }
+  respond(201,['ok'=>true]);
+ }
+ $token=(string)($body['token']??'');
+ if (!preg_match('/^[a-f0-9]{64}$/D',$token)) fail(400,'Ungültige Einladung');
+ try {
+  $db->beginTransaction();
+  $stmt=$db->prepare('SELECT id,family_id,invited_email FROM family_invitations WHERE token_hash=? AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at>UTC_TIMESTAMP() FOR UPDATE');
+  $stmt->execute([hash('sha256',$token)]);$invite=$stmt->fetch();
+  if (!$invite) { $db->rollBack();fail(400,'Einladung ungültig oder abgelaufen'); }
+  $stmt=$db->prepare('SELECT email FROM users WHERE id=?');$stmt->execute([$uid]);
+  if (!hash_equals(email((string)$invite['invited_email']),email((string)$stmt->fetchColumn()))) {
+   $db->rollBack();fail(403,'Einladung ist für ein anderes Konto bestimmt');
+  }
+  $stmt=$db->prepare("INSERT IGNORE INTO family_members(family_id,user_id,role) VALUES (?,?,'member')");
+  $stmt->execute([$invite['family_id'],$uid]);
+  $stmt=$db->prepare('UPDATE family_invitations SET accepted_at=UTC_TIMESTAMP() WHERE id=?');$stmt->execute([$invite['id']]);
+  $db->commit();respond(200,['ok'=>true,'family_id'=>(int)$invite['family_id']]);
+ } catch (Throwable $e) {
+  if ($db->inTransaction()) $db->rollBack();
+  error_log('PHEV family invitation acceptance failed: '.get_class($e));
+  fail(500,'Einladung konnte nicht angenommen werden');
+ }
+}
 // Mitgliedschaften: Lesezugriff nur für Mitglieder, Aufnahme nur durch Eigentümer.
 // Bereits registrierte Konten müssen vorab selbst zugestimmt haben; deshalb wird
 // hier bewusst KEIN direkter Hinzufügen-Endpunkt ohne Einladungsbestätigung angeboten.
