@@ -21,6 +21,8 @@ function pendingCount(){
  try{return JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]').length;}catch{return 0;}
 }
 function updateSyncIndicator(){
+ const familyButton=ce('open-family-page');
+ if(familyButton)familyButton.hidden=!cloudToken;
  const el=ce('cloud-sync-indicator');if(!el)return;
  const pending=pendingCount();
  let message='Nicht angemeldet',state='idle';
@@ -200,6 +202,7 @@ window.loadSharedAnalytics=async function(){
   const [vehiclesResponse,recordsResponse]=await Promise.all([cloudCall('family-shared-vehicles'),cloudCall('family-shared-records')]);
   const vehicles=[...new Map((vehiclesResponse.vehicles||[]).map(v=>[String(v.id),v])).values()];
   const records=recordsResponse.records||[];
+  window.setFamilyAnalyticsData?.(vehicles,records);
   for(const target of targets){
    target.replaceChildren();
    if(!vehicles.length){target.textContent='Keine Fahrzeuge für dich freigegeben.';continue;}

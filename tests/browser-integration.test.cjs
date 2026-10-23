@@ -69,7 +69,9 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     fixture=await openFixture(browser);
     const {page,calls,errors}=fixture;
     assert.equal(await page.locator('body.login-locked').count(),0,'Login-Sperre muss entfernt sein');
-    assert.equal(await page.locator('#vehicleFilter option').count(),8);
+    assert.equal(await page.locator('#vehicleFilter option').count(),9);
+    assert.equal(await page.locator('#vehicleFilter option[value="family:987"]').count(),1);
+    assert.equal(await page.locator('#entryVehicle option[value="family:987"]').count(),0);
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
     // Vorhandene Lade-/Tankdaten werden ohne neue Pflichtfelder getrennt ausgewertet.
