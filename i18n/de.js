@@ -6,8 +6,9 @@ window.PhevTranslations.de=Object.freeze({
  'nav.administration':'Administration',
  'nav.menu':'☰ Menü öffnen',
  'account.title':'Mein Konto','account.language':'Sprache','account.languageNote':'Die Sprache wird in deinem Benutzerkonto gespeichert.',
+ 'common.cancelArrow':'← Abbrechen',
  'common.save':'Speichern','common.cancel':'Abbrechen','common.back':'Zurück',
- 'entries.new':'Neuer Eintrag','vehicles.new':'Neues Fahrzeug',
- 'locations.new':'Neuer Ladeort','providers.new':'Neuer Anbieter',
- 'expenses.new':'Neue Ausgabe','admin.users':'Benutzerverwaltung'
+ 'entries.new':'+ Neuer Eintrag','vehicles.new':'+ Neues Fahrzeug',
+ 'locations.new':'+ Neuer Ladeort','providers.new':'+ Neuer Anbieter',
+ 'expenses.new':'+ Neue Ausgabe','admin.users':'Benutzerverwaltung'
 });
