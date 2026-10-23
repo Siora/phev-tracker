@@ -1078,3 +1078,17 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .account-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .account-heading h2{margin:0}
 .account-heading button{width:auto;max-width:100%}
+
+/* Familienverwaltung: kompakte Karten und auf Mobilgeräten scrollbar bleibende Tabellen. */
+#cloud-settings{background:linear-gradient(155deg,#172637,#112237);border:1px solid #ffffff1c;border-radius:22px;padding:clamp(16px,2.5vw,28px)}
+.account-actions{display:flex;flex-wrap:wrap;gap:8px}
+.family-summary{display:grid;gap:8px;margin:12px 0 24px}
+.family-summary-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid #34536b;border-radius:12px;background:#102437}
+.family-summary-item span{font-size:13px;color:#bde3ec}
+.family-table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0 24px;border:1px solid #34536b;border-radius:12px}
+.family-table{width:100%;min-width:350px;border-collapse:collapse}
+.family-table th,.family-table td{padding:12px;text-align:left;vertical-align:middle;overflow-wrap:anywhere}
+.family-table button{width:auto;white-space:nowrap;padding:9px 12px}
+.family-invitations{margin-top:24px;padding:14px;border:1px solid #34536b;border-radius:12px}
+.family-invitations summary{cursor:pointer;font-weight:650}
+.family-invitations[open] summary{margin-bottom:16px}
