@@ -412,7 +412,13 @@ function tab(t){
   if(t==='administration'&&document.getElementById('admin-nav')?.hidden)t='cloud';
   if(t==='cloud-settings'&&document.getElementById('open-cloud-page')?.hidden)t='cloud';
   navigationPages.forEach(x=>$(x).classList.toggle('hide',x!==t));
-  document.querySelectorAll('.sidebar nav button').forEach((b,i)=>b.classList.toggle('active',(i===8?t==='administration':navigationPages[i]===t || ((t==='family'||t==='cloud-settings') && navigationPages[i]==='cloud'))));
+  // Navigation über das tatsächliche tab-Ziel statt feste Button-Indizes:
+  // Unterseiten wie Import/Export und Optionen markieren den Konto-Einstieg.
+  const accountPages=new Set(['cloud','family','cloud-settings','csv','options']);
+  document.querySelectorAll('.sidebar nav button').forEach(button=>{
+   const target=button.getAttribute('onclick')?.match(/tab\('([^']+)'\)/)?.[1];
+   button.classList.toggle('active',target===t||(target==='cloud'&&accountPages.has(t)));
+  });
   rememberPage(t);
   render();
   renderIntelligence();
