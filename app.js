@@ -289,6 +289,36 @@ function renderIntelligence(){
   card.append(heading,detail);insights.append(card);
  }
 }
+/**
+ * Berechnet ausschließlich ein hypothetisches Fahrprofil. Keine Cloud-Anfrage,
+ * keine lokale Speicherung und keine Änderung an echten Fahrzeugkosten.
+ */
+function renderEconomicsScenario(){
+ const form=document.getElementById('economics-form');
+ const output=document.getElementById('economics-results');
+ if(!form||!output||!window.PhevIntelligence)return;
+ const fields=['annualKm','electricShare','kwhPer100','litersPer100','priceKwh','priceLiter','fixedAnnual'];
+ const values={};
+ for(const field of fields){
+  const element=form.elements.namedItem(field);
+  values[field]=element&&element.value.trim()!==''?Number(element.value):NaN;
+ }
+ const result=window.PhevIntelligence.economicsScenario(values);
+ output.replaceChildren();
+ const paragraph=document.createElement('p');
+ if(!result.available){paragraph.textContent=result.reason;output.append(paragraph);return;}
+ const money=value=>new Intl.NumberFormat('de-CH',{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
+ paragraph.textContent='Geschätzte Jahreskosten: '+money(result.annual)+' · Kosten pro 100 km: '+money(result.costPer100);
+ const detail=document.createElement('p');
+ detail.textContent='Strom: '+money(result.electricity)+' · Benzin: '+money(result.fuel)+' · Fixkosten: '+money(result.fixed);
+ const note=document.createElement('small');
+ note.textContent='Szenario auf Basis deiner Eingaben, keine Prognose aus echten Fahrdaten. Werte werden nicht gespeichert.';
+ output.append(paragraph,detail,note);
+}
+document.getElementById('economics-form')?.addEventListener('submit',event=>{
+ event.preventDefault();
+ renderEconomicsScenario();
+});
 window.renderIntelligence=renderIntelligence;
 
 function tab(t){
