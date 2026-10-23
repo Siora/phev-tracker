@@ -279,7 +279,22 @@ async function loadFamilyMembers(){
  try{
   const result=await cloudCall('family-members',undefined,{family_id:String(familyId)});
   if(!(result.members||[]).length){list.textContent='Keine Mitglieder vorhanden.';return;}
-  familyTable(list,['E-Mail','Rolle'],result.members.map(member=>[member.email,member.role==='owner'?'Besitzer':'Mitglied']));
+  const isOwner=[...ce('family-invite-group').options].some(option=>Number(option.value)===familyId);
+  const rows=result.members.map(member=>{
+   let action='–';
+   if(isOwner&&member.role==='member'){
+    const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Entfernen';
+    button.onclick=async()=>{
+     if(!confirm('Mitglied „'+member.email+'“ aus der Familie entfernen? Der Zugriff auf freigegebene Fahrzeuge endet sofort.'))return;
+     button.disabled=true;
+     try{await cloudCall('family-member-remove',{family_id:familyId,user_id:Number(member.id)});await loadFamilyMembers();}
+     catch(error){list.textContent='Mitglied konnte nicht entfernt werden: '+error.message;}
+    };
+    action=button;
+   }
+   return [member.email,member.role==='owner'?'Besitzer':'Mitglied',action];
+  });
+  familyTable(list,['E-Mail','Rolle','Aktion'],rows);
  }catch(error){list.textContent='Mitglieder konnten nicht geladen werden: '+error.message;}
 }
 ce('family-members-refresh').onclick=loadFamilyMembers;
