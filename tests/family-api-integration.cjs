@@ -44,6 +44,18 @@ test('Familie verlassen: nur Mitglieder, Besitzer und Fremde geschützt',async()
  assert.equal(sql('SELECT COUNT(*) FROM family_members WHERE family_id=1 AND user_id=1'),'1');
 });
 
+test('Nur Besitzer dürfen andere Familienmitglieder entfernen',async()=>{
+ sql("INSERT INTO family_members(family_id,user_id,role) VALUES (1,2,'member')");
+ const owner='a'.repeat(64),member='b'.repeat(64),stranger='c'.repeat(64);
+ assert.equal((await request('family-member-remove',member,'POST',{family_id:1,user_id:1})).status,404);
+ assert.equal((await request('family-member-remove',stranger,'POST',{family_id:1,user_id:2})).status,404);
+ assert.equal((await request('family-member-remove',owner,'POST',{family_id:1,user_id:1})).status,409);
+ assert.equal((await request('family-member-remove',owner,'POST',{family_id:1,user_id:2})).status,200);
+ assert.equal(sql('SELECT COUNT(*) FROM family_members WHERE family_id=1 AND user_id=2'),'0');
+ assert.equal((await request('family-members&family_id=1',member)).status,404);
+ assert.equal((await request('family-member-remove',owner,'POST',{family_id:1,user_id:2})).status,404);
+});
+
 test('Familiengründer erhält beim Kontolöschen einen erklärenden Konflikt',async()=>{
  const passwordHash=execFileSync('php',['-r',"echo password_hash('correct-password-123', PASSWORD_DEFAULT);"],{encoding:'utf8'});
  sql("UPDATE users SET password_hash='"+passwordHash+"' WHERE id=1");

@@ -336,6 +336,22 @@ if ($action==='family-leave') {
  respond(200,['ok'=>true]);
 }
 
+// Nur der Familienbesitzer darf andere Mitglieder entfernen; Besitzer selbst sind geschützt.
+if ($action==='family-member-remove') {
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ $familyId=filter_var($body['family_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ $memberId=filter_var($body['user_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$familyId||!$memberId) fail(400,'Ungültige Familien- oder Benutzer-ID');
+ $stmt=$db->prepare("SELECT 1 FROM family_members WHERE family_id=? AND user_id=? AND role='owner'");
+ $stmt->execute([$familyId,$uid]);
+ if (!$stmt->fetchColumn()) fail(404,'Familie nicht gefunden');
+ if ($memberId===$uid) fail(409,'Der Besitzer kann sich nicht selbst entfernen');
+ $stmt=$db->prepare("DELETE FROM family_members WHERE family_id=? AND user_id=? AND role='member'");
+ $stmt->execute([$familyId,$memberId]);
+ if (!$stmt->rowCount()) fail(404,'Mitglied nicht gefunden');
+ respond(200,['ok'=>true]);
+}
+
 if ($action==='family-members') {
  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
  if (!$db->query("SHOW TABLES LIKE 'family_members'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
