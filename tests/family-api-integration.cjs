@@ -31,3 +31,12 @@ test('Familien-API erzwingt Besitz, Mitgliedschaft und Widerruf',async()=>{
  result=await request('family-shared-vehicles',member);assert.equal(result.data.vehicles.length,0);
  assert.equal((await request('family-vehicle-share-save',owner,'POST',{family_id:2,vehicle_id:1,access_level:'view'})).status,404);
 });
+
+test('Familiengründer erhält beim Kontolöschen einen erklärenden Konflikt',async()=>{
+ const passwordHash=execFileSync('php',['-r',"echo password_hash('correct-password-123', PASSWORD_DEFAULT);"],{encoding:'utf8'});
+ sql("UPDATE users SET password_hash='"+passwordHash+"' WHERE id=1");
+ const result=await request('account-delete','a'.repeat(64),'POST',{confirmation:'KONTO LÖSCHEN',password:'correct-password-123'});
+ assert.equal(result.status,409);
+ assert.match(result.data.error,/Familie/);
+ assert.equal(sql('SELECT COUNT(*) FROM users WHERE id=1'),'1');
+});

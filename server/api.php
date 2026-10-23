@@ -218,6 +218,15 @@ if ($action === 'account-delete') {
    $stmt=$db->query("SELECT id FROM users WHERE role='admin' FOR UPDATE");
    if (count($stmt->fetchAll())<=1) { $db->rollBack();fail(409,'Der letzte Administrator kann sein Konto nicht löschen'); }
   }
+  // Eine Familie darf beim Kontolöschen nicht stillschweigend verwaisen.
+  // Der bestehende Fremdschlüssel RESTRICT bleibt als zusätzliche DB-Sicherung erhalten.
+  // Bis eine explizite Eigentumsübertragung/Familienlöschung verfügbar ist,
+  // muss der Gründer die Familie vor dem Löschen seines Kontos auflösen.
+  if ($db->query("SHOW TABLES LIKE 'family_groups'")->fetchColumn()) {
+   $stmt=$db->prepare('SELECT id FROM family_groups WHERE created_by=? LIMIT 1');
+   $stmt->execute([$uid]);
+   if ($stmt->fetchColumn()) { $db->rollBack();fail(409,'Konto kann nicht gelöscht werden, solange du eine Familie gegründet hast'); }
+  }
   $stmt=$db->prepare('DELETE FROM users WHERE id=?');$stmt->execute([$uid]);
   $db->commit();
  } catch (Throwable $e) {if($db->inTransaction())$db->rollBack();error_log((string)$e);fail(500,'Konto konnte nicht gelöscht werden');}
