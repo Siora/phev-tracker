@@ -341,13 +341,18 @@
 <h2 id="administration-title">Administration · Benutzerverwaltung</h2>
 <p><small>Nur für Administratoren. Benutzerrechte werden zusätzlich serverseitig geprüft.</small></p>
 <div id="cloud-admin" class="hide">
+<div class="account-heading"><h2>Benutzer</h2><button type="button" id="admin-new-user">+ Neuen Benutzer</button></div>
+<div id="admin-create-panel" class="hide">
 <h2>Benutzer erstellen</h2>
 <form id="cloud-create">
 <label>E-Mail<input name="email" type="email" required></label>
 <label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
 <label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button>Benutzer erstellen</button>
 </form>
-<h2>Benutzer</h2><div id="cloud-users" role="region" aria-label="Benutzerliste" tabindex="0"></div>
+<button type="button" id="admin-create-cancel">← Abbrechen</button>
+</div>
+<div id="admin-users-panel"><div id="cloud-users" role="region" aria-label="Benutzerliste" tabindex="0"></div></div>
+<div id="admin-edit-panel" class="hide"><h2>Benutzer bearbeiten</h2><form id="admin-edit-form"><label>E-Mail<input name="email" type="email" maxlength="254" required></label><label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button type="submit">Änderungen speichern</button><button type="button" id="admin-edit-cancel">← Abbrechen</button></form></div>
 </div>
 </section>
 <!-- Cloud-Funktionen separat vom Konto, bestehende IDs bleiben für cloud.js erhalten. -->
