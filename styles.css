@@ -1152,3 +1152,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 /* OCR-Belegtext: volle Breite auch auf iPhone, bequem korrigierbar. */
 #receipt-assistant .receipt-text-tools{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
 #receipt-raw-text{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:190px;resize:vertical;line-height:1.5;font:inherit}
+
+/* Interne OCR-Elemente trotz spezifischer Formularregeln zuverlässig ausblenden. */
+#receipt-assistant #receipt-raw-text[hidden],#receipt-assistant #receipt-extract[hidden],#receipt-assistant #receipt-extract-preview[hidden]{display:none!important}
