@@ -58,7 +58,7 @@ async function openFixture(browser){
   await page.goto(base+'/index.html',{waitUntil:'load'});
   await page.waitForFunction(()=>document.querySelector('#cloud-status')?.textContent.includes('Sitzung wiederhergestellt'),{timeout:15000});
   // Geteilte Fahrzeuge dürfen nur in der separaten Leseübersicht auftauchen.
-  await page.waitForFunction(()=>document.querySelector('#shared-vehicle-overview-list')?.textContent.includes('Familie Testauto'));
+  await page.waitForFunction(()=>document.querySelector('#vehicleFilter option[value="family:987"]'));
   assert.equal(await page.locator('#vehicle-list').getByText('Familie Testauto').count(),0);
   return {page,context,calls,errors};
 }
