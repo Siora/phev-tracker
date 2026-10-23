@@ -56,6 +56,16 @@ test('Nur Besitzer dürfen andere Familienmitglieder entfernen',async()=>{
  assert.equal((await request('family-member-remove',owner,'POST',{family_id:1,user_id:2})).status,404);
 });
 
+test('Familie auflösen erfordert Gründer und Bestätigung; Fahrzeuge bleiben',async()=>{
+ const owner='a'.repeat(64),member='b'.repeat(64),stranger='c'.repeat(64);
+ assert.equal((await request('family-delete',member,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,404);
+ assert.equal((await request('family-delete',stranger,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,404);
+ assert.equal((await request('family-delete',owner,'POST',{family_id:1,confirmation:'falsch'})).status,400);
+ assert.equal((await request('family-delete',owner,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,200);
+ assert.equal(sql('SELECT COUNT(*) FROM family_groups WHERE id=1'),'0');
+ assert.equal(sql('SELECT COUNT(*) FROM vehicles WHERE id=1'),'1');
+});
+
 test('Familiengründer erhält beim Kontolöschen einen erklärenden Konflikt',async()=>{
  const passwordHash=execFileSync('php',['-r',"echo password_hash('correct-password-123', PASSWORD_DEFAULT);"],{encoding:'utf8'});
  sql("UPDATE users SET password_hash='"+passwordHash+"' WHERE id=1");
