@@ -260,6 +260,7 @@ function tab(t){
   rememberPage(t);
   render();
   renderIntelligence();
+  if((t==='home'||t==='intelligence')&&window.loadSharedAnalytics)void window.loadSharedAnalytics();
   window.scrollTo(0,0)
 }
 /**

@@ -43,7 +43,8 @@ async function openFixture(browser){
       'charging-catalog':{locations,providers},
       'admin-users':{users},
       'family-list':{families:[]},
-      'family-shared-vehicles':{vehicles:[{id:987,brand:'Familie',model:'Testauto',model_year:2025,drivetrain:'PHEV',access_level:'view'}]}
+      'family-shared-vehicles':{vehicles:[{id:987,brand:'Familie',model:'Testauto',model_year:2025,drivetrain:'PHEV',access_level:'view'}]},
+      'family-shared-records':{records:[{id:'family-charge',vehicle_id:987,type:'charge',cost:12.5,currency:'CHF'}]}
     }[action];
     if(payload===undefined)throw new Error('Unexpected API action: '+action);
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
