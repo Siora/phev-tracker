@@ -1163,7 +1163,7 @@ const edit=document.createElement('button');edit.type='button';edit.textContent=
      form.elements.mileage_km.value=x.mileage_km??'';
      form.elements.next_service_date.value=x.next_service_date||'';
      form.querySelector('button[type=submit]').textContent='Änderungen speichern';
-     form.scrollIntoView({behavior:'smooth',block:'start'});
+     expenseFormView(true);
     };
     const remove=document.createElement('button');remove.type='button';remove.textContent='Löschen';remove.setAttribute('aria-label','Ausgabe vom '+x.date+' löschen');
     remove.onclick=async()=>{if(!confirm('Diese Ausgabe wirklich löschen?'))return;remove.disabled=true;try{await window.deleteVehicleExpense(x.id);$('expense-status').textContent='Ausgabe gelöscht.';}catch(e){$('expense-status').textContent='Löschen fehlgeschlagen: '+e.message;remove.disabled=false;}};
@@ -1173,6 +1173,23 @@ const edit=document.createElement('button');edit.type='button';edit.textContent=
  };
  window.paginateTable(list,table,tbody,sorted,10,'vehicle-expenses',makeExpenseRow);
 }
+function expenseFormView(open){
+ $('expense-form-panel').classList.toggle('hide',!open);
+ $('expense-list-panel').classList.toggle('hide',open);
+ if(open)$('expense-form-panel').scrollIntoView({block:'start'});
+}
+$('expense-new').addEventListener('click',()=>{
+ const form=$('expense-form'),vehicle=form.elements.vehicle_id.value;
+ form.reset();delete form.dataset.editId;
+ form.elements.vehicle_id.value=vehicle;
+ form.querySelector('button[type=submit]').textContent='Ausgabe speichern';
+ expenseFormView(true);
+});
+$('expense-cancel').addEventListener('click',()=>{
+ const form=$('expense-form');
+ if((form.dataset.editId||form.elements.amount.value||form.elements.note.value||form.elements.date.value)&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+ form.reset();delete form.dataset.editId;expenseFormView(false);
+});
 $('expense-form').elements.vehicle_id.addEventListener('change',renderVehicleExpenses);
 $('expense-form').onsubmit=async e=>{
  e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]'),el=form.elements;
@@ -1186,7 +1203,7 @@ $('expense-form').onsubmit=async e=>{
   next_service_date:el.next_service_date.value||null
  };
  button.disabled=true;$('expense-status').textContent='Ausgabe wird gespeichert …';
- try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Ausgabe speichern';el.vehicle_id.value=v;$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
+ try{await window.saveVehicleExpense(item);const v=el.vehicle_id.value;form.reset();delete form.dataset.editId;form.querySelector('button[type=submit]').textContent='Ausgabe speichern';el.vehicle_id.value=v;expenseFormView(false);$('expense-status').textContent='Ausgabe sicher in der Cloud gespeichert.';}
  catch(error){$('expense-status').textContent='Speichern fehlgeschlagen: '+error.message;}
  finally{button.disabled=false;}
 };
