@@ -580,7 +580,7 @@ function beginEntryEdit(x){
   f.elements.charge_mode.value=getChargeMode(x.id);
   f.elements.vehicle_id.value=x.vehicle_id||'';
   f.dataset.editId=x.id;
-  f.querySelector('button').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
+  f.querySelector('button').textContent='Änderungen speichern';
   tab('add');
   if(typeof entryFormView==='function')entryFormView(true);
 }
@@ -936,7 +936,7 @@ function beginManagedChargingEdit(type,item){
   form.elements.name.value=item.name;
   form.elements.price.value=item.price??'';
   if(type==='locations')form.elements.kind.value=item.kind||'';
-  form.querySelector('button[type=submit]').textContent=(window.PhevI18n?.t('expenses.saveChanges')||'Änderungen speichern');
+  form.querySelector('button[type=submit]').textContent='Änderungen speichern';
   if(typeof managedChargingView==='function')managedChargingView(type,true);
   else form.scrollIntoView({behavior:'smooth',block:'start'});
 }
