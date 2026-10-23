@@ -304,8 +304,8 @@ if (in_array($action,['family-vehicle-shares','family-vehicle-share-save','famil
  $stmt->execute([$familyId,$uid]);if (!$stmt->fetchColumn()) fail(404,'Familie nicht gefunden');
  if ($action==='family-vehicle-shares') {
   if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
-  $stmt=$db->prepare('SELECT s.vehicle_id,s.access_level,v.brand,v.model,v.plate FROM family_vehicle_shares s JOIN vehicles v ON v.id=s.vehicle_id AND v.user_id=s.owner_user_id WHERE s.family_id=? ORDER BY v.brand,v.model,v.id');
-  $stmt->execute([$familyId]);respond(200,['shares'=>$stmt->fetchAll()]);
+  $stmt=$db->prepare('SELECT s.vehicle_id,s.access_level,(s.owner_user_id=?) AS can_manage,v.brand,v.model,v.plate FROM family_vehicle_shares s JOIN vehicles v ON v.id=s.vehicle_id AND v.user_id=s.owner_user_id WHERE s.family_id=? ORDER BY v.brand,v.model,v.id');
+  $stmt->execute([$uid,$familyId]);respond(200,['shares'=>$stmt->fetchAll()]);
  }
  if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
  $vehicleId=filter_var($body['vehicle_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
