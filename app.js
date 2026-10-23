@@ -955,7 +955,7 @@ function renderChargingManagement(){
  const data=chargingData();
  for(const [type,field,listId] of [['locations','managed_location','managed-locations-list'],['providers','managed_provider','managed-providers-list']]){
   const list=$(listId);if(!list)continue;list.replaceChildren();
-  const table=document.createElement('table');table.className='management-table';
+  const table=document.createElement('table');table.className='management-table managed-charging-table';
   const thead=document.createElement('thead'),heading=document.createElement('tr');
   for(const title of (type==='locations'?['Ladeort','Typ','Preis / kWh','Aktionen']:['Anbieter','Preis / kWh','Aktionen'])){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
   thead.append(heading);table.append(thead);
@@ -966,9 +966,20 @@ function renderChargingManagement(){
    const values=type==='locations'?[item.name,item.kind||'–',item.price===null?'–':item.price+' '+settings.base]:[item.name,item.price===null?'–':item.price+' '+settings.base];
    for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
    const actions=document.createElement('td');actions.className='management-actions';
-   const edit=document.createElement('button'),del=document.createElement('button');
-   edit.textContent='Bearbeiten';edit.type='button';edit.onclick=()=>beginManagedChargingEdit(type,item);
-   del.textContent='Löschen';del.type='button';del.onclick=()=>deleteManagedChargingItem(data,type,item.id);
+   const actionIcon=(label,pathData)=>{
+    const button=document.createElement('button');button.type='button';button.className='managed-icon-action';
+    button.title=label;button.setAttribute('aria-label',label);
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','18');svg.setAttribute('height','18');
+    svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
+    svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',pathData);
+    svg.append(path);button.append(svg);return button;
+   };
+   const edit=actionIcon('Bearbeiten: '+item.name,'M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z');
+   edit.onclick=()=>beginManagedChargingEdit(type,item);
+   const del=actionIcon('Löschen: '+item.name,'M3 6h18 M8 6V4h8v2 M5 6l1 14h12l1-14 M10 10v7 M14 10v7');
+   del.onclick=()=>deleteManagedChargingItem(data,type,item.id);
    actions.append(edit,del);row.append(actions);return row;
   };
   table.append(tbody);window.paginateTable(list,table,tbody,data[type],5,'managed-'+type,makeManagedRow);
