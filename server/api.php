@@ -352,6 +352,18 @@ if ($action==='family-member-remove') {
  respond(200,['ok'=>true]);
 }
 
+// Familienauflösung entfernt nur Familienzuordnungen; persönliche Fahrzeuge bleiben erhalten.
+if ($action==='family-delete') {
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ $familyId=filter_var($body['family_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$familyId) fail(400,'Ungültige Familien-ID');
+ if (($body['confirmation']??'')!=='FAMILIE LÖSCHEN') fail(400,'Bestätigung FAMILIE LÖSCHEN erforderlich');
+ $stmt=$db->prepare('DELETE FROM family_groups WHERE id=? AND created_by=?');
+ $stmt->execute([$familyId,$uid]);
+ if (!$stmt->rowCount()) fail(404,'Familie nicht gefunden');
+ respond(200,['ok'=>true]);
+}
+
 if ($action==='family-members') {
  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
  if (!$db->query("SHOW TABLES LIKE 'family_members'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');
