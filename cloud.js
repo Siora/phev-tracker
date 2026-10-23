@@ -216,9 +216,24 @@ ce('family-share-form').onsubmit=async event=>{
   await cloudCall('family-vehicle-share-save',{family_id:Number(ce('family-shares-group').value),vehicle_id:Number(form.elements.vehicle_id.value),access_level:form.elements.access_level.value});
   await loadFamilyShares();
   await loadSharedVehicles();
+  await loadFamilyMembers();
  }catch(error){ce('family-shares-list').textContent='Freigabe fehlgeschlagen: '+error.message;}
  finally{button.disabled=false;}
 };
+/** Mitgliederdaten ausschließlich über den autorisierten Familien-Endpunkt laden. */
+async function loadFamilyMembers(){
+ const list=ce('family-members-list'),familyId=Number(ce('family-members-group').value);
+ list.replaceChildren();if(!cloudToken||!familyId)return;
+ try{
+  const result=await cloudCall('family-members&family_id='+encodeURIComponent(familyId));
+  if(!(result.members||[]).length){list.textContent='Keine Mitglieder vorhanden.';return;}
+  const ul=document.createElement('ul');
+  for(const member of result.members){const li=document.createElement('li');li.textContent=member.email+' ('+(member.role==='owner'?'Besitzer':'Mitglied')+')';ul.append(li);}
+  list.append(ul);
+ }catch(error){list.textContent='Mitglieder konnten nicht geladen werden: '+error.message;}
+}
+ce('family-members-refresh').onclick=loadFamilyMembers;
+ce('family-members-group').onchange=loadFamilyMembers;
 async function loadFamilies(){
  if(!cloudToken)return;
  const status=ce('family-status'),list=ce('family-list'),select=ce('family-invite-group');
@@ -226,8 +241,10 @@ async function loadFamilies(){
   const result=await cloudCall('family-list');
   list.replaceChildren();select.replaceChildren();
   const shareSelect=ce('family-shares-group');shareSelect.replaceChildren();
+  const membersSelect=ce('family-members-group');membersSelect.replaceChildren();
   for(const family of result.families||[]){
    const shareOption=document.createElement('option');shareOption.value=String(family.id);shareOption.textContent=family.name;shareSelect.append(shareOption);
+   const memberOption=document.createElement('option');memberOption.value=String(family.id);memberOption.textContent=family.name;membersSelect.append(memberOption);
    const item=document.createElement('p');item.textContent=family.name+' ('+(family.role==='owner'?'Besitzer':'Mitglied')+')';list.append(item);
    if(family.role==='owner'){
     const option=document.createElement('option');option.value=String(family.id);option.textContent=family.name;select.append(option);
