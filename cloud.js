@@ -209,7 +209,7 @@ ce('family-accept-form').onsubmit=async event=>{
  catch(error){ce('family-status').textContent='Einladung konnte nicht angenommen werden: '+error.message;}
  finally{button.disabled=false;}
 };
-\nfunction showAccount(email,role){void loadFamilies();document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
+function showAccount(email,role){void loadFamilies();document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',role!=='admin');if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
 /**
  * Lädt die Benutzerliste für Administratoren und zeigt 20 Benutzer je Seite.
  * Die Benutzerobjekte werden ausschließlich dargestellt, nicht geändert.
