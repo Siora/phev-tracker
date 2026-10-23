@@ -111,8 +111,8 @@ function refreshVehicles(){
   const entry=$('entryVehicle');
   const chosen=entry.value;
   replaceVehicleOptions(filter,'Alle Fahrzeuge',selected,false);
-  appendFamilyOptions(filter);
-  if(familySelection(selected))filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
+  if(typeof appendFamilyOptions==='function')appendFamilyOptions(filter);
+  if(selected.startsWith('family:'))filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
   const reportVehicle=$('report-vehicle');
   if(reportVehicle)replaceVehicleOptions(reportVehicle,'Alle Fahrzeuge',reportVehicle.value,false);
   replaceVehicleOptions(entry,'Bitte Fahrzeug auswählen',chosen,true);
