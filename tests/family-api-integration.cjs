@@ -45,6 +45,7 @@ test('Familie verlassen: nur Mitglieder, Besitzer und Fremde geschützt',async()
 });
 
 test('Nur Besitzer dürfen andere Familienmitglieder entfernen',async()=>{
+ sql("INSERT INTO family_members(family_id,user_id,role) VALUES (1,2,'member')");
  const owner='a'.repeat(64),member='b'.repeat(64),stranger='c'.repeat(64);
  assert.equal((await request('family-member-remove',member,'POST',{family_id:1,user_id:1})).status,404);
  assert.equal((await request('family-member-remove',stranger,'POST',{family_id:1,user_id:2})).status,404);
