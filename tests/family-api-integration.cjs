@@ -64,3 +64,14 @@ test('Familiengründer erhält beim Kontolöschen einen erklärenden Konflikt',a
  assert.match(result.data.error,/Familie/);
  assert.equal(sql('SELECT COUNT(*) FROM users WHERE id=1'),'1');
 });
+
+test('Familie auflösen erfordert Gründer und Bestätigung; Fahrzeuge bleiben',async()=>{
+ const owner='a'.repeat(64),member='b'.repeat(64),stranger='c'.repeat(64);
+ assert.equal((await request('family-delete',member,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,404);
+ assert.equal((await request('family-delete',stranger,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,404);
+ assert.equal((await request('family-delete',owner,'POST',{family_id:1,confirmation:'falsch'})).status,400);
+ assert.equal((await request('family-delete',owner,'POST',{family_id:1,confirmation:'FAMILIE LÖSCHEN'})).status,200);
+ assert.equal(sql('SELECT COUNT(*) FROM family_groups WHERE id=1'),'0');
+ assert.equal(sql('SELECT COUNT(*) FROM vehicles WHERE id=1'),'1');
+});
+

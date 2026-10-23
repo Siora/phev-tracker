@@ -311,6 +311,17 @@ async function loadFamilies(){
    const shareOption=document.createElement('option');shareOption.value=String(family.id);shareOption.textContent=family.name;shareSelect.append(shareOption);
    const memberOption=document.createElement('option');memberOption.value=String(family.id);memberOption.textContent=family.name;membersSelect.append(memberOption);
    const item=document.createElement('div');item.className='family-summary-item';const name=document.createElement('strong');name.textContent=family.name;const role=document.createElement('span');role.textContent=family.role==='owner'?'Besitzer':'Mitglied';item.append(name,role);
+   if(family.role==='owner'){
+    const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Familie auflösen';
+    remove.onclick=async()=>{
+     const confirmation=prompt('Familie „'+family.name+'“ endgültig auflösen? Alle Mitgliedschaften, Einladungen und Freigaben werden entfernt. Persönliche Fahrzeuge bleiben erhalten. Zur Bestätigung FAMILIE LÖSCHEN eingeben:');
+     if(confirmation!=='FAMILIE LÖSCHEN')return;
+     remove.disabled=true;
+     try{await cloudCall('family-delete',{family_id:Number(family.id),confirmation});await loadFamilies();await loadSharedVehicles();await loadSharedVehicleOverview();}
+     catch(error){status.textContent='Familie konnte nicht aufgelöst werden: '+error.message;remove.disabled=false;}
+    };
+    item.append(remove);
+   }
    if(family.role!=='owner'){
     const leave=document.createElement('button');leave.type='button';leave.className='secondary';leave.textContent='Familie verlassen';
     leave.onclick=async()=>{
