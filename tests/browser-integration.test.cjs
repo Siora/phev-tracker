@@ -44,7 +44,7 @@ async function openFixture(browser){
       'admin-users':{users},
       'family-list':{families:[]},
       'family-shared-vehicles':{vehicles:[{id:987,brand:'Familie',model:'Testauto',model_year:2025,drivetrain:'PHEV',access_level:'view'}]},
-      'family-shared-records':{records:[{id:'family-charge',vehicle_id:987,type:'charge',cost:12.5,currency:'CHF'}]}
+      'family-shared-records':{records:[{id:'family-charge',vehicle_id:987,type:'charge',date:'2026-10-12',amount:25,cost:12.5,currency:'CHF',km:4000,place:'Familien-Ladeort'}]}
     }[action];
     if(payload===undefined)throw new Error('Unexpected API action: '+action);
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
@@ -72,6 +72,11 @@ test('Browser: Dashboard, Tabellen-Pagination und Bearbeitungsnavigation mit syn
     assert.equal(await page.locator('#vehicleFilter option').count(),9);
     assert.equal(await page.locator('#vehicleFilter option[value="family:987"]').count(),1);
     assert.equal(await page.locator('#entryVehicle option[value="family:987"]').count(),0);
+    await page.locator('#vehicleFilter').selectOption('family:987');
+    await page.waitForFunction(()=>document.querySelector('#vehicle-summary')?.textContent.includes('1 Einträge'));
+    assert.match(await page.locator('#vehicle-summary').innerText(),/12\.50 CHF/,'Freigegebene Energiekosten müssen im Dashboard erscheinen');
+    assert.match(await page.locator('#vehicle-summary').innerText(),/25\.00 kWh/,'Freigegebene Lademenge muss im Dashboard erscheinen');
+    await page.locator('#vehicleFilter').selectOption('');
     assert.equal(await page.locator('#vehicle-list tbody tr').count(),5,'Fahrzeuge: 5 pro Seite');
     assert.equal(await page.locator('#entries tbody tr').count(),20,'Einträge: 20 pro Seite');
     // Vorhandene Lade-/Tankdaten werden ohne neue Pflichtfelder getrennt ausgewertet.
