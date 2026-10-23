@@ -936,7 +936,7 @@ function beginManagedChargingEdit(type,item){
   form.elements.price.value=item.price??'';
   if(type==='locations')form.elements.kind.value=item.kind||'';
   form.querySelector('button[type=submit]').textContent='Änderungen speichern';
-  managedChargingView(type,true);
+  if(typeof managedChargingView==='function')managedChargingView(type,true);
 }
 
 /**
