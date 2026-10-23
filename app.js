@@ -225,6 +225,26 @@ function renderIntelligence(){
    vehicleComparison.append(tr);
   }
  }
+ // Langfristige Entwicklung mit denselben Datensätzen und Währungsregeln wie
+ // die Monatsanalyse. Bei Familienfahrzeugen sind persönliche Ausgaben ausgeschlossen.
+ const yearlyBody=$('intelligence-years');
+ if(yearlyBody){
+  yearlyBody.replaceChildren();
+  const yearSet=[...new Set([...analysisRecords,...(isFamily?[]:vehicleExpenses)].filter(r=>!vehicleSelect.value||String(r.vehicle_id)===vehicleSelect.value).map(r=>Number(String(r.date||'').slice(0,4))))]
+   .filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
+  if(!yearSet.length){
+   const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;
+   td.textContent='Noch keine erfassten Jahreskosten vorhanden.';tr.append(td);yearlyBody.append(tr);
+  }
+  for(const year of yearSet){
+   const totals=window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,year,conv,e=>expenseCurrency(Number(e.amount),e.currency));
+   const tr=document.createElement('tr');
+   [String(year)+(year===currentYear?' (laufend)':''),money(totals.energyCost),money(totals.fuelCost),money(totals.otherCost),money(totals.total)].forEach((value,index)=>{
+    const cell=document.createElement(index===0?'th':'td');if(index===0)cell.scope='row';cell.textContent=value;tr.append(cell);
+   });
+   yearlyBody.append(tr);
+  }
+ }
  // Prognose bewusst separat anzeigen: eine Hochrechnung ist keine Ist-Ausgabe.
  const forecastPanel=$('intelligence-forecast');
  if(forecastPanel){
