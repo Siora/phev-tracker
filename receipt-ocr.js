@@ -43,6 +43,7 @@
    stage='OCR-Sprachdaten/Worker laden';
    worker=await window.Tesseract.createWorker('deu',1,{
     workerPath:local('tesseract-worker.min.js?v=220'),
+    workerBlobURL:false,
     corePath:local(''),
     langPath:local(''),
     gzip:true,
