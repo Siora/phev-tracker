@@ -60,13 +60,13 @@
 <h2 data-i18n="analysis.economics">🧮 Individuelle Wirtschaftlichkeitsanalyse</h2>
 <p><small>Hypothetische Jahreskosten für ein Fahrprofil. Diese Werte sind Annahmen und werden nicht als tatsächliche Ausgaben gespeichert. Kein Fahrzeugvergleich.</small></p>
 <form id="economics-form" class="grid" novalidate>
-<label>Jährliche Fahrleistung (km)<input name="annualKm" type="text" inputmode="numeric" value="12000" required></label>
-<label>Elektrischer Fahranteil (%)<input name="electricShare" type="text" inputmode="numeric" value="50" required></label>
-<label>Stromverbrauch (kWh/100 km)<input name="kwhPer100" type="text" inputmode="decimal" value="20" required></label>
-<label>Benzinverbrauch (l/100 km)<input name="litersPer100" type="text" inputmode="decimal" value="6" required></label>
-<label>Strompreis (Basiswährung/kWh)<input name="priceKwh" type="text" inputmode="decimal" value="0.30" required></label>
-<label>Benzinpreis (Basiswährung/l)<input name="priceLiter" type="text" inputmode="decimal" value="1.80" required></label>
-<label>Jährliche Fixkosten (Basiswährung)<input name="fixedAnnual" type="text" inputmode="decimal" value="600" required></label>
+<label><span data-i18n="analysisInput.annualDistance">Jährliche Fahrleistung (km)</span><input name="annualKm" type="text" inputmode="numeric" value="12000" required></label>
+<label><span data-i18n="analysisInput.electricShare">Elektrischer Fahranteil (%)</span><input name="electricShare" type="text" inputmode="numeric" value="50" required></label>
+<label><span data-i18n="analysisInput.powerConsumption">Stromverbrauch (kWh/100 km)</span><input name="kwhPer100" type="text" inputmode="decimal" value="20" required></label>
+<label><span data-i18n="analysisInput.fuelConsumption">Benzinverbrauch (l/100 km)</span><input name="litersPer100" type="text" inputmode="decimal" value="6" required></label>
+<label><span data-i18n="analysisInput.electricityPrice">Strompreis (Basiswährung/kWh)</span><input name="priceKwh" type="text" inputmode="decimal" value="0.30" required></label>
+<label><span data-i18n="analysisInput.fuelPrice">Benzinpreis (Basiswährung/l)</span><input name="priceLiter" type="text" inputmode="decimal" value="1.80" required></label>
+<label><span data-i18n="analysisInput.fixedCosts">Jährliche Fixkosten (Basiswährung)</span><input name="fixedAnnual" type="text" inputmode="decimal" value="600" required></label>
 <button type="submit">Szenario berechnen</button>
 </form>
 <div id="economics-results" aria-live="polite"></div>
