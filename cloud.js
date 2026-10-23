@@ -21,6 +21,8 @@ function pendingCount(){
  try{return JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]').length;}catch{return 0;}
 }
 function updateSyncIndicator(){
+ const familyButton=ce('open-family-page');
+ if(familyButton)familyButton.hidden=!cloudToken;
  const el=ce('cloud-sync-indicator');if(!el)return;
  const pending=pendingCount();
  let message='Nicht angemeldet',state='idle';
