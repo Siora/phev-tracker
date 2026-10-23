@@ -38,8 +38,9 @@ function updateSyncIndicator(){
  * GET bei fehlendem data-Argument, sonst JSON-POST; Cookie-Sitzung bleibt aktiv.
  * Fehler werden an den Aufrufer weitergegeben, statt lokale Daten zu löschen.
  */
-async function cloudCall(action,data){
- const response=await fetch(cloudApi+'?action='+encodeURIComponent(action),{
+async function cloudCall(action,data,query={}){
+ const params=new URLSearchParams({action,...query});
+ const response=await fetch(cloudApi+'?'+params.toString(),{
   method:data===undefined?'GET':'POST',
   headers:{...(data===undefined?{}:{'Content-Type':'application/json'}),...(/^[a-f0-9]{64}$/.test(cloudToken||'')?{'Authorization':'Bearer '+cloudToken}:{})},
   ...(data===undefined?{}:{body:JSON.stringify(data)}),
@@ -202,7 +203,7 @@ async function loadFamilyShares(){
  const familyId=Number(ce('family-shares-group').value),list=ce('family-shares-list');
  list.replaceChildren();if(!familyId||!cloudToken)return;
  try{
-  const response=await cloudCall('family-vehicle-shares&family_id='+encodeURIComponent(familyId));
+  const response=await cloudCall('family-vehicle-shares',undefined,{family_id:String(familyId)});
   for(const share of response.shares||[]){
    const line=document.createElement('p');line.textContent=[share.brand,share.model,'('+share.access_level+')'].join(' ');
    // Nur der tatsächliche Fahrzeugeigentümer darf eine Freigabe widerrufen.
@@ -239,7 +240,7 @@ async function loadFamilyMembers(){
  const list=ce('family-members-list'),familyId=Number(ce('family-members-group').value);
  list.replaceChildren();if(!cloudToken||!familyId)return;
  try{
-  const result=await cloudCall('family-members&family_id='+encodeURIComponent(familyId));
+  const result=await cloudCall('family-members',undefined,{family_id:String(familyId)});
   if(!(result.members||[]).length){list.textContent='Keine Mitglieder vorhanden.';return;}
   const ul=document.createElement('ul');
   for(const member of result.members){const li=document.createElement('li');li.textContent=member.email+' ('+(member.role==='owner'?'Besitzer':'Mitglied')+')';ul.append(li);}
