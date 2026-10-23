@@ -20,3 +20,9 @@ test('needs four historical prices and ignores future years',()=>{
  const results=detect([...base.slice(0,3),row('2026-02-01',10,6),row('2027-01-01',10,100)],'1',2026,r=>r.cost);
  assert.equal(results.length,0);
 });
+
+// Same-day prices must not count as historical comparison entries.
+test('same-day bookings are not used as earlier baseline',()=>{
+ const sameDay=[...base.slice(0,3),row('2026-02-01',10,3),row('2026-02-01',10,6)];
+ assert.equal(detect(sameDay,'1',2026,r=>r.cost).length,0);
+});
