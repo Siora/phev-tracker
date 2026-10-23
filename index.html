@@ -152,7 +152,7 @@
 </section>
 <section id="charging-management" class="hide"><h2>Ladeorte & Anbieter</h2><p>Getrennte Verwaltung. Anbieterpreis hat Vorrang. Preise in Basiswährung.</p><div class="dashboard-actions"><article class="quick-card managed-charging-card"><div class="managed-form-panel hide" id="managed-location-panel"><div class="account-heading"><h3>Neuer Ladeort</h3><button type="button" data-managed-cancel="location">← Zurück</button></div><form id="managed-location-form"><label>Name<input name="name" required maxlength="100"></label><label>Typ<select name="kind"><option value="">Nicht angegeben</option><option>Zuhause</option><option>Öffentlich</option><option>Arbeitsplatz</option><option>Kostenlos</option></select></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form></div><div class="managed-list-panel" id="managed-location-list-panel"><div class="account-heading"><h3>Ladeorte</h3><button type="button" data-managed-new="location">+ Neuer Ladeort</button></div><div id="managed-locations-list"></div></div></article><article class="quick-card managed-charging-card"><div class="managed-form-panel hide" id="managed-provider-panel"><div class="account-heading"><h3>Neuer Anbieter</h3><button type="button" data-managed-cancel="provider">← Zurück</button></div><form id="managed-provider-form"><label>Name<input name="name" required maxlength="100"></label><label>Preis pro kWh<input name="price" type="number" min="0" step="any" placeholder="Optional"></label><button type="submit">Speichern</button><button type="reset">Abbrechen</button></form></div><div class="managed-list-panel" id="managed-provider-list-panel"><div class="account-heading"><h3>Anbieter</h3><button type="button" data-managed-new="provider">+ Neuer Anbieter</button></div><div id="managed-providers-list"></div></div></article></div><p id="managed-charging-status" role="status"></p></section><!-- Ausführliches Formular für Lade- und Tankvorgänge -->
 <section id="add" class="hide">
-<h2>Neuer Eintrag</h2>
+<div id="entry-form-panel" class="hide"><div class="account-heading"><h2>Eintrag erfassen / bearbeiten</h2><button type="button" id="entry-cancel">← Abbrechen</button></div>
 <details class="quick-card" id="receipt-assistant">
 <summary>📷 Belegfoto erkennen</summary>
 <p>Wähle ein Foto deiner Lade- oder Tankquittung. Die Erkennung erfolgt lokal auf deinem Gerät. Prüfe die erkannten Werte und übernimm sie anschließend ausdrücklich ins Formular. Es wird nichts automatisch gespeichert.</p>
@@ -197,9 +197,9 @@
 <label>Gespeicherter Ladeort<select name="managed_location"><option value="">Keiner</option></select></label><label>Anbieter<select name="managed_provider"><option value="">Keiner</option></select></label><label>Ladestrom<select name="charge_mode"><option value="">Nicht angegeben</option><option value="AC">AC – Wechselstrom</option><option value="DC">DC – Gleichstrom / Schnellladen</option></select></label><label>Ladeort<select name="charge_kind"><option value="">Nicht angegeben</option><option value="Zuhause">Zuhause</option><option value="Öffentlich">Öffentlich</option><option value="Arbeitsplatz">Arbeitsplatz</option><option value="Kostenlos">Kostenlos</option></select></label>
 <label id="entry-place-label">Tankstelle<input name="place" placeholder="Name der Tankstelle"></label>
 <button>Speichern</button>
-</form>
-<div class="entry-table-section">
-<h2>Alle Einträge</h2>
+</form></div>
+<div class="entry-table-section" id="entry-list-panel">
+<div class="account-heading"><h2>Alle Einträge</h2><button type="button" id="entry-new">+ Neuer Eintrag</button></div>
 <label for="entry-sort">Sortierung nach Datum und Uhrzeit</label>
 <select id="entry-sort" aria-label="Einträge nach Datum und Uhrzeit sortieren"><option value="desc">Neueste zuerst</option><option value="asc">Älteste zuerst</option></select>
 <div id="entries" class="entry-table-scroll" role="region" aria-label="Tabelle aller Ladungen und Tankungen" tabindex="0"></div>

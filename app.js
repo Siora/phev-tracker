@@ -582,6 +582,7 @@ function beginEntryEdit(x){
   f.dataset.editId=x.id;
   f.querySelector('button').textContent='Änderungen speichern';
   tab('add');
+  if(typeof entryFormView==='function')entryFormView(true);
 }
 
 function renderEntryHistory(){
@@ -1019,6 +1020,23 @@ updateEntryPlaceVisibility();
 installPriceCalculator($('form'));
 document.querySelectorAll('.quick-form').forEach(installPriceCalculator);
 
+function entryFormView(open){
+ $('entry-form-panel').classList.toggle('hide',!open);
+ $('entry-list-panel').classList.toggle('hide',open);
+ if(open)$('entry-form-panel').scrollIntoView({block:'start'});
+}
+$('entry-new').addEventListener('click',()=>{
+ const form=$('form');form.reset();delete form.dataset.editId;
+ form.querySelector('button').textContent='Speichern';
+ entryFormView(true);
+});
+$('entry-cancel').addEventListener('click',()=>{
+ const form=$('form');
+ if((form.dataset.editId||form.elements.amount.value||form.elements.cost.value||form.elements.place.value)&&!confirm('Ungespeicherte Eingaben verwerfen?'))return;
+ form.reset();delete form.dataset.editId;
+ form.querySelector('button').textContent='Speichern';
+ entryFormView(false);
+});
 $('form').onsubmit=e=>{
   e.preventDefault();
   let f=new FormData(e.target),x={
@@ -1049,7 +1067,8 @@ $('form').onsubmit=e=>{
   $('provider').value='';
   $('vehicleFilter').value='';
   $('period').value='12';
-  // Remain on the entry form after saving.
+  // Return to the full entry history after saving.
+  entryFormView(false);
 };
 // Schnellformulare im Dashboard verwenden dieselbe zentrale Speicherlogik.
 document.querySelectorAll('.quick-form').forEach(form=>{form.elements.date.value=new Date().toISOString().slice(0,10);form.elements.time.value=localClock();form.onsubmit=e=>{e.preventDefault();const f=e.currentTarget;const vid=Number(f.elements.vehicle_id.value);if(!vehicles.some(v=>Number(v.id)===vid)){alert('Bitte ein Fahrzeug auswählen.');return;}const record={id:crypto.randomUUID(),type:f.dataset.type,date:f.elements.date.value,amount:n(f.elements.amount.value),cost:n(f.elements.cost.value),currency:settings.base,km:null,place:managedPlace(f),vehicle_id:vid};if(record.amount<=0)return;record.time=f.elements.time.value;record.charge_mode=record.type==='charge'?f.elements.charge_mode.value:'';record.charge_kind=record.type==='charge'?f.elements.charge_kind.value:'';records.push(record);setRecordTime(record.id,record.time);if(record.type==='charge'){setChargingType(record.id,f.elements.charge_kind.value);setChargeMode(record.id,f.elements.charge_mode.value);}save();f.reset();f.elements.date.value=new Date().toISOString().slice(0,10);f.elements.time.value=localClock();f.elements.vehicle_id.value=String(vid);alert('Eintrag gespeichert.');};});
