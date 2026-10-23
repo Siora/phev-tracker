@@ -8,10 +8,16 @@ Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Ko
 
 - [ ] **3.0 – Familienverwaltung:** Mitglieder einladen und verwalten, Fahrzeuge mit expliziten Rollen/Berechtigungen teilen, Ausgaben einzelnen Fahrern zuordnen. Vor Umsetzung: Eigentümerschaft, Zugriff auf Historie, Austritt und Löschung sicher modellieren.
 - [ ] **3.0 – Erweiterte Auswertungen:** Langfristige Kostenentwicklung und individuell einstellbare Wirtschaftlichkeitsanalysen je Fahrzeug mit nachvollziehbaren Annahmen. Der direkte Wirtschaftlichkeitsvergleich zwischen Fahrzeugen ist ausdrücklich auf Version 4.0 verschoben.
-- [ ] **3.0 – Belegerkennung:** Fotos von Tank- und Laderechnungen erfassen, relevante Werte auslesen, Vorschau und manuelle Korrektur vor dem Speichern. Datenschutz und Aufbewahrung klären.
+- [x] **3.0 – Belegerkennung (technisch funktionsfähig; Praxistests mit echten Belegen ausstehend):** Fotos von Tank- und Laderechnungen erfassen, relevante Werte auslesen, Vorschau und manuelle Korrektur vor dem Speichern. Datenschutz und Aufbewahrung klären.
 - [ ] **3.0 – Automatische Fahrzeugdaten:** Kilometerstand und Ladezustand über geeignete Hersteller- oder Drittanbieter-Schnittstellen einlesen, nur sofern für das Fahrzeug unterstützt. Manuelle Eingabe bleibt möglich; Zugangsdaten und Tokens geschützt speichern.
 
 **Vorgeschlagene Reihenfolge:** Familienverwaltung → Auswertungen → Belegerkennung → Fahrzeugschnittstellen. Technische Machbarkeit und Anbieterabhängigkeiten vor der letzten Etappe klären. Ein Release 3.0 ist erst nach Umsetzung und Abnahme aller vier Bereiche vorgesehen; nicht unterstützte Hersteller müssen ausdrücklich als Einschränkung dokumentiert werden.
+
+## Ergänzungen für Version 3.0 (23. Oktober 2026)
+
+- [ ] Administratoren können Benutzer bearbeiten und löschen; serverseitige Rechteprüfung, Schutz des letzten Administrators und kontrollierte Bereinigung abhängiger Daten sind verpflichtend.
+- [ ] Import / Export sowie Optionen & Backup als eigene, über Konto erreichbare Unterseiten statt Hauptnavigation.
+- [x] Belegerkennung auf dem iPhone mit lokalem OCR-Worker funktionsfähig; weitere Praxistests mit echten Belegen werden nach Verfügbarkeit durchgeführt.
 
 ## Planung Fahrzeuganbindung (23. Oktober 2026)
 
