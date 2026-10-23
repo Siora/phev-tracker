@@ -1,0 +1,62 @@
+/*
+ * Lokale Beleg-OCR: kein Upload, keine CDN-Pfade, keine automatische Übernahme.
+ * Der Worker wird nur nach ausdrücklichem Klick gestartet und danach beendet.
+ */
+'use strict';
+(function(){
+ const button=document.getElementById('receipt-ocr-start');
+ const fileInput=document.getElementById('receipt-photo');
+ const text=document.getElementById('receipt-raw-text');
+ const status=document.getElementById('receipt-ocr-status');
+ const extract=document.getElementById('receipt-extract');
+ if(!button||!fileInput||!text||!status)return;
+ let running=false;
+ let worker=null;
+ const local=(name)=>new URL(name,document.baseURI).href;
+ button.addEventListener('click',async()=>{
+  if(running)return;
+  const file=fileInput.files&&fileInput.files[0];
+  if(!file){status.textContent='Bitte zuerst ein Belegfoto auswählen.';return;}
+  running=true;
+  button.disabled=true;
+  status.textContent='Texterkennung wird vorbereitet. Das Foto bleibt auf diesem Gerät.';
+  try{
+   if(!window.Tesseract){
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement('script');
+     script.src=local('tesseract.min.js?v=218');
+     script.onload=resolve;
+     script.onerror=()=>reject(new Error('ocr-library-unavailable'));
+     document.head.append(script);
+    });
+   }
+   if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function')throw new Error('ocr-library-unavailable');
+   worker=await window.Tesseract.createWorker('deu',1,{
+    workerPath:local('tesseract-worker.min.js'),
+    corePath:local(''),
+    langPath:local(''),
+    gzip:true,
+    logger:(message)=>{
+     if(message.status==='recognizing text'&&typeof message.progress==='number')
+      status.textContent='Texterkennung: '+Math.round(message.progress*100)+' %';
+    }
+   });
+   const result=await worker.recognize(file);
+   const recognized=result&&result.data&&result.data.text||'';
+   if(!recognized.trim())throw new Error('empty-result');
+   text.value=recognized;
+   text.dispatchEvent(new Event('input',{bubbles:true}));
+   status.textContent='Text erkannt und zur Kontrolle eingefügt. Bitte prüfen und anschließend „Werte aus Text vorschlagen“ wählen.';
+   if(extract)extract.focus();
+  }catch(error){
+   status.textContent=error&&error.message==='empty-result'
+    ?'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden oder den Text manuell eingeben.'
+    :'Texterkennung fehlgeschlagen. Prüfe die Verbindung und das Bildformat oder gib den Text manuell ein.';
+  }finally{
+   if(worker){try{await worker.terminate();}catch(_error){}worker=null;}
+   running=false;
+   button.disabled=false;
+  }
+ });
+ window.addEventListener('pagehide',()=>{if(worker)worker.terminate();});
+})();
