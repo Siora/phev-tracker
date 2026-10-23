@@ -206,21 +206,21 @@
 </section>
 <!-- Fahrzeugverwaltung und Zuordnung vorhandener Einträge -->
 <section id="vehicles" class="hide">
-<h2>Meine Fahrzeuge</h2>
+<h2 data-i18n="vehicles.title">Meine Fahrzeuge</h2>
 <p id="vehicle-status">Bitte anmelden, um Fahrzeuge in der Cloud zu verwalten.</p>
 
 <div class="expense-section"><h3>💳 Fahrzeug-Gesamtkosten</h3><p>Versicherung, Verkehrssteuer, Wartung, Reifen und weitere Ausgaben pro Fahrzeug erfassen. Strom und Benzin werden aus deinen bisherigen Einträgen ergänzt.</p><div id="expense-form-panel" class="hide"><h3>Fahrzeugausgabe erfassen</h3><form id="expense-form"><label><span data-i18n="form.vehicle">Fahrzeug</span><select name="vehicle_id" required></select></label><label>Kategorie<select name="category" required><option>Versicherung</option><option>Verkehrssteuer</option><option>Service</option><option>Reifen</option><option>Reparatur</option><option>Parken</option><option>Sonstiges</option></select></label><label><span data-i18n="form.date">Datum</span><input name="date" type="date" required></label><label>Betrag<input name="amount" type="number" step="0.01" min="0.01" required inputmode="decimal"></label><label>Währung<select name="currency"><option>CHF</option><option>EUR</option></select></label><label>Kilometerstand (optional)<input name="mileage_km" type="number" min="0" step="0.1" inputmode="decimal"></label><label>Nächste Wartung (optional)<input name="next_service_date" type="date"></label><label>Notiz<input name="note" maxlength="160" placeholder="Optional"></label><button type="submit">Ausgabe speichern</button><button type="button" id="expense-cancel">← Abbrechen</button></form></div><p id="expense-status" role="status"></p><div id="expense-list-panel"><div class="account-heading"><h3>Fahrzeugkosten</h3><button type="button" id="expense-new" data-i18n="expenses.new">+ Neue Ausgabe</button></div><div id="expense-summary"></div><div id="expense-reminders" aria-live="polite"></div><div id="expense-list"></div></div></div>
-<div id="vehicle-form-panel" class="hide"><div class="account-heading"><h3>Fahrzeug hinzufügen / bearbeiten</h3></div>
+<div id="vehicle-form-panel" class="hide"><div class="account-heading"><h3 data-i18n="vehicles.formTitle">Fahrzeug hinzufügen / bearbeiten</h3></div>
 <form id="vehicle-form">
-<label>Marke<input name="brand" maxlength="100" required></label>
-<label>Modell<input name="model" maxlength="100" required></label>
-<label>Baujahr<input name="model_year" type="number" min="1900" max="2200"></label>
-<label>Kennzeichen<input name="plate" maxlength="40"></label>
-<label>Antriebsart<input name="drivetrain" maxlength="60" placeholder="z. B. Plug-in-Hybrid"></label>
-<label>Batteriekapazität (kWh)<input name="battery_kwh" type="number" step="any" min="0"></label>
-<label>Tankvolumen (Liter)<input name="tank_liters" type="number" step="any" min="0"></label>
-<label>Notizen<textarea name="notes" maxlength="5000"></textarea></label>
-<button type="submit">Fahrzeug speichern</button>
+<label><span data-i18n="vehicles.brand">Marke</span><input name="brand" maxlength="100" required></label>
+<label><span data-i18n="vehicles.model">Modell</span><input name="model" maxlength="100" required></label>
+<label><span data-i18n="vehicles.year">Baujahr</span><input name="model_year" type="number" min="1900" max="2200"></label>
+<label><span data-i18n="vehicles.plate">Kennzeichen</span><input name="plate" maxlength="40"></label>
+<label><span data-i18n="vehicles.drivetrain">Antriebsart</span><input name="drivetrain" maxlength="60" placeholder="z. B. Plug-in-Hybrid"></label>
+<label><span data-i18n="vehicles.battery">Batteriekapazität (kWh)</span><input name="battery_kwh" type="number" step="any" min="0"></label>
+<label><span data-i18n="vehicles.tank">Tankvolumen (Liter)</span><input name="tank_liters" type="number" step="any" min="0"></label>
+<label><span data-i18n="vehicles.notes">Notizen</span><textarea name="notes" maxlength="5000"></textarea></label>
+<button type="submit" data-i18n="vehicles.save">Fahrzeug speichern</button>
 <button type="button" id="vehicle-cancel" data-i18n="common.cancel">Abbrechen</button>
 </form></div>
 <article class="quick-card" id="vehicle-connectivity-preview" aria-labelledby="vehicle-connectivity-title">
