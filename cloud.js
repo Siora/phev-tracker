@@ -185,6 +185,19 @@ function prepareFamilyInviteLink(){
 prepareFamilyInviteLink();
 window.addEventListener('hashchange',prepareFamilyInviteLink);
 /** Freigaben sind Metadaten; gemeinsame Fahrzeugdatensätze bleiben vorerst gesperrt. */
+/** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
+async function loadSharedVehicles(){
+ const list=ce('family-shared-vehicles');if(!cloudToken)return;
+ try{
+  const result=await cloudCall('family-shared-vehicles');list.replaceChildren();
+  if(!(result.vehicles||[]).length){list.textContent='Noch keine Fahrzeuge für dich freigegeben.';return;}
+  for(const vehicle of result.vehicles){
+   const line=document.createElement('p');
+   line.textContent=vehicle.brand+' '+vehicle.model+' – '+(vehicle.access_level==='edit'?'Bearbeitungsfreigabe (noch nicht aktiviert)':'Lesefreigabe');
+   list.append(line);
+  }
+ }catch(error){list.textContent='Geteilte Fahrzeuge derzeit nicht verfügbar: '+error.message;}
+}
 async function loadFamilyShares(){
  const familyId=Number(ce('family-shares-group').value),list=ce('family-shares-list');
  list.replaceChildren();if(!familyId||!cloudToken)return;
@@ -202,6 +215,7 @@ ce('family-share-form').onsubmit=async event=>{
  try{
   await cloudCall('family-vehicle-share-save',{family_id:Number(ce('family-shares-group').value),vehicle_id:Number(form.elements.vehicle_id.value),access_level:form.elements.access_level.value});
   await loadFamilyShares();
+  await loadSharedVehicles();
  }catch(error){ce('family-shares-list').textContent='Freigabe fehlgeschlagen: '+error.message;}
  finally{button.disabled=false;}
 };
