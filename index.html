@@ -347,9 +347,9 @@
 <form id="cloud-create">
 <label>E-Mail<input name="email" type="email" required></label>
 <label>Startpasswort (mindestens 12 Zeichen)<input name="password" type="password" minlength="12" autocomplete="new-password" required></label>
-<label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button>Benutzer erstellen</button>
+<label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button type="submit">Benutzer erstellen</button>
+<button type="button" id="admin-create-cancel" class="secondary-action">← Abbrechen</button>
 </form>
-<button type="button" id="admin-create-cancel">← Abbrechen</button>
 </div>
 <div id="admin-users-panel"><div id="cloud-users" role="region" aria-label="Benutzerliste" tabindex="0"></div></div>
 <div id="admin-edit-panel" class="hide"><h2>Benutzer bearbeiten</h2><form id="admin-edit-form"><label>E-Mail<input name="email" type="email" maxlength="254" required></label><label>Rolle<select name="role"><option value="user">Benutzer</option><option value="admin">Administrator</option></select></label><button type="submit">Änderungen speichern</button><button type="button" id="admin-edit-cancel">← Abbrechen</button></form></div>
