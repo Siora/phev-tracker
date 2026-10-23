@@ -499,7 +499,7 @@ function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cos
   if(v){
   const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
   const mileage=(selectedVehicle.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords:records).filter(r=>String(r.vehicle_id)===String(v.id)&&Number(r.km)>0).map(r=>Number(r.km));
-  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+r.amount,0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+r.amount,0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString('de-CH')+' km':'–')+'.';
+  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString('de-CH')+' km':'–')+'.';
   summary.append(details,latest);
   }
   }
@@ -600,8 +600,8 @@ function buildDashboardStatTiles({
   return [
     ['⚡ Ø Preis pro kWh',averageElectric],
     ['⛽ Ø Preis pro Liter',averageFuel],
-    ['⚡ Geladene Energie',charges.reduce((v,x)=>v+x.amount,0).toFixed(2)+' kWh'],
-    ['⛽ Benzin',fuel.reduce((v,x)=>v+x.amount,0).toFixed(2)+' l'],
+    ['⚡ Geladene Energie',charges.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' kWh'],
+    ['⛽ Benzin',fuel.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' l'],
     ['💰 Gesamtkosten',fmt(cost,currency)],
     ['🔌 Stromkosten',fmt(electric,currency)],
     ['⛽ Benzinkosten',fmt(petrol,currency)],
