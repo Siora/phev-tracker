@@ -322,6 +322,20 @@ if (in_array($action,['family-vehicle-shares','family-vehicle-share-save','famil
  $stmt->execute([$familyId,$vehicleId,$uid,$access]);respond(200,['ok'=>true]);
 }
 
+// Mitglied kann die Familie verlassen; Gründer bleiben zum Schutz der Familie erhalten.
+if ($action==='family-leave') {
+ if ($_SERVER['REQUEST_METHOD']!=='POST') fail(405,'POST erforderlich');
+ $familyId=filter_var($body['family_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if (!$familyId) fail(400,'Ungültige Familien-ID');
+ $stmt=$db->prepare('SELECT role FROM family_members WHERE family_id=? AND user_id=?');
+ $stmt->execute([$familyId,$uid]);$role=$stmt->fetchColumn();
+ if (!$role) fail(404,'Familie nicht gefunden');
+ if ($role==='owner') fail(409,'Besitzer können die Familie nicht verlassen. Zuerst muss die Familienverwaltung übertragen oder die Familie gelöscht werden.');
+ $stmt=$db->prepare("DELETE FROM family_members WHERE family_id=? AND user_id=? AND role='member'");
+ $stmt->execute([$familyId,$uid]);
+ respond(200,['ok'=>true]);
+}
+
 if ($action==='family-members') {
  if ($_SERVER['REQUEST_METHOD']!=='GET') fail(405,'GET erforderlich');
  if (!$db->query("SHOW TABLES LIKE 'family_members'")->fetchColumn()) fail(503,'Familienverwaltung ist noch nicht eingerichtet');

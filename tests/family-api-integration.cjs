@@ -32,6 +32,18 @@ test('Familien-API erzwingt Besitz, Mitgliedschaft und Widerruf',async()=>{
  assert.equal((await request('family-vehicle-share-save',owner,'POST',{family_id:2,vehicle_id:1,access_level:'view'})).status,404);
 });
 
+test('Familie verlassen: nur Mitglieder, Besitzer und Fremde geschützt',async()=>{
+ const owner='a'.repeat(64),member='b'.repeat(64),stranger='c'.repeat(64);
+ assert.equal((await request('family-leave',owner,'POST',{family_id:1})).status,409);
+ assert.equal((await request('family-leave',stranger,'POST',{family_id:1})).status,404);
+ assert.equal((await request('family-leave',member,'POST',{family_id:0})).status,400);
+ assert.equal((await request('family-leave',member,'POST',{family_id:1})).status,200);
+ assert.equal(sql('SELECT COUNT(*) FROM family_members WHERE family_id=1 AND user_id=2'),'0');
+ assert.equal((await request('family-members&family_id=1',member)).status,404);
+ assert.equal((await request('family-leave',member,'POST',{family_id:1})).status,404);
+ assert.equal(sql('SELECT COUNT(*) FROM family_members WHERE family_id=1 AND user_id=1'),'1');
+});
+
 test('Familiengründer erhält beim Kontolöschen einen erklärenden Konflikt',async()=>{
  const passwordHash=execFileSync('php',['-r',"echo password_hash('correct-password-123', PASSWORD_DEFAULT);"],{encoding:'utf8'});
  sql("UPDATE users SET password_hash='"+passwordHash+"' WHERE id=1");
