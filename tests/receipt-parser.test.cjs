@@ -21,3 +21,9 @@ test('unlabeled prices and invalid dates are not guessed',()=>{
  assert.equal(r.amount,4);
 });
 test('empty text yields no values',()=>assert.equal(Object.keys(parse('')).length,0));
+
+test('OCR unit price with currency prefix',()=>{
+ const r=parse('23.10.2026\n24,50 kWh\nPreis pro kWh CHF 0,45\nGesamtbetrag CHF 11,03');
+ assert.equal(r.unit_price,0.45);
+ assert.equal(r.cost,11.03);
+});
