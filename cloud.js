@@ -122,6 +122,7 @@ async function loadVehicles(){
     const f=ce('vehicle-form');f.dataset.id=v.id;
     for(const key of ['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'])f.elements[key].value=v[key]??'';
     f.querySelector('button[type=submit]').textContent='Änderungen speichern';
+    vehicleFormView(true);
    };
    del.textContent='Löschen';del.onclick=async()=>{
     if(!confirm('Fahrzeug löschen? Fahrzeuge mit Einträgen können nicht gelöscht werden.'))return;
@@ -164,7 +165,23 @@ async function loadVehicles(){
   table.append(tbody);window.paginateTable(list,table,tbody,data.vehicles,5,'vehicles',makeVehicleRow);
  }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
 }
+function vehicleFormView(open){
+ ce('vehicle-form-panel').classList.toggle('hide',!open);
+ ce('vehicle-list-panel').classList.toggle('hide',open);
+ if(open)ce('vehicle-form-panel').scrollIntoView({block:'start'});
+}
+ce('vehicle-new').onclick=()=>{
+ const f=ce('vehicle-form');f.reset();delete f.dataset.id;
+ f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
+ vehicleFormView(true);
+};
 ce('vehicle-cancel').onclick=()=>{
+ const f=ce('vehicle-form');
+ if((f.dataset.id||['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'].some(key=>f.elements[key].value))&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+ f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
+ vehicleFormView(false);
+};
+function resetVehicleAfterSave(){
  const f=ce('vehicle-form');f.reset();delete f.dataset.id;f.querySelector('button[type=submit]').textContent='Fahrzeug speichern';
 };
 ce('vehicle-form').onsubmit=async e=>{
@@ -175,7 +192,7 @@ ce('vehicle-form').onsubmit=async e=>{
   const v={id:f.dataset.id?Number(f.dataset.id):null};
   for(const key of ['brand','model','model_year','plate','drivetrain','battery_kwh','tank_liters','notes'])v[key]=f.elements[key].value;
   await cloudCall('vehicle-save',{vehicle:v});
-  ce('vehicle-cancel').click();await loadVehicles();
+  resetVehicleAfterSave();vehicleFormView(false);await loadVehicles();
  }catch(error){ce('vehicle-status').textContent=error.message;}
  finally{button.disabled=false;}
 };
