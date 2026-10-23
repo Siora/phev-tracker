@@ -99,7 +99,7 @@
 <select id="provider" onchange="render()">
 <option value="">Alle Orte / Tankstellen</option>
 </select>
-<div id="vehicle-summary" aria-live="polite"></div>
+<div id="vehicle-summary" aria-live="polite" hidden style="display:none"></div>
 <h2>Verbrauch und Energiekosten pro 100 km</h2><div class="grid" id="consumption-stats"></div><p id="consumption-note"></p>
 <article data-dashboard-widget="Verbrauchsanalyse" class="quick-card consumption-insights"><h2>🧠 Intelligente Verbrauchsanalyse</h2><p class="insights-intro">Trends, Durchschnittspreise und auffällige Ladevorgänge im ausgewählten Zeitraum.</p><div id="consumption-insights" aria-live="polite"></div></article>
 <article data-dashboard-widget="Energiebilanz" class="quick-card"><h2>⚡⛽ Kombinierte Energiebilanz</h2><div id="energy-balance" aria-live="polite"></div><p id="energy-balance-note"></p></article>
@@ -325,7 +325,7 @@
 </section>
 </section>
 <script src="jspdf.umd.min.js?v=205" defer></script>
-<script src="charts.js" defer></script>
+<script src="charts.js?v=206" defer></script>
 <script src="pagination.js?v=205" defer></script>
 <script src="pdf-report.js?v=205" defer></script>
 <script src="csv-import-utils.js?v=205" defer></script>
