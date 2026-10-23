@@ -184,13 +184,36 @@ function prepareFamilyInviteLink(){
 }
 prepareFamilyInviteLink();
 window.addEventListener('hashchange',prepareFamilyInviteLink);
+/** Freigaben sind Metadaten; gemeinsame Fahrzeugdatensätze bleiben vorerst gesperrt. */
+async function loadFamilyShares(){
+ const familyId=Number(ce('family-shares-group').value),list=ce('family-shares-list');
+ list.replaceChildren();if(!familyId||!cloudToken)return;
+ try{
+  const response=await cloudCall('family-vehicle-shares&family_id='+encodeURIComponent(familyId));
+  for(const share of response.shares||[]){
+   const line=document.createElement('p');line.textContent=[share.brand,share.model,'('+share.access_level+')'].join(' ');
+   list.append(line);
+  }
+ }catch(error){list.textContent='Freigaben konnten nicht geladen werden: '+error.message;}
+}
+ce('family-shares-refresh').onclick=loadFamilyShares;
+ce('family-share-form').onsubmit=async event=>{
+ event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
+ try{
+  await cloudCall('family-vehicle-share-save',{family_id:Number(ce('family-shares-group').value),vehicle_id:Number(form.elements.vehicle_id.value),access_level:form.elements.access_level.value});
+  await loadFamilyShares();
+ }catch(error){ce('family-shares-list').textContent='Freigabe fehlgeschlagen: '+error.message;}
+ finally{button.disabled=false;}
+};
 async function loadFamilies(){
  if(!cloudToken)return;
  const status=ce('family-status'),list=ce('family-list'),select=ce('family-invite-group');
  try{
   const result=await cloudCall('family-list');
   list.replaceChildren();select.replaceChildren();
+  const shareSelect=ce('family-shares-group');shareSelect.replaceChildren();
   for(const family of result.families||[]){
+   const shareOption=document.createElement('option');shareOption.value=String(family.id);shareOption.textContent=family.name;shareSelect.append(shareOption);
    const item=document.createElement('p');item.textContent=family.name+' ('+(family.role==='owner'?'Besitzer':'Mitglied')+')';list.append(item);
    if(family.role==='owner'){
     const option=document.createElement('option');option.value=String(family.id);option.textContent=family.name;select.append(option);
@@ -198,6 +221,10 @@ async function loadFamilies(){
   }
   ce('family-invite-form').classList.toggle('hide',!select.options.length);
   status.textContent=(result.families||[]).length+' Familie(n) vorhanden.';
+  const vehicles=await cloudCall('vehicles');const vehicleSelect=ce('family-share-vehicle');vehicleSelect.replaceChildren();
+  for(const vehicle of vehicles.vehicles||[]){const option=document.createElement('option');option.value=String(vehicle.id);option.textContent=vehicle.brand+' '+vehicle.model;vehicleSelect.append(option);}
+  ce('family-share-form').classList.toggle('hide',!vehicleSelect.options.length||!shareSelect.options.length);
+  await loadFamilyShares();
  }catch(error){status.textContent='Familienverwaltung derzeit nicht verfügbar: '+error.message;}
 }
 ce('family-create-form').onsubmit=async event=>{
