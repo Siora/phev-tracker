@@ -200,6 +200,7 @@ window.loadSharedAnalytics=async function(){
   const [vehiclesResponse,recordsResponse]=await Promise.all([cloudCall('family-shared-vehicles'),cloudCall('family-shared-records')]);
   const vehicles=[...new Map((vehiclesResponse.vehicles||[]).map(v=>[String(v.id),v])).values()];
   const records=recordsResponse.records||[];
+  window.setFamilyAnalyticsData?.(vehicles,records);
   for(const target of targets){
    target.replaceChildren();
    if(!vehicles.length){target.textContent='Keine Fahrzeuge für dich freigegeben.';continue;}
