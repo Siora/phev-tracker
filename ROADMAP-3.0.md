@@ -7,11 +7,24 @@ Stand: Oktober 2026. Quellcode-Integration, Deployment und produktive Abnahme si
 Diese vier Erweiterungen gehören ausdrücklich zu Version 3.0. Die bisherige Kontoverwaltung allein schließt Version 3.0 nicht ab.
 
 - [ ] **3.0 – Familienverwaltung:** Mitglieder einladen und verwalten, Fahrzeuge mit expliziten Rollen/Berechtigungen teilen, Ausgaben einzelnen Fahrern zuordnen. Vor Umsetzung: Eigentümerschaft, Zugriff auf Historie, Austritt und Löschung sicher modellieren.
-- [ ] **3.0 – Erweiterte Auswertungen:** Langfristige Kostenentwicklung und individuell einstellbare Wirtschaftlichkeitsanalysen je Fahrzeug mit nachvollziehbaren Annahmen. Der direkte Wirtschaftlichkeitsvergleich zwischen Fahrzeugen ist ausdrücklich auf Version 4.0 verschoben.
+- [x] **3.0 – Erweiterte Auswertungen (Quellcode umgesetzt):** Mehrjährige Kostenentwicklung, individuelle hypothetische Wirtschaftlichkeitsanalyse, Vorjahresvergleich, Jahresprognose und Hinweise auf auffällige Energiepreise (PR #93–#99). Die produktive Abnahme bleibt separat. Der direkte Wirtschaftlichkeitsvergleich zwischen Fahrzeugen ist ausdrücklich auf Version 4.0 verschoben.
 - [ ] **3.0 – Belegerkennung:** Fotos von Tank- und Laderechnungen erfassen, relevante Werte auslesen, Vorschau und manuelle Korrektur vor dem Speichern. Datenschutz und Aufbewahrung klären.
 - [ ] **3.0 – Automatische Fahrzeugdaten:** Kilometerstand und Ladezustand über geeignete Hersteller- oder Drittanbieter-Schnittstellen einlesen, nur sofern für das Fahrzeug unterstützt. Manuelle Eingabe bleibt möglich; Zugangsdaten und Tokens geschützt speichern.
 
 **Vorgeschlagene Reihenfolge:** Familienverwaltung → Auswertungen → Belegerkennung → Fahrzeugschnittstellen. Technische Machbarkeit und Anbieterabhängigkeiten vor der letzten Etappe klären. Ein Release 3.0 ist erst nach Umsetzung und Abnahme aller vier Bereiche vorgesehen; nicht unterstützte Hersteller müssen ausdrücklich als Einschränkung dokumentiert werden.
+
+## Bestandsaufnahme Auswertungen (23. Oktober 2026)
+
+Die Analysefunktionen sind im Frontend integriert. Die Berechnungen erfolgen lokal und regelbasiert; eine externe KI oder ein neues Datenbankschema ist dafür nicht erforderlich.
+
+- **Jahresverlauf:** gestapelte Strom-, Benzin- und sonstige Kosten sowie weiterhin eine barrierearme Jahrestabelle. Laufende Jahre sind als unvollständig gekennzeichnet.
+- **Vorjahresvergleich:** absolute und prozentuale Änderungen. Im laufenden Jahr werden nur abgeschlossene Monate mit denselben Vorjahresmonaten verglichen. Fehlende Buchungen können Ergebnisse verfälschen.
+- **Wirtschaftlichkeitsszenario:** frei einstellbare Jahresfahrleistung, elektrischer Anteil, Verbräuche, Preise und Fixkosten. Es sind ausdrücklich *hypothetische* Jahreskosten, keine tatsächlichen Ausgaben.
+- **Preisauffälligkeiten:** Strompreis pro kWh bzw. Benzinpreis pro Liter wird mit dem Median von mindestens vier früheren Buchungen derselben Energieart verglichen; Hinweis ab 35 % Abweichung. Kein Nachweis für einen Buchungsfehler.
+- **Einschränkungen:** Ausgaben und Fahrleistung können unvollständig sein. Ohne getrennte Fahrstrecken je Antriebsart ist kein belastbarer Verbrauch je 100 km und kein normierter Fahrzeug-Wirtschaftlichkeitsvergleich möglich.
+- **Tests:** Frontend-Regressions- und Browser-Integrationstests sind in GitHub Actions eingebunden. Ein bestandener Workflow ist keine Bestätigung einer vollständigen produktiven Abnahme auf allen Endgeräten.
+
+**Nächster Funktionsbereich:** Belegerkennung. Vor Implementierung müssen Bildspeicherung, Einwilligung, Löschung und ein manueller Korrekturschritt festgelegt werden. Eine Texterkennung darf keine ungeprüften Daten automatisch speichern.
 
 ## Bestandsaufnahme Familienverwaltung (23. Oktober 2026)
 
