@@ -26,6 +26,13 @@
   }
   const unit=String(text).match(/(?:preis\s*(?:pro|\/)|price\s*per)\s*(?:kWh|liter|l)?\s*[:=]?\s*(\d+(?:[.,]\d+)?)/i);
   if(unit)result.unit_price=number(unit[1]);
+  // Beleg-OCR: „Preis pro kWh CHF 0,45“ und „CHF 0,45 / kWh“.
+  if(result.unit_price===undefined){
+   const labeled=String(text).match(/(?:preis\s*(?:pro|je|\/)\s*(?:kWh|liter|l)|(?:kWh|liter|l)\s*[-:]?\s*preis)\s*[:=]?\s*(?:CHF|EUR|Fr\.?|€)?\s*(\d+(?:[.,]\d+)?)/i);
+   const reversed=String(text).match(/(?:CHF|EUR|Fr\.?|€)?\s*(\d+(?:[.,]\d+)?)\s*(?:CHF|EUR|Fr\.?|€)?\s*\/\s*(?:kWh|liter|l)\b/i);
+   const found=labeled||reversed;
+   if(found)result.unit_price=number(found[1]);
+  }
   return result;
  }
  root.PhevReceiptParser={parse};
