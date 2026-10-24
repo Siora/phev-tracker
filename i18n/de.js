@@ -723,4 +723,6 @@ window.PhevTranslations.de=Object.freeze({
  'import.previewWarning':". Prüfe insbesondere Kosten und Währung.",
  'energy.invalidFactor':"Bitte einen Faktor zwischen 1 und 20 eingeben.",
  'energy.factorSaved':"Umrechnungsfaktor gespeichert.",
+ 'dynamic.menuClose':"✕ Menü schliessen",
+ 'family.vehiclePrefix':"Familie · ",
 });
