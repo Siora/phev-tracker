@@ -45,3 +45,48 @@ test('regional date and number formatting follows account language',()=>{
  i18n.setLanguage('de');
  assert.equal(i18n.locale(),'de-CH');
 });
+
+test('placeholder, aria-label and alt attributes switch without overwriting user edits',()=>{
+ const elements={};
+ for(const attribute of ['placeholder','aria-label','alt']){
+  const key='data-i18n-'+attribute;
+  const values={[key]:'label',[attribute]:'Deutsch'};
+  elements[attribute]={
+   getAttribute:name=>values[name]??null,
+   setAttribute:(name,value)=>{values[name]=value;},
+   values
+  };
+ }
+ const document={
+  documentElement:{lang:'de'},
+  querySelectorAll:selector=>{
+   const match=/^\[data-i18n-(placeholder|aria-label|alt)\]$/.exec(selector);
+   return match?[elements[match[1]]]:[];
+  },
+  addEventListener:()=>{}
+ };
+ const window={PhevTranslations:{de:{label:'Deutsch'},en:{label:'English'}}};
+ vm.runInNewContext(core,{window,document,WeakMap});
+ const i18n=window.PhevI18n;
+ i18n.setLanguage('en');
+ for(const attr of Object.keys(elements))assert.equal(elements[attr].values[attr],'English');
+ elements.placeholder.values.placeholder='Custom placeholder';
+ i18n.setLanguage('de');
+ assert.equal(elements.placeholder.values.placeholder,'Custom placeholder');
+ assert.equal(elements['aria-label'].values['aria-label'],'Deutsch');
+ assert.equal(elements.alt.values.alt,'Deutsch');
+});
+
+test('translation interpolates named variables and falls back to German',()=>{
+ const {i18n}=setup();
+ const source=fs.readFileSync(path.join(__dirname,'../i18n/core.js'),'utf8');
+ const window={PhevTranslations:{de:{greeting:'Hallo {name}',fallback:'Nur Deutsch'},en:{greeting:'Hello {name}'}}};
+ const document={documentElement:{lang:'de'},querySelectorAll:()=>[],addEventListener:()=>{}};
+ vm.runInNewContext(source,{window,document,WeakMap});
+ assert.equal(window.PhevI18n.t('greeting',{name:'Alex'}),'Hallo Alex');
+ window.PhevI18n.setLanguage('en');
+ assert.equal(window.PhevI18n.t('greeting',{name:'Alex'}),'Hello Alex');
+ assert.equal(window.PhevI18n.t('fallback'),'Nur Deutsch');
+ assert.equal(window.PhevI18n.t('missing.key'),'missing.key');
+ assert.equal(i18n.locale(),'de-CH');
+});
