@@ -46,7 +46,7 @@
   for(const attribute of ['placeholder','aria-label','alt']){
    document.querySelectorAll('[data-i18n-'+attribute+']').forEach(element=>translateAttribute(element,attribute));
   }
-  if(changed)document.dispatchEvent(new CustomEvent('phev:language-changed',{detail:{language:code}}));
+  if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')document.dispatchEvent(new CustomEvent('phev:language-changed',{detail:{language:code}}));
   return true;
  }
  window.PhevI18n=Object.freeze({t:translate,setLanguage,getLanguage:()=>active,locale:()=>active==='en'?'en-CH':'de-CH',languages});
