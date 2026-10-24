@@ -18,3 +18,13 @@ foreach (['de','en'] as $language) {
 check(phevMailLanguage('fr')==='de','Unknown language must fall back to German');
 check(str_starts_with(phevMailSubjectHeader('Passwort zurücksetzen'),'=?UTF-8?B?'),'UTF-8 subject encoding missing');
 echo "Transactional email localization: OK\n";
+
+// Each transactional template must be selected by the recipient language,
+// independent of the language used for the previous email.
+foreach (['en','de','en','de'] as $language) {
+ foreach (['password-reset','family-invite'] as $type) {
+  [$subject,$body]=phevMailContent($type,$language,$link);
+  check(str_contains($subject,$language==='en'?($type==='password-reset'?'Reset your password':'Family invitation'):($type==='password-reset'?'Passwort zurücksetzen':'Familieneinladung')),'Subject language mismatch');
+  check(str_contains($body,$language==='en'?($type==='password-reset'?'To reset your password':'You have been invited'):($type==='password-reset'?'Öffne zum Zurücksetzen':'Du wurdest zu einer Familie')),'Body language mismatch');
+ }
+}
