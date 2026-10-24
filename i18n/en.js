@@ -511,4 +511,8 @@ window.PhevTranslations.en=Object.freeze({
  'analysisEmpty.vehicles':'No vehicles available in your account.',
  'analysisEmpty.costs':'No yearly costs recorded yet.',
  'analysisEmpty.months':'No monthly data available.',
+ 'dashboardEmpty.timeline':'No charging or refueling activity in the selected period.',
+ 'dashboardEmpty.addVehicle':'Please add a vehicle.',
+ 'dashboardEmpty.consumption':'Not enough mileage data to display a monthly consumption trend.',
+ 'dashboardEmpty.energyDistance':'At least two different mileage readings are required to calculate kWh/100 km.',
 });

@@ -262,3 +262,11 @@ test('Leere Analysezustände sind in Deutsch und Englisch lokalisiert',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Dashboard-Leerzustände sind zweisprachig und ohne Browser nutzbar',()=>{
+ const app=read('app.js');
+ for(const key of ['dashboardEmpty.timeline','dashboardEmpty.addVehicle','dashboardEmpty.consumption','dashboardEmpty.energyDistance']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
+ }
+});

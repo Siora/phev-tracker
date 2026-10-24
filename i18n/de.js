@@ -511,4 +511,8 @@ window.PhevTranslations.de=Object.freeze({
  'analysisEmpty.vehicles':'Noch keine eigenen Fahrzeuge vorhanden.',
  'analysisEmpty.costs':'Noch keine erfassten Jahreskosten vorhanden.',
  'analysisEmpty.months':'Noch keine Monatsdaten.',
+ 'dashboardEmpty.timeline':'Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.',
+ 'dashboardEmpty.addVehicle':'Bitte ein Fahrzeug anlegen.',
+ 'dashboardEmpty.consumption':'Noch keine Monate mit ausreichenden Kilometerständen für eine Verbrauchskurve vorhanden.',
+ 'dashboardEmpty.energyDistance':'Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.',
 });
