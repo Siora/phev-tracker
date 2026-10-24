@@ -32,3 +32,8 @@ test('translation targets never contain form controls',()=>{
   .map(m=>m[0].slice(0,130));
  assert.deepEqual(unsafe,[],'data-i18n on a label would delete its controls');
 });
+
+test('all translated attribute keys exist in both dictionaries',()=>{
+ const keys=[...new Set([...html.matchAll(/data-i18n-(?:placeholder|aria-label|alt)="([^"]+)"/g)].map(m=>m[1]))];
+ for(const lang of ['de','en']) assert.deepEqual(keys.filter(key=>!dictionaries[lang].has(key)),[]);
+});

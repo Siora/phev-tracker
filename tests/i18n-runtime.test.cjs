@@ -8,7 +8,7 @@ const core=fs.readFileSync(path.join(__dirname,'../i18n/core.js'),'utf8');
 function setup(){
  const label={dataset:{i18n:'label'},textContent:'Deutsch'};
  const status={dataset:{i18n:'status'},textContent:'Wartet'};
- const document={documentElement:{lang:'de'},querySelectorAll:()=>[label,status],addEventListener:()=>{}};
+ const document={documentElement:{lang:'de'},querySelectorAll:(selector)=>selector==='[data-i18n]'?[label,status]:[],addEventListener:()=>{}};
  const window={PhevTranslations:{de:{label:'Deutsch',status:'Wartet'},en:{label:'English',status:'Waiting'}}};
  vm.runInNewContext(core,{window,document,WeakMap});
  return {label,status,document,i18n:window.PhevI18n};
