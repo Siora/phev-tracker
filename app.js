@@ -1449,7 +1449,7 @@ function renderCostComparison(charges,fuel){
  const electricity=charges.reduce((total,r)=>total+conv(r),0)/chargeKwh*assumptions.electric;
  const petrol=fuel.reduce((total,r)=>total+conv(r),0)/fuelLiters*assumptions.fuel;
  const difference=petrol-electricity;
- target.textContent='Strom: '+fmt(electricity,settings.base)+'/100 km · Benzin: '+fmt(petrol,settings.base)+'/100 km · '+(difference>=0?(globalThis.window?.PhevI18n?.t('comparison.electricCheaper')||'Strom günstiger um '):(globalThis.window?.PhevI18n?.t('comparison.petrolCheaper')||'Benzin günstiger um '))+fmt(Math.abs(difference),settings.base)+'/100 km.';
+ target.textContent=(globalThis.window?.PhevI18n?.t('comparison.electricLabel')||'Strom: ')+fmt(electricity,settings.base)+(globalThis.window?.PhevI18n?.t('comparison.petrolLabel')||'/100 km · Benzin: ')+fmt(petrol,settings.base)+'/100 km · '+(difference>=0?(globalThis.window?.PhevI18n?.t('comparison.electricCheaper')||'Strom günstiger um '):(globalThis.window?.PhevI18n?.t('comparison.petrolCheaper')||'Benzin günstiger um '))+fmt(Math.abs(difference),settings.base)+'/100 km.';
 }
 try{
  const comparison=getCostComparison();
@@ -1478,7 +1478,7 @@ function renderChargingTypes(charges){
  if(!target)return;
  const groups=new Map();
  for(const record of charges){
-  const type=getChargingType(record.id)||'Nicht angegeben';
+  const type=getChargingType(record.id)||(globalThis.window?.PhevI18n?.t('charging.report.unspecified')||'Nicht angegeben');
   const value=groups.get(type)||{count:0,energy:0,cost:0};
   value.count++;
   value.energy+=Number(record.amount||0);
@@ -1489,7 +1489,7 @@ function renderChargingTypes(charges){
  if(!groups.size){target.textContent=(globalThis.window?.PhevI18n?.t('dynamic.noCharges')||'Noch keine Ladungen im gewählten Zeitraum.');return;}
  for(const [type,data] of groups){
   const row=document.createElement('p');
-  row.textContent=type+': '+data.count+' Ladungen · '+data.energy.toFixed(1)+' kWh · '+fmt(data.cost,settings.base);
+  row.textContent=(globalThis.window?.PhevI18n?.t('charging.type.'+type)||type)+': '+data.count+(globalThis.window?.PhevI18n?.t('charging.report.charges')||' Ladungen · ')+data.energy.toFixed(1)+' kWh · '+fmt(data.cost,settings.base);
   target.append(row);
  }
 }

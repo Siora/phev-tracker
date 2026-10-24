@@ -676,4 +676,12 @@ window.PhevTranslations.de=Object.freeze({
  'energy.balance.calculatedFrom':" kWh. Berechnet aus ",
  'energy.balance.disclaimer':" km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.",
  'comparison.saved':"Vergleichswerte gespeichert.",
+ 'comparison.electricLabel':"Strom: ",
+ 'comparison.petrolLabel':"/100 km · Benzin: ",
+ 'charging.report.unspecified':"Nicht angegeben",
+ 'charging.report.charges':" Ladungen · ",
+ 'charging.type.Zuhause':"Zuhause",
+ 'charging.type.Öffentlich':"Öffentlich",
+ 'charging.type.Arbeitsplatz':"Arbeitsplatz",
+ 'charging.type.Kostenlos':"Kostenlos",
 });
