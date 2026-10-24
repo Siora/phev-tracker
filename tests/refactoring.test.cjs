@@ -461,3 +461,10 @@ test('Verbrauchstabelle, Familienfahrzeuge und mobiles Menü übersetzt',()=>{
  }
  for(const key of ['pdf.col.month','pdf.col.electricity','pdf.col.petrol','pdf.col.total','pdf.col.cost','entries.save'])assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
 });
+
+test('Jahresprognose und Kosten pro 100 km sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['forecast.recorded','forecast.projected','forecast.completedYear','forecast.average','forecast.basedOn','forecast.monthsWith','forecast.activeMonths','forecast.partialWarning','intelligence.costPer100']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});
