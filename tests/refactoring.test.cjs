@@ -402,3 +402,11 @@ test('Energiebilanz und Vergleichsbestätigung sind zweisprachig',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Kostenvergleich und Ladeartenbericht sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['comparison.electricLabel','comparison.petrolLabel','charging.report.unspecified','charging.report.charges','charging.type.Zuhause','charging.type.Öffentlich','charging.type.Arbeitsplatz','charging.type.Kostenlos']){
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+ assert.ok(app.includes("PhevI18n?.t('charging.type.'+type)"));
+});
