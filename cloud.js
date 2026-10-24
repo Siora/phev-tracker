@@ -107,7 +107,7 @@ async function loadVehicles(){
   const list=ce('vehicle-list');list.replaceChildren();
   const table=document.createElement('table');table.className='management-table vehicle-management-table';
   const thead=document.createElement('thead'),heading=document.createElement('tr');
-  for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank','Aktionen'].map((fallback,i)=>window.PhevI18n?.t(['familyVehicles.column.vehicle','familyVehicles.column.year','familyVehicles.column.plate','familyVehicles.column.drivetrain','familyVehicles.column.battery','familyVehicles.column.tank','vehicles.column.actions'][i])||fallback)){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
+  for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank',(globalThis.window?.PhevI18n?.t('adminConfirm.adminActions')||'Aktionen')].map((fallback,i)=>window.PhevI18n?.t(['familyVehicles.column.vehicle','familyVehicles.column.year','familyVehicles.column.plate','familyVehicles.column.drivetrain','familyVehicles.column.battery','familyVehicles.column.tank','vehicles.column.actions'][i])||fallback)){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
   if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent=(window.PhevI18n?.t('vehicles.empty')||'Noch keine Fahrzeuge angelegt.');tr.append(td);tbody.append(tr);}
@@ -288,7 +288,7 @@ async function loadFamilyShares(){
    if(Number(share.can_manage)===1){
     const revoke=document.createElement('button');revoke.type='button';revoke.textContent=(window.PhevI18n?.t('familyShares.revoke')||'Widerrufen');
     revoke.onclick=async()=>{
-     if(!confirm('Freigabe für '+share.brand+' '+share.model+' wirklich widerrufen?'))return;
+     if(!confirm((globalThis.window?.PhevI18n?.t('adminConfirm.revokeStart')||'Freigabe für ')+share.brand+' '+share.model+(globalThis.window?.PhevI18n?.t('adminConfirm.revokeEnd')||' wirklich widerrufen?')))return;
      revoke.disabled=true;
      try{await cloudCall('family-vehicle-share-delete',{family_id:familyId,vehicle_id:Number(share.vehicle_id)});await loadFamilyShares();await loadSharedVehicles();}
      catch(error){revoke.disabled=false;list.textContent=(window.PhevI18n?.t('familyShares.revokeFailed')||'Widerruf fehlgeschlagen: ')+error.message;}
@@ -332,7 +332,7 @@ async function loadFamilyMembers(){
    }
    return [member.email,member.role==='owner'?(window.PhevI18n?.t('familyList.owner')||'Besitzer'):(window.PhevI18n?.t('familyList.member')||'Mitglied'),action];
   });
-  familyTable(list,[(window.PhevI18n?.t('familyComplete.email')||'E-Mail'),(window.PhevI18n?.t('familyComplete.role')||'Rolle'),(window.PhevI18n?.t('familyShares.action')||'Aktion')],rows);
+  familyTable(list,[(window.PhevI18n?.t('familyComplete.email')||'E-Mail'),(window.PhevI18n?.t('familyComplete.role')||(globalThis.window?.PhevI18n?.t('adminConfirm.adminRole')||'Rolle')),(window.PhevI18n?.t('familyShares.action')||'Aktion')],rows);
  }catch(error){list.textContent=(window.PhevI18n?.t('familyComplete.loadFailed')||'Mitglieder konnten nicht geladen werden: ')+error.message;}
 }
 ce('family-members-refresh').onclick=loadFamilyMembers;
@@ -473,7 +473,7 @@ async function cloudUsers(){
  const container=ce('cloud-users');container.replaceChildren();
  const table=document.createElement('table');table.className='management-table admin-users-table';
  const thead=document.createElement('thead'),heading=document.createElement('tr');
- for(const label of ['E-Mail-Adresse','Rolle','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
+ for(const label of [(globalThis.window?.PhevI18n?.t('adminConfirm.adminEmail')||'E-Mail-Adresse'),(globalThis.window?.PhevI18n?.t('adminConfirm.adminRole')||'Rolle'),(globalThis.window?.PhevI18n?.t('adminConfirm.adminActions')||'Aktionen')]){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
  thead.append(heading);table.append(thead);
  const tbody=document.createElement('tbody');
  if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=3;cell.textContent=(window.PhevI18n?.t('adminSync.noUsers')||'Noch keine Benutzer vorhanden.');row.append(cell);tbody.append(row);}
@@ -482,16 +482,16 @@ async function cloudUsers(){
   const emailCell=document.createElement('td');emailCell.textContent=user.email;
   const roleCell=document.createElement('td');roleCell.textContent=user.role==='admin'?(window.PhevI18n?.t('adminSync.admin')||'Administrator'):(window.PhevI18n?.t('adminSync.user')||'Benutzer');
   const actions=document.createElement('td');actions.className='admin-user-actions';
-  const edit=adminActionIcon('edit','Benutzer '+user.email+' bearbeiten');
+  const edit=adminActionIcon('edit',(globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserStart')||'Benutzer ')+user.email+' bearbeiten');
   edit.onclick=()=>{
    adminEditingId=user.id;
    const form=ce('admin-edit-form');
    form.elements.email.value=user.email;form.elements.role.value=user.role;
    adminView('edit');
   };
-  const remove=adminActionIcon('delete','Benutzer '+user.email+' löschen');
+  const remove=adminActionIcon('delete',(globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserStart')||'Benutzer ')+user.email+' löschen');
   remove.onclick=async()=>{
-   if(!confirm('Benutzer '+user.email+' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.'))return;
+   if(!confirm((globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserStart')||'Benutzer ')+user.email+(globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserEnd')||' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.')))return;
    if(prompt('Zur Bestätigung LÖSCHEN eingeben:')!=='LÖSCHEN')return;
    remove.disabled=true;
    try{await cloudCall('admin-delete-user',{id:user.id});cs((window.PhevI18n?.t('accountFeedback.userDeleted')||'Benutzer gelöscht.'));await cloudUsers();}
@@ -576,7 +576,7 @@ ce('cloud-delete-account').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button[type=submit]');
  if(form.elements.confirmation.value!=='KONTO LÖSCHEN'){cs('Bitte KONTO LÖSCHEN eingeben.');return;}
- if(!window.confirm('Konto und zugehörige Cloud-Daten unwiderruflich löschen?'))return;
+ if(!window.confirm((globalThis.window?.PhevI18n?.t('adminConfirm.accountDeleteConfirm')||'Konto und zugehörige Cloud-Daten unwiderruflich löschen?')))return;
  button.disabled=true;
  try{
   const deletedEmail=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;
@@ -743,7 +743,7 @@ window.scheduleCloudPreferences=function(){
 };
 ce('cloud-preferences-upload').onclick=async()=>{
  if(!cloudToken)return cs((window.PhevI18n?.t('authSync.signInFirst')||'Bitte zuerst anmelden.'));
- if(!confirm('Lokale Einstellungen und Fahrzeugfoto-Links in dein Cloud-Konto übernehmen? Vorhandene Cloud-Einstellungen können dadurch ersetzt werden.'))return;
+ if(!confirm((globalThis.window?.PhevI18n?.t('adminConfirm.cloudSettingsConfirm')||'Lokale Einstellungen und Fahrzeugfoto-Links in dein Cloud-Konto übernehmen? Vorhandene Cloud-Einstellungen können dadurch ersetzt werden.')))return;
  const button=ce('cloud-preferences-upload');button.disabled=true;
  try{
   const current=window.collectCloudPreferences();
