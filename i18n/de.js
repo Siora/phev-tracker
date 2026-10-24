@@ -671,4 +671,9 @@ window.PhevTranslations.de=Object.freeze({
  'dashboard.stats.costPer100':"🚗 Kosten / 100 km",
  'dashboard.stats.chargingEvents':"Ladevorgänge",
  'dashboard.stats.refuelingEvents':"Tankungen",
+ 'energy.balance.fuelLabel':" kWh/100 km · ⛽ Benzin: ",
+ 'energy.balance.totalLabel':" kWh/100 km · Gesamt: ",
+ 'energy.balance.calculatedFrom':" kWh. Berechnet aus ",
+ 'energy.balance.disclaimer':" km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.",
+ 'comparison.saved':"Vergleichswerte gespeichert.",
 });
