@@ -26,8 +26,8 @@ function compareRecordDateTime(a,b){const av=String(a.date||'')+'T'+(recordTime(
 function localClock(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
 let cloudView=false;
-function toggleMobileMenu(){const nav=$('primary-nav'),button=$('mobile-menu-toggle');if(!nav||!button)return;const open=nav.classList.toggle('menu-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?'✕ Menü schliessen':(globalThis.window?.PhevI18n?.t('dynamic.menuOpen')||'☰ Menü öffnen');}
-document.addEventListener('click',event=>{if(event.target.closest('#primary-nav button')){const nav=$('primary-nav'),button=$('mobile-menu-toggle');nav?.classList.remove('menu-open');if(button){button.setAttribute('aria-expanded','false');button.textContent='☰ Menü öffnen';}}});
+function toggleMobileMenu(){const nav=$('primary-nav'),button=$('mobile-menu-toggle');if(!nav||!button)return;const open=nav.classList.toggle('menu-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?(globalThis.window?.PhevI18n?.t('dynamic.menuClose')||'✕ Menü schliessen'):(globalThis.window?.PhevI18n?.t('dynamic.menuOpen')||'☰ Menü öffnen');}
+document.addEventListener('click',event=>{if(event.target.closest('#primary-nav button')){const nav=$('primary-nav'),button=$('mobile-menu-toggle');nav?.classList.remove('menu-open');if(button){button.setAttribute('aria-expanded','false');button.textContent=(globalThis.window?.PhevI18n?.t('dynamic.menuOpen')||'☰ Menü öffnen');}}});
 function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
 window.updateLoginNotice=updateLoginNotice;
 let vehicles=[];
@@ -40,7 +40,7 @@ window.setFamilyAnalyticsData=function(shared,entries){
  refreshVehicles();render();
 };
 function appendFamilyOptions(select){
- for(const vehicle of familyVehicles)select.add(new Option('Familie · '+vehicleName(vehicle),'family:'+vehicle.id));
+ for(const vehicle of familyVehicles)select.add(new Option((globalThis.window?.PhevI18n?.t('family.vehiclePrefix')||'Familie · ')+vehicleName(vehicle),'family:'+vehicle.id));
 }
 
 window.setVehicles=function(items){vehicles=items;refreshVehicles();scheduleAutomaticBackup();render();};
@@ -919,7 +919,7 @@ for(const [key,type] of [['location','locations'],['provider','providers']]){
  document.querySelector('[data-managed-new="'+key+'"]').addEventListener('click',()=>{
   const form=$(key==='location'?'managed-location-form':'managed-provider-form');
   form.reset();delete form.dataset.editId;
-  form.querySelector('button[type=submit]').textContent='Speichern';
+  form.querySelector('button[type=submit]').textContent=(globalThis.window?.PhevI18n?.t('entries.save')||'Speichern');
   managedChargingView(type,true);
  });
  document.querySelector('[data-managed-cancel="'+key+'"]').addEventListener('click',()=>{
@@ -1400,7 +1400,7 @@ function renderConsumptionTrend(){
  const draw=(key,color)=>{let segment=[];const flush=()=>{if(segment.length>1)make('polyline',{points:segment.join(' '),fill:'none',stroke:color,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});segment=[];};rows.forEach((r,i)=>{if(!r.valid){flush();return;}const x=48+i*48,y=195-r[key]/max*172;segment.push(x+','+y.toFixed(1));make('circle',{cx:x,cy:y,r:3.5,fill:color});});flush();};
  draw('electric','#168fbe');draw('fuel','#e39b38');draw('total','#283e63');
  target.append(svg);
- const table=document.createElement('div');table.style.cssText='overflow-x:auto';const inner=document.createElement('table');inner.style.cssText='width:100%;font-size:12px;border-collapse:collapse';const head=document.createElement('tr');for(const h of ['Monat','Strom','Benzin','Gesamt','Kosten']){const th=document.createElement('th');th.textContent=h;th.style.padding='6px';head.append(th);}inner.append(head);
+ const table=document.createElement('div');table.style.cssText='overflow-x:auto';const inner=document.createElement('table');inner.style.cssText='width:100%;font-size:12px;border-collapse:collapse';const head=document.createElement('tr');for(const h of [(globalThis.window?.PhevI18n?.t('pdf.col.month')||'Monat'),(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin'),(globalThis.window?.PhevI18n?.t('pdf.col.total')||'Gesamt'),(globalThis.window?.PhevI18n?.t('pdf.col.cost')||'Kosten')]){const th=document.createElement('th');th.textContent=h;th.style.padding='6px';head.append(th);}inner.append(head);
  for(const r of rows){const tr=document.createElement('tr');for(const value of [r.label,r.valid?r.electric.toFixed(1):'–',r.valid?r.fuel.toFixed(1):'–',r.valid?r.total.toFixed(1):'–',r.valid?r.cost.toFixed(2)+' '+settings.base:'–']){const td=document.createElement('td');td.textContent=value;td.style.cssText='padding:6px;border-top:1px solid #e2eaf3;text-align:center';tr.append(td);}inner.append(tr);}table.append(inner);target.append(table);
 }
 

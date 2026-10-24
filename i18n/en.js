@@ -723,4 +723,6 @@ window.PhevTranslations.en=Object.freeze({
  'import.previewWarning':". Check costs and currency in particular.",
  'energy.invalidFactor':"Please enter a factor between 1 and 20.",
  'energy.factorSaved':"Conversion factor saved.",
+ 'dynamic.menuClose':"✕ Close menu",
+ 'family.vehiclePrefix':"Family · ",
 });
