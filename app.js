@@ -73,7 +73,7 @@ async function updateVehiclePhoto(vehicle){
  const request=++photoRequest;
  if(!vehicle){displayVehiclePhoto(null);return;}
  const custom=localStorage.getItem('phev-photo-'+vehicle.id);
- if(custom){displayVehiclePhoto({src:custom,page:custom,custom:true,alt:'Eigenes Fahrzeugfoto: '+vehicleName(vehicle)});return;}
+ if(custom){displayVehiclePhoto({src:custom,page:custom,custom:true,alt:(globalThis.window?.PhevI18n?.t('vehiclePhoto.customAlt')||'Eigenes Fahrzeugfoto: ')+vehicleName(vehicle)});return;}
  const key=(vehicle.brand+' '+vehicle.model).trim().toLowerCase();
  if(vehiclePhotoCache.has(key)){displayVehiclePhoto(vehiclePhotoCache.get(key));return;}
  displayVehiclePhoto(null);
@@ -209,7 +209,7 @@ function renderYearlyCostChart(data,money,currentYear){
    segment.style.width=(value/totals.total*100)+'%';
    stack.append(segment);
   }
-  const description=String(year)+': Strom '+money(totals.energyCost)+', Benzin '+money(totals.fuelCost)+', Weitere '+money(totals.otherCost)+', Gesamt '+money(totals.total)+(year===currentYear?'. Laufendes, unvollständiges Jahr.':'');
+  const description=String(year)+(globalThis.window?.PhevI18n?.t('yearChart.electricity')||': Strom ')+money(totals.energyCost)+(globalThis.window?.PhevI18n?.t('yearChart.petrol')||', Benzin ')+money(totals.fuelCost)+(globalThis.window?.PhevI18n?.t('yearChart.other')||', Weitere ')+money(totals.otherCost)+(globalThis.window?.PhevI18n?.t('yearChart.total')||', Gesamt ')+money(totals.total)+(year===currentYear?(globalThis.window?.PhevI18n?.t('yearChart.incomplete')||'. Laufendes, unvollständiges Jahr.'):'');
   track.title=description;track.setAttribute('aria-label',description);
   track.append(stack);
   const total=document.createElement('span');total.className='yearly-cost-total';total.textContent=money(totals.total);
