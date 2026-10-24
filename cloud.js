@@ -780,4 +780,11 @@ document.addEventListener('phev:language-changed',()=>{
  void loadFamilies();
  void loadFamilyShares();
  void loadFamilyMembers();
+ // Shared-vehicle cards and administrator tables are also generated on demand.
+ void loadSharedVehicleOverview();
+ void loadSharedVehicles();
+ const adminPanel=ce('cloud-admin');
+ if(adminPanel && !adminPanel.classList.contains('hide') && !ce('admin-users-panel').classList.contains('hide')){
+  void cloudUsers();
+ }
 });

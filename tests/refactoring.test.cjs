@@ -332,3 +332,11 @@ test('Sprachwechsel aktualisiert Familienlisten und dynamische Aktionen',()=>{
  assert.ok(listener.includes('if(!cloudToken)return'));
  for(const method of ['loadFamilies','loadFamilyShares','loadFamilyMembers'])assert.ok(listener.includes('void '+method+'();'));
 });
+
+test('Sprachwechsel aktualisiert auch Fahrzeugfreigaben und Administration',()=>{
+ const source=read('cloud.js');
+ const section=source.slice(source.lastIndexOf("document.addEventListener('phev:language-changed'"));
+ assert.ok(section.includes('void loadSharedVehicleOverview();'));
+ assert.ok(section.includes('void loadSharedVehicles();'));
+ assert.ok(section.includes('void cloudUsers();'));
+});
