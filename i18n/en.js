@@ -695,4 +695,10 @@ window.PhevTranslations.en=Object.freeze({
  'pdf.petrolFactor':"Petrol factor",
  'pdf.costByMonth':"Costs by month",
  'pdf.costByDay':"Costs by day",
+ 'pdf.monthlyValuesNote':". Monthly values reflect recorded data.",
+ 'pdf.summaryElectric':"; Electricity: ",
+ 'pdf.summaryFuel':"; Petrol: ",
+ 'pdf.summaryExtras':"; Additional expenses: ",
+ 'pdf.ofTwelve':" of 12.",
+ 'pdf.highestMonth':" Highest-cost month: ",
 });
