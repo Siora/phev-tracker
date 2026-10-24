@@ -76,3 +76,17 @@ test('placeholder, aria-label and alt attributes switch without overwriting user
  assert.equal(elements['aria-label'].values['aria-label'],'Deutsch');
  assert.equal(elements.alt.values.alt,'Deutsch');
 });
+
+test('translation interpolates named variables and falls back to German',()=>{
+ const {i18n}=setup();
+ const source=fs.readFileSync(path.join(__dirname,'../i18n/core.js'),'utf8');
+ const window={PhevTranslations:{de:{greeting:'Hallo {name}',fallback:'Nur Deutsch'},en:{greeting:'Hello {name}'}}};
+ const document={documentElement:{lang:'de'},querySelectorAll:()=>[],addEventListener:()=>{}};
+ vm.runInNewContext(source,{window,document,WeakMap});
+ assert.equal(window.PhevI18n.t('greeting',{name:'Alex'}),'Hallo Alex');
+ window.PhevI18n.setLanguage('en');
+ assert.equal(window.PhevI18n.t('greeting',{name:'Alex'}),'Hello Alex');
+ assert.equal(window.PhevI18n.t('fallback'),'Nur Deutsch');
+ assert.equal(window.PhevI18n.t('missing.key'),'missing.key');
+ assert.equal(i18n.locale(),'de-CH');
+});
