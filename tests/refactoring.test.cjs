@@ -340,3 +340,10 @@ test('Sprachwechsel aktualisiert auch Fahrzeugfreigaben und Administration',()=>
  assert.ok(section.includes('void loadSharedVehicles();'));
  assert.ok(section.includes('void cloudUsers();'));
 });
+
+test('Sprachwechsel aktualisiert Ladeorte und Anbieter',()=>{
+ const source=read('app.js');
+ const listener=source.slice(source.lastIndexOf("document.addEventListener('phev:language-changed'"));
+ assert.ok(listener.includes('render();'));
+ assert.ok(listener.includes('renderChargingManagement();'));
+});
