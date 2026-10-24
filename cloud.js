@@ -772,4 +772,12 @@ window.addEventListener('storage',updateSyncIndicator);
 updateSyncIndicator();
 
 // Refresh cloud status text when the account language changes.
-document.addEventListener('phev:language-changed',()=>updateSyncIndicator());
+document.addEventListener('phev:language-changed',()=>{
+ updateSyncIndicator();
+ // Family tables, role labels and action buttons are built dynamically.
+ // Refresh their translations only for an authenticated account.
+ if(!cloudToken)return;
+ void loadFamilies();
+ void loadFamilyShares();
+ void loadFamilyMembers();
+});
