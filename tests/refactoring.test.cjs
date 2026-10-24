@@ -270,3 +270,12 @@ test('Dashboard-Leerzustände sind zweisprachig und ohne Browser nutzbar',()=>{
   for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
  }
 });
+
+test('Dynamische Analyse-, Dashboard- und Importtexte sind zweisprachig',()=>{
+ const app=read('app.js');
+ const keys=["dynamic.menuOpen","dynamic.yearFootnote","dynamic.costChange","dynamic.notable","dynamic.estimatedAnnual","dynamic.scenarioNote","dynamic.selectedPeriod","dynamic.unknownColumns","dynamic.consumptionLegend","dynamic.energyEstimate","dynamic.electricity","dynamic.petrol","dynamic.comparisonMissing","dynamic.noCharges"];
+ for(const key of keys){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
+ }
+});
