@@ -1410,11 +1410,11 @@ function renderEnergyBalance(items){
  if(!b.distance){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.energyDistance')||'Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.');$('energy-balance-note').textContent=(globalThis.window?.PhevI18n?.t('dynamic.energyEstimate')||'Erfasste Lade- und Tankmengen sind Näherungswerte.');return;}
  const f=v=>(100*v/b.distance).toFixed(2);
  target.replaceChildren();
- const p=document.createElement('p');p.textContent=(globalThis.window?.PhevI18n?.t('dynamic.electricity')||'⚡ Strom: ')+f(b.electric)+' kWh/100 km · ⛽ Benzin: '+f(b.fuelKwh)+' kWh/100 km · Gesamt: '+f(b.total)+' kWh/100 km';target.append(p);
+ const p=document.createElement('p');p.textContent=(globalThis.window?.PhevI18n?.t('dynamic.electricity')||'⚡ Strom: ')+f(b.electric)+(globalThis.window?.PhevI18n?.t('energy.balance.fuelLabel')||' kWh/100 km · ⛽ Benzin: ')+f(b.fuelKwh)+(globalThis.window?.PhevI18n?.t('energy.balance.totalLabel')||' kWh/100 km · Gesamt: ')+f(b.total)+' kWh/100 km';target.append(p);
  const bar=document.createElement('div');bar.style.cssText='display:flex;height:16px;border-radius:8px;overflow:hidden;background:#e5e7eb';
  const e=document.createElement('div');e.style.cssText='background:#1795be;width:'+(b.total?b.electric/b.total*100:0)+'%';
  const g=document.createElement('div');g.style.cssText='background:#e9a145;flex:1';bar.append(e,g);target.append(bar);
- $('energy-balance-note').textContent=(globalThis.window?.PhevI18n?.t('dynamic.petrol')||'Benzin: ')+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
+ $('energy-balance-note').textContent=(globalThis.window?.PhevI18n?.t('dynamic.petrol')||'Benzin: ')+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+(globalThis.window?.PhevI18n?.t('energy.balance.calculatedFrom')||' kWh. Berechnet aus ')+b.distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+(globalThis.window?.PhevI18n?.t('energy.balance.disclaimer')||' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.');
 }
 try{$('fuel-energy-factor').value=fuelEnergyFactor();}catch(error){console.warn(error);}
 
@@ -1434,7 +1434,7 @@ function saveCostComparison(){
  localStorage.setItem(costComparisonKey,JSON.stringify({electric,fuel}));
  window.scheduleCloudPreferences?.();
  render();
- alert('Vergleichswerte gespeichert.');
+ alert((globalThis.window?.PhevI18n?.t('comparison.saved')||'Vergleichswerte gespeichert.'));
 }
 function renderCostComparison(charges,fuel){
  const target=$('cost-comparison-result');

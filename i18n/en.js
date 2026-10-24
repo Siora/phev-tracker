@@ -671,4 +671,9 @@ window.PhevTranslations.en=Object.freeze({
  'dashboard.stats.costPer100':"🚗 Cost / 100 km",
  'dashboard.stats.chargingEvents':"Charging sessions",
  'dashboard.stats.refuelingEvents':"Refueling sessions",
+ 'energy.balance.fuelLabel':" kWh/100 km · ⛽ Petrol: ",
+ 'energy.balance.totalLabel':" kWh/100 km · Total: ",
+ 'energy.balance.calculatedFrom':" kWh. Calculated from ",
+ 'energy.balance.disclaimer':" km odometer range; not a measurement of actual driving consumption.",
+ 'comparison.saved':"Comparison values saved.",
 });

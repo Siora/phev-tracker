@@ -393,3 +393,12 @@ test('Dashboard-Statistikkacheln sind zweisprachig',()=>{
   assert.ok(en.includes("'"+name+"'"));
  }
 });
+
+test('Energiebilanz und Vergleichsbestätigung sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['energy.balance.fuelLabel','energy.balance.totalLabel','energy.balance.calculatedFrom','energy.balance.disclaimer','comparison.saved']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});
