@@ -28,3 +28,35 @@ foreach (['en','de','en','de'] as $language) {
   check(str_contains($body,$language==='en'?($type==='password-reset'?'To reset your password':'You have been invited'):($type==='password-reset'?'Öffne zum Zurücksetzen':'Du wurdest zu einer Familie')),'Body language mismatch');
  }
 }
+
+
+/**
+ * Regression protection: messages must be built independently for each recipient.
+ * A language change between two sends must not leak the previous template.
+ */
+foreach (['en','de','en','de','en'] as $language) {
+ foreach (['password-reset','family-invite'] as $type) {
+  $uniqueLink='https://tracker.web-produktion.com/#'.rawurlencode($language.'-'.$type);
+  [$subject,$body]=phevMailContent($type,$language,$uniqueLink);
+  check(str_contains($body,$uniqueLink),'Recipient-specific link was lost');
+  check(str_starts_with($subject,'PHEV Tracker - '),'Mail subject prefix missing');
+  check(!str_contains($body,$language==='en'?'Öffne':'To reset your password'),'Wrong language leaked into email body');
+ }
+}
+check(phevMailLanguage('EN')==='de','Only supported exact language codes are accepted');
+check(phevMailLanguage(null)==='de','Missing language must use German');
+check(phevMailLanguage('')==='de','Empty language must use German');
+check(phevMailLanguage(['en'])==='de','Array input must not influence language');
+$rejected=false;
+try { phevMailContent('unsupported','en',$link); }
+catch (InvalidArgumentException $error) { $rejected=true; }
+check($rejected,'Unknown transactional mail type must be rejected');
+foreach (["Injected\rSubject","Injected\nSubject"] as $unsafe) {
+ $rejected=false;
+ try { phevMailSubjectHeader($unsafe); }
+ catch (InvalidArgumentException $error) { $rejected=true; }
+ check($rejected,'CR/LF in email subject must be rejected');
+}
+$encoded=phevMailSubjectHeader('Familieneinladung für dich');
+check(str_starts_with($encoded,'=?UTF-8?B?'),'Non-ASCII email subject must be RFC 2047 encoded');
+check(phevMailSubjectHeader('PHEV Tracker - Family invitation')==='PHEV Tracker - Family invitation','ASCII subject must remain readable');
