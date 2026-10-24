@@ -361,8 +361,8 @@ function renderIntelligence(){
   const card=document.createElement('article');card.className='insight-item';
   const heading=document.createElement('strong');heading.textContent=(globalThis.window?.PhevI18n?.t('dynamic.notable')||'Auffälliger ')+kind+' am '+item.date;
   const detail=document.createElement('p');
-  detail.textContent=money(item.price)+'/'+unit+' statt üblicher '+money(item.baseline)+'/'+unit+
-   ' ('+sign+item.deviation.toFixed(0)+' %). Vergleich mit mindestens vier früheren Einträgen; Tarifwechsel, Ladeort oder Buchungsfehler können die Abweichung erklären.';
+  detail.textContent=money(item.price)+'/'+unit+(globalThis.window?.PhevI18n?.t('intelligence.insteadOf')||' statt üblicher ')+money(item.baseline)+'/'+unit+
+   ' ('+sign+item.deviation.toFixed(0)+(globalThis.window?.PhevI18n?.t('intelligence.priceDisclaimer')||' %). Vergleich mit mindestens vier früheren Einträgen; Tarifwechsel, Ladeort oder Buchungsfehler können die Abweichung erklären.');
   card.append(heading,detail);insights.append(card);
  }
  for(const insight of result.messages){
