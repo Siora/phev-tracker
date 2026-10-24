@@ -238,7 +238,7 @@ function renderIntelligence(){
  const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
  summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
  const money=v=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
- for(const [label,value] of [['Gesamtkosten',money(result.total)],['Stromkosten',money(result.energyCost)],['Benzinkosten',money(result.fuelCost)],['Weitere Ausgaben',money(result.otherCost)],['Geladene Energie',result.kwh.toFixed(1)+' kWh'],['Benzinmenge',result.liters.toFixed(1)+' l']]){
+ for(const [label,value] of [[(''+(globalThis.window?.PhevI18n?.t('intelligence.totalCosts')||'Gesamtkosten')),money(result.total)],[(globalThis.window?.PhevI18n?.t('intelligence.electricityCosts')||'Stromkosten'),money(result.energyCost)],[(globalThis.window?.PhevI18n?.t('intelligence.petrolCosts')||'Benzinkosten'),money(result.fuelCost)],[(globalThis.window?.PhevI18n?.t('intelligence.otherExpenses')||'Weitere Ausgaben'),money(result.otherCost)],[(globalThis.window?.PhevI18n?.t('intelligence.chargedEnergy')||'Geladene Energie'),result.kwh.toFixed(1)+' kWh'],[(globalThis.window?.PhevI18n?.t('intelligence.petrolVolume')||'Benzinmenge'),result.liters.toFixed(1)+' l']]){
   const card=document.createElement('article');card.className='quick-card';
   const title=document.createElement('strong');title.textContent=label;
   const number=document.createElement('p');number.textContent=value;
