@@ -60,7 +60,7 @@ test('placeholder, aria-label and alt attributes switch without overwriting user
  const document={
   documentElement:{lang:'de'},
   querySelectorAll:selector=>{
-   const match=selector.match(/^\\[data-i18n-(placeholder|aria-label|alt)\\]$/);
+   const match=/^\[data-i18n-(placeholder|aria-label|alt)\]$/.exec(selector);
    return match?[elements[match[1]]]:[];
   },
   addEventListener:()=>{}
