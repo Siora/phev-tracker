@@ -667,7 +667,7 @@ function renderDashboardFleetOverview(){
     };
     fleet.append(btn);
   });
-  if(!vehicles.length)fleet.textContent='Bitte ein Fahrzeug anlegen.';
+  if(!vehicles.length)fleet.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.addVehicle')||'Bitte ein Fahrzeug anlegen.');
 }
 
 function renderDashboardTimeline(filtered){
@@ -690,7 +690,7 @@ function renderDashboardTimeline(filtered){
     content.append(head,details);if(notes.textContent)content.append(notes);
     item.append(marker,content);recent.append(item);
     });
-  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent='Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.';recent.append(empty);}
+  if(!recent.children.length){const empty=document.createElement('p');empty.className='timeline-empty';empty.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.timeline')||'Noch keine Lade- oder Tankvorgänge im ausgewählten Zeitraum.');recent.append(empty);}
 }
 
 function renderMonthComparison(filtered){
@@ -1389,7 +1389,7 @@ function renderConsumptionTrend(){
  const rows=consumptionTrendRows($('vehicleFilter').value,year,month);
  target.replaceChildren();
  const valid=rows.filter(r=>r.valid);
- if(!valid.length){target.textContent='Noch keine Monate mit ausreichenden Kilometerständen für eine Verbrauchskurve vorhanden.';return;}
+ if(!valid.length){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.consumption')||'Noch keine Monate mit ausreichenden Kilometerständen für eine Verbrauchskurve vorhanden.');return;}
  const legend=document.createElement('p');legend.textContent='🔵 Strom · 🟠 Benzin (umgerechnet) · Gesamtenergie in kWh/100 km';target.append(legend);
  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
  svg.setAttribute('viewBox','0 0 600 240');svg.setAttribute('role','img');svg.setAttribute('aria-label','Kombinierte Energieverbrauchsentwicklung der letzten zwölf Monate');svg.style.cssText='width:100%;height:auto;max-height:290px';
@@ -1407,7 +1407,7 @@ function renderConsumptionTrend(){
 function renderEnergyBalance(items){
  const target=$('energy-balance');if(!target)return;
  const b=energyBalance(items);
- if(!b.distance){target.textContent='Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.';$('energy-balance-note').textContent='Erfasste Lade- und Tankmengen sind Näherungswerte.';return;}
+ if(!b.distance){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.energyDistance')||'Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.');$('energy-balance-note').textContent='Erfasste Lade- und Tankmengen sind Näherungswerte.';return;}
  const f=v=>(100*v/b.distance).toFixed(2);
  target.replaceChildren();
  const p=document.createElement('p');p.textContent='⚡ Strom: '+f(b.electric)+' kWh/100 km · ⛽ Benzin: '+f(b.fuelKwh)+' kWh/100 km · Gesamt: '+f(b.total)+' kWh/100 km';target.append(p);
