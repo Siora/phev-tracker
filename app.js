@@ -789,12 +789,12 @@ function render(){
   const shared=familyVehicle(selectedVehicle);
   const active=shared||vehicles.find(v=>String(v.id)===selectedVehicle);
   if(window.currentPhotoVehicle!==String(active?.id||'')){window.currentPhotoVehicle=String(active?.id||'');updateVehiclePhoto(active);}
-  const title=active?vehicleName(active):(selectedVehicle==='none'?'Ohne Fahrzeugzuordnung':'Alle Fahrzeuge');
+  const title=active?vehicleName(active):(selectedVehicle==='none'?(window.PhevI18n?.t('dashboard.vehicle.unassigned')||'Ohne Fahrzeugzuordnung'):(window.PhevI18n?.t('dashboard.vehicle.all')||'Alle Fahrzeuge'));
   $('brandVehicle').textContent=title;
   $('footerVehicle').textContent=title;
   $('topVehicle').textContent='⚡ '+title;
   $('heroVehicle').textContent=title;
-  $('heroVehicleDetails').textContent=active?(active.drivetrain||'Fahrzeug')+' · Energie & Kosten':'Energie & Kosten';
+  $('heroVehicleDetails').textContent=active?(active.drivetrain||(window.PhevI18n?.t('dashboard.vehicle.generic')||'Fahrzeug'))+(window.PhevI18n?.t('dashboard.vehicle.energySuffix')||' · Energie & Kosten'):(window.PhevI18n?.t('dashboard.vehicle.energy')||'Energie & Kosten');
   const dashboardRecords=shared?familyRecords.filter(r=>String(r.vehicle_id)===String(shared.id)):records;
   let all=dashboardRecords.filter(x=>{
     let d=new Date(x.date+'T12:00:00');return d>=from&&d<to&&(shared||!selectedVehicle||(selectedVehicle==='none'?!x.vehicle_id:String(x.vehicle_id)===selectedVehicle))

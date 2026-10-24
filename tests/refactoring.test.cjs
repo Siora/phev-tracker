@@ -356,3 +356,12 @@ test('Verbrauchskennzahlen und Näherungshinweis sind zweisprachig',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Dashboard-Fahrzeugtitel sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['dashboard.vehicle.unassigned','dashboard.vehicle.all','dashboard.vehicle.generic','dashboard.vehicle.energySuffix','dashboard.vehicle.energy']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});
