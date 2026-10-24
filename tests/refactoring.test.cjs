@@ -241,3 +241,15 @@ test('Dynamisch eingefügte Übersetzungselemente werden nach Sprachwechsel erka
  assert.match(core,/translateElement\(node\)/);
  assert.match(core,/element\.textContent!==previous/);
 });
+
+test('Alle statischen Übersetzungsschlüssel sind in beiden Sprachen vorhanden',()=>{
+ const html=read('index.html');
+ const dictionaries=['de','en'].map(language=>read('i18n/'+language+'.js'));
+ const keys=[...html.matchAll(/data-i18n(?:-placeholder|-aria-label|-alt)?="([^"]+)"/g)].map(match=>match[1]);
+ for(const key of new Set(keys)){
+  for(const [index,dictionary] of dictionaries.entries()){
+   assert.ok(dictionary.includes("'"+key+"'"),'Missing '+key+' in '+['de','en'][index]);
+  }
+ }
+ assert.match(html,/id="account-language-status"[^>]*data-i18n="accountLanguage\.loginHint"/);
+});

@@ -99,6 +99,7 @@ window.PhevTranslations.de=Object.freeze({
  'familyVehicles.column.tank':'Tank',
  'familyVehicles.column.access':'Berechtigung',
  'familyVehicles.column.details':'Details',
+ 'accountLanguage.loginHint':'Nach der Anmeldung und Datenbankmigration verfügbar.',
  'accountLanguage.migrationMissing':'Datenbankmigration für die Sprachauswahl steht noch aus.',
  'accountLanguage.saved':'Gespeichert.',
  'vehicles.column.actions':'Aktionen',
