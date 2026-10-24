@@ -770,3 +770,6 @@ window.addEventListener('online',()=>{syncError='';updateSyncIndicator();syncClo
 window.addEventListener('offline',updateSyncIndicator);
 window.addEventListener('storage',updateSyncIndicator);
 updateSyncIndicator();
+
+// Refresh cloud status text when the account language changes.
+document.addEventListener('phev:language-changed',()=>updateSyncIndicator());
