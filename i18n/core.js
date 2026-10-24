@@ -17,22 +17,33 @@
   if(element.textContent!==next)element.textContent=next;
   translatedText.set(element,next);
  }
+ function translateAttribute(element,attribute){
+  const key=element.getAttribute('data-i18n-'+attribute);
+  if(!key)return;
+  const next=translate(key);
+  const previous=translatedAttributes.get(element)?.[attribute];
+  if(previous!==undefined && element.getAttribute(attribute)!==previous)return;
+  element.setAttribute(attribute,next);
+  const state=translatedAttributes.get(element)||{};
+  state[attribute]=next;
+  translatedAttributes.set(element,state);
+ }
+ function translateNode(node){
+  if(node.matches?.('[data-i18n]'))translateElement(node);
+  node.querySelectorAll?.('[data-i18n]').forEach(translateElement);
+  for(const attribute of ['placeholder','aria-label','alt']){
+   const selector='[data-i18n-'+attribute+']';
+   if(node.matches?.(selector))translateAttribute(node,attribute);
+   node.querySelectorAll?.(selector).forEach(element=>translateAttribute(element,attribute));
+  }
+ }
  function setLanguage(code){
   if(!languages.includes(code))return false;
   active=code;document.documentElement.lang=code;
   document.querySelectorAll('[data-i18n]').forEach(translateElement);
   // Translate attributes without replacing form controls or their current values.
   for(const attribute of ['placeholder','aria-label','alt']){
-   document.querySelectorAll('[data-i18n-'+attribute+']').forEach(element=>{
-    const key=element.getAttribute('data-i18n-'+attribute);
-    const next=translate(key);
-    const previous=translatedAttributes.get(element)?.[attribute];
-    if(previous!==undefined && element.getAttribute(attribute)!==previous)return;
-    element.setAttribute(attribute,next);
-    const state=translatedAttributes.get(element)||{};
-    state[attribute]=next;
-    translatedAttributes.set(element,state);
-   });
+   document.querySelectorAll('[data-i18n-'+attribute+']').forEach(element=>translateAttribute(element,attribute));
   }
   return true;
  }
@@ -46,8 +57,7 @@
    for(const record of records){
     for(const node of record.addedNodes){
      if(node.nodeType!==1)continue;
-     if(node.matches?.('[data-i18n]'))translateElement(node);
-     node.querySelectorAll?.('[data-i18n]').forEach(translateElement);
+     translateNode(node);
     }
    }
   });
