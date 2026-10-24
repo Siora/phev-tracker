@@ -24,6 +24,7 @@ on:
       - 'tests/refactoring.test.cjs'
       - 'server/api.php'
       - 'server/mail-i18n.php'
+      - '.github/workflows/deploy-pwa-hetzner.yml'
   workflow_dispatch:
     inputs:
       upload:
