@@ -45,3 +45,34 @@ test('regional date and number formatting follows account language',()=>{
  i18n.setLanguage('de');
  assert.equal(i18n.locale(),'de-CH');
 });
+
+test('placeholder, aria-label and alt attributes switch without overwriting user edits',()=>{
+ const elements={};
+ for(const attribute of ['placeholder','aria-label','alt']){
+  const key='data-i18n-'+attribute;
+  const values={[key]:'label',[attribute]:'Deutsch'};
+  elements[attribute]={
+   getAttribute:name=>values[name]??null,
+   setAttribute:(name,value)=>{values[name]=value;},
+   values
+  };
+ }
+ const document={
+  documentElement:{lang:'de'},
+  querySelectorAll:selector=>{
+   const match=selector.match(/^\\[data-i18n-(placeholder|aria-label|alt)\\]$/);
+   return match?[elements[match[1]]]:[];
+  },
+  addEventListener:()=>{}
+ };
+ const window={PhevTranslations:{de:{label:'Deutsch'},en:{label:'English'}}};
+ vm.runInNewContext(core,{window,document,WeakMap});
+ const i18n=window.PhevI18n;
+ i18n.setLanguage('en');
+ for(const attr of Object.keys(elements))assert.equal(elements[attr].values[attr],'English');
+ elements.placeholder.values.placeholder='Custom placeholder';
+ i18n.setLanguage('de');
+ assert.equal(elements.placeholder.values.placeholder,'Custom placeholder');
+ assert.equal(elements['aria-label'].values['aria-label'],'Deutsch');
+ assert.equal(elements.alt.values.alt,'Deutsch');
+});
