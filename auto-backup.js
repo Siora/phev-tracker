@@ -31,7 +31,7 @@ function scheduleAutomaticBackup(){
   updateAutomaticBackupStatus();
  }catch(error){
   const status=$('auto-backup-status');
-  if(status)status.textContent='Automatische Sicherung fehlgeschlagen (möglicherweise zu wenig Gerätespeicher). Bitte manuell exportieren.';
+  if(status)status.textContent=(globalThis.window?.PhevI18n?.t('backup.autoFailed')||'Automatische Sicherung fehlgeschlagen (möglicherweise zu wenig Gerätespeicher). Bitte manuell exportieren.');
   console.warn('Automatische Sicherung fehlgeschlagen',error);
  }
 }
