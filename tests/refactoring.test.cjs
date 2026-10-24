@@ -298,3 +298,7 @@ test('Jahresbericht-Titel und Erläuterungen sind zweisprachig',()=>{
  const app=read('app.js');const keys=["pdf.vehicleCosts","pdf.costPerKmNote","pdf.additionalVehicleExpenses","pdf.combinedEnergy","pdf.mileageNeeded","pdf.petrolEnergyNote","pdf.energyShares","pdf.costBreakdown","pdf.monthlyOverview","pdf.annualComparison","pdf.allAmountsIn","pdf.monthlyEnergy","pdf.expensesByCategory","pdf.vehicleComparison","pdf.vehicleMileageNote","pdf.annualSummary","pdf.totalCosts","pdf.activeMonths","pdf.reportDisclaimer","pdf.individualEntries","pdf.currencyDisclaimer"];
  for(const key of keys){assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
 });
+
+test('PDF-Tabellenspalten sind zweisprachig',()=>{
+ const app=read('app.js');for(const key of ["pdf.col.date","pdf.col.category","pdf.col.vehicle","pdf.col.costPrefix","pdf.col.month","pdf.col.charges","pdf.col.refuels","pdf.col.electricity","pdf.col.petrol","pdf.col.other","pdf.col.total","pdf.col.electricKwh","pdf.col.petrolLiters","pdf.col.amountPrefix","pdf.col.extraShare","pdf.col.cost","pdf.col.mileageRange","pdf.col.costPerKm","pdf.col.dateTime","pdf.col.type","pdf.col.quantity","pdf.col.place","pdf.col.totalPrefix"]){assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
+});
