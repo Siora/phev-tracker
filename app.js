@@ -136,7 +136,7 @@ function replaceVehicleOptions(select,placeholder,previous,autoSelectSingle){
   select.value=valid?previous:(autoSelectSingle&&vehicles.length===1?String(vehicles[0].id):'');
 }
 
-function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+' Einträge ohne Fahrzeugzuordnung.';}
+function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+(globalThis.window?.PhevI18n?.t('bulk.unassigned')||' Einträge ohne Fahrzeugzuordnung.');}
 // Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
  if(!vehicles.some(v=>String(v.id)===String(vehicleId)))throw Error('Fahrzeug nicht gefunden');
@@ -229,7 +229,7 @@ function renderIntelligence(){
  yearSelect.replaceChildren(...years.map(y=>new Option(String(y),String(y))));
  yearSelect.value=years.includes(Number(selectedYear))?selectedYear:String(currentYear);
  const selectedVehicle=vehicleSelect.value;
- vehicleSelect.replaceChildren(new Option('Alle Fahrzeuge',''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
+ vehicleSelect.replaceChildren(new Option((globalThis.window?.PhevI18n?.t('dashboard.allVehicles')||'Alle Fahrzeuge'),''),...vehicles.map(v=>new Option(vehicleName(v),String(v.id))));
  appendFamilyOptions(vehicleSelect);
  vehicleSelect.value=selectedVehicle;
  const isFamily=familySelection(vehicleSelect.value);
@@ -304,13 +304,13 @@ function renderIntelligence(){
    const prefix=comparison.difference>0?'+':'';
    headline.textContent=(globalThis.window?.PhevI18n?.t('dynamic.costChange')||'Kostenänderung: ')+prefix+money(comparison.difference)+' ('+prefix+comparison.percent.toFixed(1)+' %)';
    const period=document.createElement('p');
-   period.textContent=(comparison.partial?'Januar–'+String(comparison.months).padStart(2,'0'):'Gesamtes Jahr')+
-    ': '+money(comparison.currentTotal)+' gegenüber '+money(comparison.previousTotal)+' im Vorjahr.';
+   period.textContent=(comparison.partial?(globalThis.window?.PhevI18n?.t('intelligence.januaryThrough')||'Januar–')+String(comparison.months).padStart(2,'0'):(globalThis.window?.PhevI18n?.t('intelligence.fullYear')||'Gesamtes Jahr'))+
+    ': '+money(comparison.currentTotal)+(globalThis.window?.PhevI18n?.t('intelligence.versus')||' gegenüber ')+money(comparison.previousTotal)+(globalThis.window?.PhevI18n?.t('intelligence.previousYear')||' im Vorjahr.');
    const breakdown=document.createElement('p');
-   const names={charge:'Strom',fuel:'Benzin',extra:'Weitere'};
+   const names={charge:(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),fuel:(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin'),extra:(globalThis.window?.PhevI18n?.t('pdf.col.other')||'Weitere')};
    breakdown.textContent=comparison.breakdown.map(item=>names[item.key]+': '+money(item.current-item.previous)).join(' · ');
    const note=document.createElement('small');
-   note.textContent='Nur erfasste Kosten. Unterschiedliche Fahrleistung und fehlende Buchungen beeinflussen den Vergleich; dies ist keine Wirtschaftlichkeitsbewertung.';
+   note.textContent=(globalThis.window?.PhevI18n?.t('intelligence.comparisonDisclaimer')||'Nur erfasste Kosten. Unterschiedliche Fahrleistung und fehlende Buchungen beeinflussen den Vergleich; dies ist keine Wirtschaftlichkeitsbewertung.');
    yoyPanel.append(headline,period,breakdown,note);
   }
  }
@@ -1344,7 +1344,7 @@ $('import').onclick=()=>{
   });
   pending=[];
   save();
-  alert(added+' neu importiert, '+updated+' bestehende Einträge aktualisiert.');
+  alert(added+(globalThis.window?.PhevI18n?.t('import.newCount')||' neu importiert, ')+updated+(globalThis.window?.PhevI18n?.t('import.updatedCount')||' bestehende Einträge aktualisiert.'));
   tab('home')
 };
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{
