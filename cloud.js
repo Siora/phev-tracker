@@ -89,7 +89,7 @@ window.syncManagedCharging=async function(next){
  * Änderungen. Wichtig: die Offline-Warteschlange hat Vorrang vor einem
  * möglicherweise älteren Serverstand und wird anschließend synchronisiert.
  */
-async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();const expenseData=await cloudCall('vehicle-expenses');window.setVehicleExpenses(expenseData.expenses||[]);cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent='Cloud-Einträge: '+d.records.length+'.';}
+async function loadCloudOverview(){syncError='';updateSyncIndicator();await loadVehicles();const d=await cloudCall('data');const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;const queued=JSON.parse(localStorage.getItem('phev-queue-'+email)||'[]');const merged=new Map(d.records.map(r=>[r.id,r]));for(const op of queued){if(op.action==='delete')merged.delete(op.id);else merged.set(op.record.id,op.record);}window.showCloudRecords([...merged.values()]);if(email)localStorage.setItem('phev-cache-'+email,JSON.stringify([...merged.values()]));syncCloudQueue();await loadChargingCatalog();const expenseData=await cloudCall('vehicle-expenses');window.setVehicleExpenses(expenseData.expenses||[]);cloudPreferences=d.preferences||null;cloudPreferencesReady=!!d.preferences_available&&!!d.preferences;if(cloudPreferencesReady)window.applyCloudPreferences(cloudPreferences);updateSyncIndicator();ce('cloud-count').textContent=(window.PhevI18n?.t('cloudStatus.cloudEntries')||'Cloud-Einträge: ')+d.records.length+'.';}
 
 /**
  * Lädt Fahrzeuge aus dem Konto und aktualisiert die Verwaltungstabelle.
@@ -204,7 +204,7 @@ function prepareFamilyInviteLink(){
  if(!match)return;
  ce('family-accept-form').elements.token.value=match[1];
  history.replaceState(null,'',location.pathname+location.search);
- ce('family-status').textContent='Einladung erkannt. Bitte anmelden und Annahme bestätigen.';
+ ce('family-status').textContent=(window.PhevI18n?.t('cloudStatus.inviteDetected')||'Einladung erkannt. Bitte anmelden und Annahme bestätigen.');
 }
 prepareFamilyInviteLink();
 window.addEventListener('hashchange',prepareFamilyInviteLink);
@@ -259,7 +259,7 @@ async function loadSharedVehicleOverview(){
 /** Tabellen verwenden ausschließlich textContent; API-Daten werden nie als HTML interpretiert. */
 function familyTable(target,columns,rows){
  target.replaceChildren();
- if(!rows.length){target.textContent='Keine Einträge vorhanden.';return null;}
+ if(!rows.length){target.textContent=(window.PhevI18n?.t('cloudStatus.noRows')||'Keine Einträge vorhanden.');return null;}
  const wrapper=document.createElement('div');wrapper.className='family-table-scroll';
  const table=document.createElement('table');table.className='management-table family-table';
  const thead=document.createElement('thead'),head=document.createElement('tr');
@@ -605,7 +605,7 @@ ce('cloud-create').onsubmit=async event=>{
 ce('cloud-check').onclick=async()=>{
  try{
   const result=await cloudCall('data');
-  ce('cloud-count').textContent='Cloud-Einträge: '+result.records.length+'. Keine lokalen Änderungen.';
+  ce('cloud-count').textContent=(window.PhevI18n?.t('cloudStatus.cloudEntries')||'Cloud-Einträge: ')+result.records.length+'. Keine lokalen Änderungen.';
  }catch(error){cs(error.message);}
 };
 ce('cloud-logout').onclick=async()=>{
@@ -637,7 +637,7 @@ ce('cloud-upload').onclick=async()=>{
  try{
   for(const record of todo)await cloudCall('save',{record});
   const check=await cloudCall('data');
-  ce('cloud-upload-info').textContent='Cloud-Einträge: '+check.records.length;
+  ce('cloud-upload-info').textContent=(window.PhevI18n?.t('cloudStatus.cloudEntries')||'Cloud-Einträge: ')+check.records.length;
   cs('Import abgeschlossen. Lokale Daten unverändert.');
   await loadCloudOverview();
  }catch(e){cs('Import unterbrochen: '+e.message);}
