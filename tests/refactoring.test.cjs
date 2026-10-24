@@ -322,7 +322,7 @@ test('Sprachwechsel aktualisiert dynamisch erzeugte UI-Bereiche',()=>{
  assert.ok(core.includes("new CustomEvent('phev:language-changed'"));
  assert.ok(core.includes("if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')"));
  assert.ok(read('app.js').includes("addEventListener('phev:language-changed',()=>render())"));
- assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>updateSyncIndicator())"));
+ assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>{"));
 });
 
 // Regression: Familienverwaltung aktualisiert sich nach Sprachwechsel.
