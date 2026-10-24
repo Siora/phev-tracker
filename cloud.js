@@ -145,7 +145,7 @@ async function loadVehicles(){
       const headers=/^[a-f0-9]{64}$/.test(cloudToken||'')?{'Authorization':'Bearer '+cloudToken}:{};
       const response=await fetch(cloudApi+'?action=vehicle-photo-upload',{method:'POST',credentials:'same-origin',headers,body,cache:'no-store'});
       const result=await response.json();
-      if(!response.ok||!result.photo_url)throw Error(result.error||'Bild-Upload fehlgeschlagen');
+      if(!response.ok||!result.photo_url)throw Error(result.error||(window.PhevI18n?.t('authSync.uploadFailed')||'Bild-Upload fehlgeschlagen'));
       const url=new URL(result.photo_url,location.origin).href;
       const current=window.collectCloudPreferences();
       const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{}),[String(v.id)]:url}};
@@ -186,7 +186,7 @@ function resetVehicleAfterSave(){
 };
 ce('vehicle-form').onsubmit=async e=>{
  e.preventDefault();
- if(!cloudToken)return ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.loginRequired')||'Bitte zuerst anmelden.');
+ if(!cloudToken)return ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.loginRequired')||(window.PhevI18n?.t('authSync.signInFirst')||'Bitte zuerst anmelden.'));
  const f=e.currentTarget,button=f.querySelector('button[type=submit]');button.disabled=true;
  try{
   const v={id:f.dataset.id?Number(f.dataset.id):null};
@@ -424,7 +424,7 @@ ce('account-language')?.addEventListener('change',async event=>{
 function showAccount(email,role){void loadFamilies();
  const admin=role==='admin';
  const adminNav=ce('admin-nav');if(adminNav)adminNav.hidden=!admin;
- if(!admin&&ce('administration')&&!ce('administration').classList.contains('hide'))window.tab?.('cloud');document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',!admin);if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs('Angemeldet.');updateSyncIndicator();}
+ if(!admin&&ce('administration')&&!ce('administration').classList.contains('hide'))window.tab?.('cloud');document.body.classList.remove('login-locked');ce('cloud-identity').textContent=email+' · '+role;ce('cloud-login').classList.add('hide');ce('cloud-account').classList.remove('hide');ce('cloud-admin').classList.toggle('hide',!admin);if(!ce('cloud-status').textContent||/^(Nicht angemeldet\.?|Bitte erneut anmelden\.?)/.test(ce('cloud-status').textContent))cs((window.PhevI18n?.t('authSync.signedIn')||'Angemeldet.'));updateSyncIndicator();}
 /**
  * Benutzerformulare sind exklusive Unteransichten der Administration.
  * Die Listenposition bleibt erhalten, bis die Daten neu geladen werden.
@@ -442,7 +442,7 @@ function adminView(view){
 ce('admin-new-user').onclick=()=>{ce('cloud-create').reset();adminView('create');};
 ce('admin-create-cancel').onclick=()=>{
  const form=ce('cloud-create');
- if((form.elements.email.value||form.elements.password.value||form.elements.role.value!=='user')&&!confirm('Ungespeicherte Eingaben verwerfen?'))return;
+ if((form.elements.email.value||form.elements.password.value||form.elements.role.value!=='user')&&!confirm((window.PhevI18n?.t('authSync.discardChanges')||'Ungespeicherte Eingaben verwerfen?')))return;
  form.reset();adminView('list');
 };
 ce('admin-edit-cancel').onclick=()=>adminView('list');
@@ -588,7 +588,7 @@ ce('cloud-delete-account').onsubmit=async event=>{
   document.body.classList.add('login-locked');
   ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');
   ce('cloud-count').textContent='';window.showLocalRecords();
-  cs('Konto gelöscht. Kontobezogene Cloud-Caches auf diesem Gerät wurden entfernt; unabhängige lokale Daten bleiben erhalten.');
+  cs((window.PhevI18n?.t('authSync.accountDeleted')||'Konto gelöscht. Kontobezogene Cloud-Caches auf diesem Gerät wurden entfernt; unabhängige lokale Daten bleiben erhalten.'));
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
@@ -632,7 +632,7 @@ ce('cloud-upload').onclick=async()=>{
  const ids=new Set(remote.records.map(r=>r.id));
  const todo=local.filter(r=>!ids.has(r.id));
  if(!todo.length)return cs('Keine neuen lokalen Einträge.');
- if(!confirm(todo.length+' Einträge hochladen?'))return;
+ if(!confirm(todo.length+(window.PhevI18n?.t('authSync.uploadConfirm')||' Einträge hochladen?')))return;
  btn.disabled=true;
  try{
   for(const record of todo)await cloudCall('save',{record});
@@ -652,7 +652,7 @@ ce('cloud-upload').onclick=async()=>{
   ce('cloud-admin').classList.add('hide');
   ce('cloud-reset-confirm').classList.remove('hide');
   document.body.classList.add('login-locked');
-  cs('Bitte lege dein neues Passwort fest.');
+  cs((window.PhevI18n?.t('authSync.setPassword')||'Bitte lege dein neues Passwort fest.'));
   return;
  }
  let saved=null;
@@ -667,7 +667,7 @@ ce('cloud-upload').onclick=async()=>{
   applyAccountLanguage(account);
   try{
    const cachedVehicles=JSON.parse(localStorage.getItem('phev-vehicles-cache-'+email)||'null');
-   if(Array.isArray(cachedVehicles)){window.setVehicles(cachedVehicles);ce('vehicle-status').textContent=cachedVehicles.length+' gespeicherte Fahrzeuge (Cloud wird aktualisiert).';}
+   if(Array.isArray(cachedVehicles)){window.setVehicles(cachedVehicles);ce('vehicle-status').textContent=cachedVehicles.length+(window.PhevI18n?.t('authSync.cachedVehicles')||' gespeicherte Fahrzeuge (Cloud wird aktualisiert).');}
    const cachedRecords=JSON.parse(localStorage.getItem('phev-cache-'+email)||'null');
    if(Array.isArray(cachedRecords))window.showCloudRecords(cachedRecords);
   }catch(cacheError){console.warn('Cloud cache could not be restored',cacheError);}
@@ -685,7 +685,7 @@ ce('cloud-upload').onclick=async()=>{
    ce('cloud-admin').classList.add('hide');
    updateSyncIndicator();
    document.body.classList.add('login-locked');
-   cs('Bitte erneut anmelden. Gespeicherte Einträge bleiben erhalten.');
+   cs((window.PhevI18n?.t('authSync.sessionExpired')||'Bitte erneut anmelden. Gespeicherte Einträge bleiben erhalten.'));
   }else{
    // Keep locally cached data and session identity when server is unreachable.
    const email=saved?.email;
@@ -698,7 +698,7 @@ ce('cloud-upload').onclick=async()=>{
     }catch{}
    }
    if(saved?.email&&saved?.role){showAccount(saved.email,saved.role);ce('cloud-admin').classList.add('hide');}
-   cs('Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.');
+   cs((window.PhevI18n?.t('authSync.connectionUnavailable')||'Verbindung momentan nicht verfügbar. Anmeldung bleibt gespeichert; bitte später erneut versuchen.'));
    syncError=message||'Verbindung unterbrochen';updateSyncIndicator();
   }
  }
@@ -715,14 +715,14 @@ ce('cloud-upload').onclick=async()=>{
  * Es wird keine komplette Liste mehr in prefs_json überschrieben.
  */
 window.saveVehicleExpense=async function(item){
- if(!cloudToken)throw Error('Bitte anmelden.');
+ if(!cloudToken)throw Error((window.PhevI18n?.t('authSync.signIn')||'Bitte anmelden.'));
  const result=await cloudCall('vehicle-expense-save',{expense:item});
  const current=window.getVehicleExpenses();
  window.setVehicleExpenses([...current.filter(x=>x.id!==item.id),item]);
  return result;
 };
 window.deleteVehicleExpense=async function(id){
- if(!cloudToken)throw Error('Bitte anmelden.');
+ if(!cloudToken)throw Error((window.PhevI18n?.t('authSync.signIn')||'Bitte anmelden.'));
  await cloudCall('vehicle-expense-delete',{id});
  window.setVehicleExpenses(window.getVehicleExpenses().filter(x=>x.id!==id));
 };
@@ -742,7 +742,7 @@ window.scheduleCloudPreferences=function(){
  },700);
 };
 ce('cloud-preferences-upload').onclick=async()=>{
- if(!cloudToken)return cs('Bitte zuerst anmelden.');
+ if(!cloudToken)return cs((window.PhevI18n?.t('authSync.signInFirst')||'Bitte zuerst anmelden.'));
  if(!confirm('Lokale Einstellungen und Fahrzeugfoto-Links in dein Cloud-Konto übernehmen? Vorhandene Cloud-Einstellungen können dadurch ersetzt werden.'))return;
  const button=ce('cloud-preferences-upload');button.disabled=true;
  try{
