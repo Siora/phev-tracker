@@ -808,7 +808,7 @@ function render(){
     const info=document.createElement('p');
     const sharedEntries=shared?dashboardRecords:[];
     const dates=sharedEntries.map(r=>String(r.date||'').slice(0,10)).filter(Boolean).sort();
-    info.textContent=(shared?'Familienfreigabe: ':'Familienfreigabe noch nicht geladen: ')+sharedEntries.length+' Einträge insgesamt, '+all.length+' im Zeitraum, '+filtered.length+' nach Ortsfilter'+(dates.length?' · Erfasster Zeitraum: '+dates[0]+' bis '+dates[dates.length-1]:'')+'.';
+    info.textContent=(shared?(window.PhevI18n?.t('dashboard.family.loaded')||'Familienfreigabe: '):(window.PhevI18n?.t('dashboard.family.pending')||'Familienfreigabe noch nicht geladen: '))+sharedEntries.length+(window.PhevI18n?.t('dashboard.family.total')||' Einträge insgesamt, ')+all.length+(window.PhevI18n?.t('dashboard.family.period')||' im Zeitraum, ')+filtered.length+(window.PhevI18n?.t('dashboard.family.placeFilter')||' nach Ortsfilter')+(dates.length?(window.PhevI18n?.t('dashboard.family.datePrefix')||' · Erfasster Zeitraum: ')+dates[0]+(window.PhevI18n?.t('dashboard.family.dateBetween')||' bis ')+dates[dates.length-1]:'')+'.';
     summary.append(info);
   }
   // Die Werte beziehen sich auf die Kilometerstandsspanne im gewählten Zeitraum.

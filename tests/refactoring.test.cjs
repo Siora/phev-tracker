@@ -365,3 +365,12 @@ test('Dashboard-Fahrzeugtitel sind zweisprachig',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Familienfreigabe-Diagnose im Dashboard ist zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['dashboard.family.loaded','dashboard.family.pending','dashboard.family.total','dashboard.family.period','dashboard.family.placeFilter','dashboard.family.datePrefix','dashboard.family.dateBetween']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});
