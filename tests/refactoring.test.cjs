@@ -293,3 +293,8 @@ test('Nebenmodule und Belegverarbeitung sind zweisprachig',()=>{
  const modules={"charts.js":["charts.noData","charts.tapBars","charts.noCharging","charts.noChargingEvents"],"pagination.js":["pagination.noEntries"],"pdf-report.js":["pdf.libraryFailed"],"auto-backup.js":["backup.autoFailed"],"intelligent-analytics.js":["analytics.invalidAssumptions","analytics.addRecords","analytics.significantChange","analytics.previousMonth"],"receipt-ocr.js":["receipt.selectFirst","receipt.ocrPreparing","receipt.ocrCheck","receipt.ocrRecognized","receipt.ocrUnreadable"],"receipt-parser.js":["receipt.textChanged","receipt.suggestions","receipt.applied"],"receipt-preview.js":["receipt.noneSelected","receipt.imageTypes","receipt.maxSize"]};
  for(const [file,keys] of Object.entries(modules))for(const key of keys){assert.ok(read(file).includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
 });
+
+test('Jahresbericht-Titel und Erläuterungen sind zweisprachig',()=>{
+ const app=read('app.js');const keys=["pdf.vehicleCosts","pdf.costPerKmNote","pdf.additionalVehicleExpenses","pdf.combinedEnergy","pdf.mileageNeeded","pdf.petrolEnergyNote","pdf.energyShares","pdf.costBreakdown","pdf.monthlyOverview","pdf.annualComparison","pdf.allAmountsIn","pdf.monthlyEnergy","pdf.expensesByCategory","pdf.vehicleComparison","pdf.vehicleMileageNote","pdf.annualSummary","pdf.totalCosts","pdf.activeMonths","pdf.reportDisclaimer","pdf.individualEntries","pdf.currencyDisclaimer"];
+ for(const key of keys){assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
+});
