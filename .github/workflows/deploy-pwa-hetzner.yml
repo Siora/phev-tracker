@@ -23,6 +23,7 @@ on:
       - 'manifest.webmanifest'
       - 'tests/refactoring.test.cjs'
       - 'server/api.php'
+      - 'server/mail-i18n.php'
   workflow_dispatch:
     inputs:
       upload:
@@ -58,7 +59,7 @@ jobs:
 
       - name: Validate PHP API syntax
         shell: bash
-        run: php -l server/api.php
+        run: php -l server/api.php && php -l server/mail-i18n.php && php tests/mail-i18n.test.php
 
       - name: Verify server identity
         shell: bash
@@ -111,20 +112,43 @@ jobs:
           test "$SFTP_HOST" = "www35.your-server.de"
           test "$SFTP_DIR" = "public_html/phev-tracker"
           test -s server/api.php
-          # Save the current production API privately on the runner before
-          # replacing it. No backup or config file is written into webroot.
+          test -s server/mail-i18n.php
+          # Back up the existing API and, when present, its mail dependency.
+          # An optional missing mail file is expected on older installations.
           printf 'cd "%s/api"\nget "api.php" "/tmp/phev-api-previous.php"\n' "$SFTP_DIR" > /tmp/check-api.batch
           sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check-api.batch "$SFTP_USER@$SFTP_HOST"
           test -s /tmp/phev-api-previous.php
-          printf 'cd "%s/api"\nput "server/api.php" "api.php"\n' "$SFTP_DIR" > /tmp/upload-api.batch
-          sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload-api.batch "$SFTP_USER@$SFTP_HOST"
-          # An unauthenticated request must receive 401. This also detects
-          # PHP fatal errors, missing config and unavailable database.
-          code="$(curl --silent --show-error --output /tmp/api-health.json --write-out '%{http_code}' 'https://tracker.web-produktion.com/api/api.php?action=session')"
-          if [ "$code" != "401" ]; then
-            echo "API health check failed (HTTP $code); restoring previous version."
-            printf 'cd "%s/api"\nput "/tmp/phev-api-previous.php" "api.php"\n' "$SFTP_DIR" > /tmp/restore-api.batch
+          printf 'cd "%s/api"\nget "mail-i18n.php" "/tmp/phev-mail-previous.php"\n' "$SFTP_DIR" > /tmp/check-mail.batch
+          mail_existed=false
+          if sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/check-mail.batch "$SFTP_USER@$SFTP_HOST"; then
+            test -s /tmp/phev-mail-previous.php
+            mail_existed=true
+          fi
+          rollback_api() {
+            echo "Restoring previous API and mail dependency."
+            {
+              printf 'cd "%s/api"\n' "$SFTP_DIR"
+              printf 'put "/tmp/phev-api-previous.php" "api.php"\n'
+              if [ "$mail_existed" = true ]; then
+                printf 'put "/tmp/phev-mail-previous.php" "mail-i18n.php"\n'
+              else
+                printf 'rm "mail-i18n.php"\n'
+              fi
+            } > /tmp/restore-api.batch
             sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/restore-api.batch "$SFTP_USER@$SFTP_HOST"
+          }
+          # Upload the dependency first, then the API that requires it.
+          printf 'cd "%s/api"\nput "server/mail-i18n.php" "mail-i18n.php"\nput "server/api.php" "api.php"\n' "$SFTP_DIR" > /tmp/upload-api.batch
+          if ! sftp -oBatchMode=yes -oStrictHostKeyChecking=yes -oIdentityFile="$HOME/.ssh/deploy_key" -P 22 -b /tmp/upload-api.batch "$SFTP_USER@$SFTP_HOST"; then
+            rollback_api
+            exit 1
+          fi
+          # No redirects: an unauthenticated API session request must return 401.
+          code="$(curl --silent --show-error --output /tmp/api-health.json --write-out '%{http_code}' 'https://tracker.web-produktion.com/api/api.php?action=session')" || code="000"
+          if [ "$code" != "401" ]; then
+            echo "API health check failed (HTTP $code); response content type:"
+            file -b /tmp/api-health.json 2>/dev/null || true
+            rollback_api
             exit 1
           fi
           echo "PHP API deployed and unauthenticated health check passed."
