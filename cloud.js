@@ -409,7 +409,7 @@ function applyAccountLanguage(account){
  select.disabled=!available;
  select.value=account.language==='en'?'en':'de';
  window.PhevI18n?.setLanguage(select.value);
- status.textContent=available?'':'Datenbankmigration für die Sprachauswahl steht noch aus.';
+ status.textContent=available?'':(window.PhevI18n?.t('accountLanguage.migrationMissing')||'Datenbankmigration für die Sprachauswahl steht noch aus.');
 }
 ce('account-language')?.addEventListener('change',async event=>{
  const select=event.currentTarget,previous=window.PhevI18n?.getLanguage()||'de';
@@ -417,7 +417,7 @@ ce('account-language')?.addEventListener('change',async event=>{
  try{
   const result=await cloudCall('account-language',{language:select.value});
   window.PhevI18n?.setLanguage(result.language);
-  ce('account-language-status').textContent='Gespeichert.';
+  ce('account-language-status').textContent=(window.PhevI18n?.t('accountLanguage.saved')||'Gespeichert.');
  }catch(error){select.value=previous;ce('account-language-status').textContent=error.message;}
  finally{select.disabled=false;}
 });

@@ -99,6 +99,8 @@ window.PhevTranslations.en=Object.freeze({
  'familyVehicles.column.tank':'Tank',
  'familyVehicles.column.access':'Access',
  'familyVehicles.column.details':'Details',
+ 'accountLanguage.migrationMissing':'The database migration for language selection is still pending.',
+ 'accountLanguage.saved':'Saved.',
  'nav.home':'Overview','nav.analysis':'🧠 Analytics dashboard','nav.entries':'⚡ Charging / ⛽ Refuelling',
  'nav.vehicles':'🚘 Vehicles','nav.charging':'⚡ Charging locations & providers','nav.account':'Account',
  'nav.administration':'Administration',
