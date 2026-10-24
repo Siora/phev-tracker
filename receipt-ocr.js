@@ -16,10 +16,10 @@
  button.addEventListener('click',async()=>{
   if(running)return;
   const file=fileInput.files&&fileInput.files[0];
-  if(!file){status.textContent='Bitte zuerst ein Belegfoto auswählen.';return;}
+  if(!file){status.textContent=(globalThis.window?.PhevI18n?.t('receipt.selectFirst')||'Bitte zuerst ein Belegfoto auswählen.');return;}
   running=true;
   button.disabled=true;
-  status.textContent='Texterkennung wird vorbereitet. Das Foto bleibt auf diesem Gerät.';
+  status.textContent=(globalThis.window?.PhevI18n?.t('receipt.ocrPreparing')||'Texterkennung wird vorbereitet. Das Foto bleibt auf diesem Gerät.');
   let stage='Bibliothek laden';
   try{
    if(!window.Tesseract){
@@ -34,7 +34,7 @@
    if(!window.Tesseract||typeof window.Tesseract.createWorker!=='function')throw new Error('ocr-library-unavailable');
    // Frühzeitig unterscheiden: fehlende Deployment-Datei, HTTP-Fehler oder Worker-Initialisierung.
    for(const asset of ['tesseract-worker.min.js','deu.traineddata.gz','tesseract-core-simd-lstm.wasm.js']){
-    stage='OCR-Datei prüfen: '+asset;
+    stage=(globalThis.window?.PhevI18n?.t('receipt.ocrCheck')||'OCR-Datei prüfen: ')+asset;
     const response=await fetch(local(asset+'?v=220'),{cache:'no-store'});
     if(!response.ok)throw new Error(asset+': HTTP '+response.status);
     const type=response.headers.get('content-type')||'';
@@ -67,14 +67,14 @@
    text.value=recognized;
    text.dispatchEvent(new Event('input',{bubbles:true}));
    if(extract){extract.click();}
-   status.textContent='Text erkannt. Die Werte stehen unten zur Prüfung bereit; bitte erst nach Kontrolle ins Formular übernehmen.';
+   status.textContent=(globalThis.window?.PhevI18n?.t('receipt.ocrRecognized')||'Text erkannt. Die Werte stehen unten zur Prüfung bereit; bitte erst nach Kontrolle ins Formular übernehmen.');
    const review=document.getElementById('receipt-extract-preview');
    if(review&&!review.hidden)review.scrollIntoView({block:'nearest',behavior:'smooth'});
   }catch(error){
    const detail=error&&error.message?String(error.message).slice(0,160):'Unbekannter Fehler';
    console.error('Lokale Beleg-OCR fehlgeschlagen bei '+stage,error);
    status.textContent=error&&error.message==='empty-result'
-    ?'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden.'
+    ?(globalThis.window?.PhevI18n?.t('receipt.ocrUnreadable')||'Kein lesbarer Text erkannt. Bitte ein schärferes Foto verwenden.')
     :'Texterkennung fehlgeschlagen ('+stage+'). Technischer Hinweis: '+detail+'. Bitte Seite neu laden und erneut versuchen.';
   }finally{
    if(worker){try{await worker.terminate();}catch(_error){}worker=null;}
