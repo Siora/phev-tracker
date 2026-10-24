@@ -34,7 +34,7 @@ test('translation targets never contain form controls',()=>{
 });
 
 test('all translated attribute keys exist in both dictionaries',()=>{
- const keys=[...new Set([...html.matchAll(/data-i18n-(?:placeholder|aria-label|alt)="([^"]+)"/g)].map(m=>m[1]))];
+ const keys=[...new Set([...html.matchAll(/data-i18n-(?:placeholder|aria-label|alt|title)="([^"]+)"/g)].map(m=>m[1]))];
  for(const lang of ['de','en']) assert.deepEqual(keys.filter(key=>!dictionaries[lang].has(key)),[]);
 });
 
