@@ -744,16 +744,16 @@ function buildDashboardStatTiles({
   distance, currency
 }){
   return [
-    ['⚡ Ø Preis pro kWh',averageElectric],
-    ['⛽ Ø Preis pro Liter',averageFuel],
-    ['⚡ Geladene Energie',charges.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' kWh'],
-    ['⛽ Benzin',fuel.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' l'],
-    ['💰 Gesamtkosten',fmt(cost,currency)],
-    ['🔌 Stromkosten',fmt(electric,currency)],
-    ['⛽ Benzinkosten',fmt(petrol,currency)],
-    ['🚗 Kosten / 100 km',distance?fmt(cost/distance*100,currency):'–'],
-    ['Ladevorgänge',charges.length],
-    ['Tankungen',fuel.length]
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.averageElectric')||'⚡ Ø Preis pro kWh'),averageElectric],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.averageFuel')||'⛽ Ø Preis pro Liter'),averageFuel],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.chargedEnergy')||'⚡ Geladene Energie'),charges.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' kWh'],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.petrol')||'⛽ Benzin'),fuel.reduce((v,x)=>v+Number(x.amount||0),0).toFixed(2)+' l'],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.totalCost')||'💰 Gesamtkosten'),fmt(cost,currency)],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.electricCost')||'🔌 Stromkosten'),fmt(electric,currency)],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.fuelCost')||'⛽ Benzinkosten'),fmt(petrol,currency)],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.costPer100')||'🚗 Kosten / 100 km'),distance?fmt(cost/distance*100,currency):'–'],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.chargingEvents')||'Ladevorgänge'),charges.length],
+    [(globalThis.window?.PhevI18n?.t('dashboard.stats.refuelingEvents')||'Tankungen'),fuel.length]
   ];
 }
 

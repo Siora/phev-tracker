@@ -383,3 +383,13 @@ test('Fahrzeugübersicht und Timeline im Dashboard sind zweisprachig',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Dashboard-Statistikkacheln sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['averageElectric','averageFuel','chargedEnergy','petrol','totalCost','electricCost','fuelCost','costPer100','chargingEvents','refuelingEvents']){
+  const name='dashboard.stats.'+key;
+  assert.ok(app.includes("PhevI18n?.t('"+name+"')"));
+  assert.ok(de.includes("'"+name+"'"));
+  assert.ok(en.includes("'"+name+"'"));
+ }
+});
