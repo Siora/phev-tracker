@@ -506,5 +506,9 @@ window.PhevTranslations.de=Object.freeze({
  'common.save':'Speichern','common.cancel':'Abbrechen','common.back':'Zurück',
  'entries.new':'+ Neuer Eintrag','vehicles.new':'+ Neues Fahrzeug',
  'locations.new':'+ Neuer Ladeort','providers.new':'+ Neuer Anbieter',
- 'expenses.new':'+ Neue Ausgabe','admin.users':'Benutzerverwaltung'
+ 'expenses.new':'+ Neue Ausgabe','admin.users':'Benutzerverwaltung',
+ 'analysisEmpty.yearly':'Noch keine Jahresdaten für die grafische Darstellung vorhanden.',
+ 'analysisEmpty.vehicles':'Noch keine eigenen Fahrzeuge vorhanden.',
+ 'analysisEmpty.costs':'Noch keine erfassten Jahreskosten vorhanden.',
+ 'analysisEmpty.months':'Noch keine Monatsdaten.',
 });

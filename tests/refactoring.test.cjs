@@ -253,3 +253,12 @@ test('Alle statischen Übersetzungsschlüssel sind in beiden Sprachen vorhanden'
  }
  assert.match(html,/id="account-language-status"[^>]*data-i18n="accountLanguage\.loginHint"/);
 });
+
+test('Leere Analysezustände sind in Deutsch und Englisch lokalisiert',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['analysisEmpty.yearly','analysisEmpty.vehicles','analysisEmpty.costs','analysisEmpty.months']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});

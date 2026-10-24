@@ -506,5 +506,9 @@ window.PhevTranslations.en=Object.freeze({
  'common.save':'Save','common.cancel':'Cancel','common.back':'Back',
  'entries.new':'New entry','vehicles.new':'New vehicle',
  'locations.new':'New charging location','providers.new':'New provider',
- 'expenses.new':'New expense','admin.users':'User management'
+ 'expenses.new':'New expense','admin.users':'User management',
+ 'analysisEmpty.yearly':'No yearly data available to display in the chart.',
+ 'analysisEmpty.vehicles':'No vehicles available in your account.',
+ 'analysisEmpty.costs':'No yearly costs recorded yet.',
+ 'analysisEmpty.months':'No monthly data available.',
 });

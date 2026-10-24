@@ -191,7 +191,7 @@ function renderYearlyCostChart(data,money,currentYear){
  container.replaceChildren();
  if(!data.length){
   const empty=document.createElement('p');
-  empty.textContent='Noch keine Jahresdaten für die grafische Darstellung vorhanden.';
+  empty.textContent=(globalThis.window?.PhevI18n?.t('analysisEmpty.yearly')||'Noch keine Jahresdaten für die grafische Darstellung vorhanden.');
   container.append(empty);return;
  }
  const max=Math.max(1,...data.map(item=>item.totals.total));
@@ -254,7 +254,7 @@ function renderIntelligence(){
    totals:window.PhevIntelligence.analyze(records,vehicleExpenses,String(vehicle.id),Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency))
   })).sort((a,b)=>b.totals.total-a.totals.total);
   if(!comparison.length){
-   const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='Noch keine eigenen Fahrzeuge vorhanden.';tr.append(td);vehicleComparison.append(tr);
+   const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent=(globalThis.window?.PhevI18n?.t('analysisEmpty.vehicles')||'Noch keine eigenen Fahrzeuge vorhanden.');tr.append(td);vehicleComparison.append(tr);
   }
   for(const {vehicle,totals} of comparison){
    const tr=document.createElement('tr');
@@ -273,7 +273,7 @@ function renderIntelligence(){
    .filter(y=>Number.isInteger(y)&&y>=2020&&y<=2100).sort((a,b)=>b-a);
   if(!yearSet.length){
    const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;
-   td.textContent='Noch keine erfassten Jahreskosten vorhanden.';tr.append(td);yearlyBody.append(tr);
+   td.textContent=(globalThis.window?.PhevI18n?.t('analysisEmpty.costs')||'Noch keine erfassten Jahreskosten vorhanden.');tr.append(td);yearlyBody.append(tr);
   }
   const annualData=yearSet.map(year=>({
    year,
@@ -711,7 +711,7 @@ function renderMonthComparison(filtered){
     const amount=document.createElement('strong');amount.textContent=fmt(value,settings.base);
     line.append(label,track,amount);compare.append(line);
   });
-  if(!monthsMap.size)compare.textContent='Noch keine Monatsdaten.';
+  if(!monthsMap.size)compare.textContent=(globalThis.window?.PhevI18n?.t('analysisEmpty.months')||'Noch keine Monatsdaten.');
 }
 
 /**
