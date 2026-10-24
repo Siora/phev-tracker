@@ -39,12 +39,14 @@
  }
  function setLanguage(code){
   if(!languages.includes(code))return false;
+  const changed=active!==code;
   active=code;document.documentElement.lang=code;
   document.querySelectorAll('[data-i18n]').forEach(translateElement);
   // Translate attributes without replacing form controls or their current values.
   for(const attribute of ['placeholder','aria-label','alt']){
    document.querySelectorAll('[data-i18n-'+attribute+']').forEach(element=>translateAttribute(element,attribute));
   }
+  if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')document.dispatchEvent(new CustomEvent('phev:language-changed',{detail:{language:code}}));
   return true;
  }
  window.PhevI18n=Object.freeze({t:translate,setLanguage,getLanguage:()=>active,locale:()=>active==='en'?'en-CH':'de-CH',languages});
