@@ -643,4 +643,11 @@ window.PhevTranslations.de=Object.freeze({
  'dashboard.vehicle.generic':"Fahrzeug",
  'dashboard.vehicle.energySuffix':" · Energie & Kosten",
  'dashboard.vehicle.energy':"Energie & Kosten",
+ 'dashboard.family.loaded':"Familienfreigabe: ",
+ 'dashboard.family.pending':"Familienfreigabe noch nicht geladen: ",
+ 'dashboard.family.total':" Einträge insgesamt, ",
+ 'dashboard.family.period':" im Zeitraum, ",
+ 'dashboard.family.placeFilter':" nach Ortsfilter",
+ 'dashboard.family.datePrefix':" · Erfasster Zeitraum: ",
+ 'dashboard.family.dateBetween':" bis ",
 });
