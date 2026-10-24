@@ -286,18 +286,18 @@ async function loadFamilyShares(){
    let action='—';
    // Der Server prüft den Fahrzeugbesitz erneut; die UI allein vergibt keine Rechte.
    if(Number(share.can_manage)===1){
-    const revoke=document.createElement('button');revoke.type='button';revoke.textContent=(window.PhevI18n?.t('familyShares.revoke')||(window.PhevI18n?.t('familyShares.revoke')||'Widerrufen'));
+    const revoke=document.createElement('button');revoke.type='button';revoke.textContent=(window.PhevI18n?.t('familyShares.revoke')||'Widerrufen');
     revoke.onclick=async()=>{
      if(!confirm('Freigabe für '+share.brand+' '+share.model+' wirklich widerrufen?'))return;
      revoke.disabled=true;
      try{await cloudCall('family-vehicle-share-delete',{family_id:familyId,vehicle_id:Number(share.vehicle_id)});await loadFamilyShares();await loadSharedVehicles();}
-     catch(error){revoke.disabled=false;list.textContent=(window.PhevI18n?.t('familyShares.revokeFailed')||(window.PhevI18n?.t('familyShares.revokeFailed')||'Widerruf fehlgeschlagen: '))+error.message;}
+     catch(error){revoke.disabled=false;list.textContent=(window.PhevI18n?.t('familyShares.revokeFailed')||'Widerruf fehlgeschlagen: ')+error.message;}
     };action=revoke;
    }
-   return [share.brand+' '+share.model,share.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)')):(window.PhevI18n?.t('familyShares.read')||(window.PhevI18n?.t('familyShares.read')||'Lesen')),action];
+   return [share.brand+' '+share.model,share.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)'):(window.PhevI18n?.t('familyShares.read')||'Lesen'),action];
   });
   familyTable(list,[(window.PhevI18n?.t('familyVehicles.column.vehicle')||'Fahrzeug'),(window.PhevI18n?.t('familyVehicles.column.access')||'Berechtigung'),(window.PhevI18n?.t('familyShares.action')||'Aktion')],rows);
- }catch(error){list.textContent=(window.PhevI18n?.t('familyShares.loadFailed')||(window.PhevI18n?.t('familyShares.loadFailed')||'Freigaben konnten nicht geladen werden: '))+error.message;}
+ }catch(error){list.textContent=(window.PhevI18n?.t('familyShares.loadFailed')||'Freigaben konnten nicht geladen werden: ')+error.message;}
 }
 ce('family-shares-refresh').onclick=loadFamilyShares;
 ce('family-share-form').onsubmit=async event=>{
@@ -307,7 +307,7 @@ ce('family-share-form').onsubmit=async event=>{
   await loadFamilyShares();
   await loadSharedVehicles();
   await loadFamilyMembers();
- }catch(error){ce('family-shares-list').textContent=(window.PhevI18n?.t('familyShares.saveFailed')||(window.PhevI18n?.t('familyShares.saveFailed')||'Freigabe fehlgeschlagen: '))+error.message;}
+ }catch(error){ce('family-shares-list').textContent=(window.PhevI18n?.t('familyShares.saveFailed')||'Freigabe fehlgeschlagen: ')+error.message;}
  finally{button.disabled=false;}
 };
 /** Mitgliederdaten ausschließlich über den autorisierten Familien-Endpunkt laden. */
