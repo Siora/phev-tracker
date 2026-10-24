@@ -381,6 +381,7 @@ window.PhevTranslations.en=Object.freeze({
  'vehiclePage.saved':"Saved vehicles",
  'vehiclePage.shared':"Vehicles shared by family",
  'vehiclePage.sharedLoading':"Loading shared vehicles.",
+ 'common.cancelArrow':'← Cancel',
  'nav.home':'Overview','nav.analysis':'🧠 Analytics dashboard','nav.entries':'⚡ Charging / ⛽ Refuelling',
  'nav.vehicles':'🚘 Vehicles','nav.charging':'⚡ Charging locations & providers','nav.account':'Account',
  'nav.administration':'Administration',
