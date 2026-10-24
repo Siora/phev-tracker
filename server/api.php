@@ -14,6 +14,7 @@ function respond(int $status, array $body): never { http_response_code($status);
 function fail(int $code, string $message): never { respond($code, ['error'=>$message]); }
 if (!is_file(__DIR__.'/config.php')) fail(503, 'Serverkonfiguration fehlt');
 $config = require __DIR__.'/config.php';
+require_once __DIR__.'/mail-i18n.php';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin && !in_array($origin, [$config['allowed_origin'], 'capacitor://localhost', 'https://tracker.web-produktion.com'], true)) fail(403, 'Origin nicht erlaubt');
 if ($origin) { header('Access-Control-Allow-Origin: '.$origin); header('Vary: Origin'); }
@@ -94,7 +95,7 @@ function sendResetMail(array $config,string $recipient,string $subject,string $m
   $send('MAIL FROM:<'.$sender.'>');if ($read()!==250)return false;
   $send('RCPT TO:<'.$recipient.'>');if (!in_array($read(),[250,251],true))return false;
   $send('DATA');if ($read()!==354)return false;
-  $headers="From: PHEV Tracker <".$sender.">\r\nTo: <".$recipient.">\r\nSubject: ".$subject."\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
+  $headers="From: PHEV Tracker <".$sender.">\r\nTo: <".$recipient.">\r\nSubject: ".phevMailSubjectHeader($subject)."\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8";
   $payload=$headers."\r\n\r\n".$message;
   $payload=str_replace(["\r\n","\r"],"\n",$payload);
   $payload=preg_replace('/^\./m','..',$payload);
@@ -122,8 +123,7 @@ if ($action === 'password-reset-request') {
    $stmt=$db->prepare('INSERT INTO password_resets(user_id,token_hash,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 30 MINUTE))');
    $stmt->execute([$target,$hash]);
    $link='https://tracker.web-produktion.com/#reset-token='.$token;
-   $subject='PHEV Tracker - Passwort zuruecksetzen';
-   $message="Zum Zuruecksetzen des Passworts diesen Link innerhalb von 30 Minuten oeffnen:\n".$link."\nFalls du dies nicht angefordert hast, ignoriere diese E-Mail.\n";
+   [$subject,$message]=phevMailContent('password-reset',phevUserMailLanguage($db,(int)$target),$link);
    if (!sendResetMail($config,$mail,$subject,$message)) {
     $stmt=$db->prepare('DELETE FROM password_resets WHERE token_hash=?');$stmt->execute([$hash]);
     error_log('PHEV password reset email delivery failed');
