@@ -302,3 +302,9 @@ test('Jahresbericht-Titel und Erläuterungen sind zweisprachig',()=>{
 test('PDF-Tabellenspalten sind zweisprachig',()=>{
  const app=read('app.js');for(const key of ["pdf.col.date","pdf.col.category","pdf.col.vehicle","pdf.col.costPrefix","pdf.col.month","pdf.col.charges","pdf.col.refuels","pdf.col.electricity","pdf.col.petrol","pdf.col.other","pdf.col.total","pdf.col.electricKwh","pdf.col.petrolLiters","pdf.col.amountPrefix","pdf.col.extraShare","pdf.col.cost","pdf.col.mileageRange","pdf.col.costPerKm","pdf.col.dateTime","pdf.col.type","pdf.col.quantity","pdf.col.place","pdf.col.totalPrefix"]){assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
 });
+
+test('Analyse-Kennzahlen werden in Deutsch und Englisch übersetzt',()=>{
+ const app=read('app.js');
+ const keys=["noData","totalCosts","costPer100","entriesPeriod","estimatedFrom","mileageSpan","needMileage","weightedPrice","chargesIncluded","aboveAverage","costTrend","trendNote","petrolVolume","liters"];
+ for(const suffix of keys){const key='insight.label.'+suffix;assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
+});

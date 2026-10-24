@@ -448,21 +448,21 @@ function renderConsumptionInsights(items,charges,fuel,distance){
   const detail=document.createElement('small');detail.textContent=note;
   card.append(heading,figure,detail);target.append(card);
  };
- if(!items.length){add('Noch keine Daten','–',(globalThis.window?.PhevI18n?.t('insights.addEntries')||'Erfasse Ladungen oder Tankungen für eine Auswertung.'));return;}
+ if(!items.length){add((globalThis.window?.PhevI18n?.t('insight.label.noData')||'Noch keine Daten'),'–',(globalThis.window?.PhevI18n?.t('insights.addEntries')||'Erfasse Ladungen oder Tankungen für eine Auswertung.'));return;}
  const total=items.reduce((sum,r)=>sum+conv(r),0);
- add('Gesamtkosten',fmt(total,settings.base),items.length+' Einträge im gewählten Zeitraum');
- if(distance>0)add('Kosten je 100 km',fmt(total/distance*100,settings.base),'Näherung aus '+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne');
- else add('Kosten je 100 km','–','Mindestens zwei unterschiedliche Kilometerstände erforderlich');
+ add((globalThis.window?.PhevI18n?.t('insight.label.totalCosts')||'Gesamtkosten'),fmt(total,settings.base),items.length+(globalThis.window?.PhevI18n?.t('insight.label.entriesPeriod')||' Einträge im gewählten Zeitraum'));
+ if(distance>0)add((globalThis.window?.PhevI18n?.t('insight.label.costPer100')||'Kosten je 100 km'),fmt(total/distance*100,settings.base),(globalThis.window?.PhevI18n?.t('insight.label.estimatedFrom')||'Näherung aus ')+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+(globalThis.window?.PhevI18n?.t('insight.label.mileageSpan')||' km Kilometerstandsspanne'));
+ else add('Kosten je 100 km','–',(globalThis.window?.PhevI18n?.t('insight.label.needMileage')||'Mindestens zwei unterschiedliche Kilometerstände erforderlich'));
  const valid=charges.filter(r=>Number(r.amount)>0&&Number.isFinite(conv(r))&&conv(r)>=0);
  const sumKwh=valid.reduce((a,r)=>a+Number(r.amount),0);
  const sumCost=valid.reduce((a,r)=>a+conv(r),0);
  if(sumKwh>0){
   const avg=sumCost/sumKwh;
-  add('Gewichteter Strompreis',fmt(avg,settings.base)+' / kWh',valid.length+' Ladevorgänge berücksichtigt');
+  add((globalThis.window?.PhevI18n?.t('insight.label.weightedPrice')||'Gewichteter Strompreis'),fmt(avg,settings.base)+' / kWh',valid.length+(globalThis.window?.PhevI18n?.t('insight.label.chargesIncluded')||' Ladevorgänge berücksichtigt'));
   const costly=valid.filter(r=>Number(r.amount)>=1&&conv(r)/Number(r.amount)>avg*1.5&&conv(r)/Number(r.amount)>avg+0.05).sort((a,b)=>conv(b)/Number(b.amount)-conv(a)/Number(a.amount));
   if(valid.length>=3&&costly.length){
    const highest=costly[0],price=conv(highest)/Number(highest.amount);
-   add((globalThis.window?.PhevI18n?.t('insights.highChargingPrice')||'Auffälliger Ladepreis'),fmt(price,settings.base)+' / kWh',(highest.place||(globalThis.window?.PhevI18n?.t('insights.unknownLocation')||'Unbekannter Ladeort'))+' · '+highest.date+' · über 50 % über dem Durchschnitt');
+   add((globalThis.window?.PhevI18n?.t('insights.highChargingPrice')||'Auffälliger Ladepreis'),fmt(price,settings.base)+' / kWh',(highest.place||(globalThis.window?.PhevI18n?.t('insights.unknownLocation')||'Unbekannter Ladeort'))+' · '+highest.date+(globalThis.window?.PhevI18n?.t('insight.label.aboveAverage')||' · über 50 % über dem Durchschnitt'));
   }else add((globalThis.window?.PhevI18n?.t('insights.priceCheck')||'Ladepreis-Prüfung'),(globalThis.window?.PhevI18n?.t('insights.noAnomaly')||'Keine Auffälligkeit'),valid.length<3?(globalThis.window?.PhevI18n?.t('insights.minimumCharges')||'Ab 3 Ladevorgängen wird auf hohe Einzelpreise geprüft.'):(globalThis.window?.PhevI18n?.t('insights.noHighPrice')||'Kein Einzelpreis liegt deutlich über dem Durchschnitt.'));
  }
  const sorted=items.filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)).slice().sort((a,b)=>a.date.localeCompare(b.date));
@@ -472,11 +472,11 @@ function renderConsumptionInsights(items,charges,fuel,distance){
   const before=avgCost(earlier),after=avgCost(later);
   if(before>0){
    const delta=(after/before-1)*100;
-   add('Kostenentwicklung je Eintrag',(delta>0?'+':'')+delta.toFixed(1)+' %','Vergleich der früheren und neueren Hälfte der Einträge; kein Verbrauchstrend pro km');
+   add((globalThis.window?.PhevI18n?.t('insight.label.costTrend')||'Kostenentwicklung je Eintrag'),(delta>0?'+':'')+delta.toFixed(1)+' %',(globalThis.window?.PhevI18n?.t('insight.label.trendNote')||'Vergleich der früheren und neueren Hälfte der Einträge; kein Verbrauchstrend pro km'));
   }
  }
  const liters=fuel.reduce((sum,r)=>sum+Number(r.amount||0),0);
- if(liters>0)add('Erfasste Benzinmenge',liters.toFixed(1)+' Liter',(globalThis.window?.PhevI18n?.t('insights.fuelDisclaimer')||'Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.'));
+ if(liters>0)add((globalThis.window?.PhevI18n?.t('insight.label.petrolVolume')||'Erfasste Benzinmenge'),liters.toFixed(1)+(globalThis.window?.PhevI18n?.t('insight.label.liters')||' Liter'),(globalThis.window?.PhevI18n?.t('insights.fuelDisclaimer')||'Tankmenge ist nicht gleich tatsächlichem Motorverbrauch.'));
 }
 
 /**
