@@ -1573,7 +1573,7 @@ function exportPdfReport(mode){
   * gerechnet. Ohne mindestens zwei gültige Stände bleibt der Wert offen.
   */
  if(mode==='year'){
-  const months=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const months=Array.from({length:12},(_,i)=>new Intl.DateTimeFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{month:'short'}).format(new Date(2024,i,1)));
   const money=value=>Number(value).toFixed(2);
   const expenseValue=x=>expenseCurrency(Number(x.amount),x.currency);
   const monthly=buckets.map((key,index)=>{
@@ -1590,7 +1590,7 @@ function exportPdfReport(mode){
   pdf.table([(globalThis.window?.PhevI18n?.t('pdf.col.month')||'Monat'),(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin'),(globalThis.window?.PhevI18n?.t('pdf.col.other')||'Weitere'),(globalThis.window?.PhevI18n?.t('pdf.col.total')||'Gesamt')],
    monthly.map(m=>[m.name,money(m.electricity),money(m.petrol),money(m.other),money(m.total)]),
    [65,105,105,105,115]);
-  pdf.note((globalThis.window?.PhevI18n?.t('pdf.allAmountsIn')||'Alle Beträge in ')+settings.base+'. Monatswerte entsprechen den erfassten Daten.');
+  pdf.note((globalThis.window?.PhevI18n?.t('pdf.allAmountsIn')||'Alle Beträge in ')+settings.base+(globalThis.window?.PhevI18n?.t('pdf.monthlyValuesNote')||'. Monatswerte entsprechen den erfassten Daten.'));
   pdf.heading((globalThis.window?.PhevI18n?.t('pdf.monthlyEnergy')||'Energieverbrauch pro Monat'));
   pdf.table([(globalThis.window?.PhevI18n?.t('pdf.col.month')||'Monat'),(globalThis.window?.PhevI18n?.t('pdf.col.electricKwh')||'Strom kWh'),(globalThis.window?.PhevI18n?.t('pdf.col.petrolLiters')||'Benzin Liter'),(globalThis.window?.PhevI18n?.t('pdf.col.totalPrefix')||'Gesamt ')+settings.base],
    monthly.map(m=>[m.name,m.kwh.toFixed(1),m.liters.toFixed(1),money(m.total)]),
@@ -1629,8 +1629,8 @@ function exportPdfReport(mode){
   pdf.heading((globalThis.window?.PhevI18n?.t('pdf.annualSummary')||'Jahresfazit'));
   const activeMonths=monthly.filter(m=>m.total>0);
   const highest=activeMonths.slice().sort((a,b)=>b.total-a.total)[0];
-  pdf.note((globalThis.window?.PhevI18n?.t('pdf.totalCosts')||'Erfasste Gesamtkosten: ')+money(combined)+' '+settings.base+'; Strom: '+money(sum(charges,conv))+'; Benzin: '+money(sum(fuel,conv))+'; Zusatzkosten: '+money(extras)+'.');
-  pdf.note((globalThis.window?.PhevI18n?.t('pdf.activeMonths')||'Aktive Kostenmonate: ')+activeMonths.length+' von 12.'+(highest?' Kostenintensivster Monat: '+highest.name+' ('+money(highest.total)+' '+settings.base+').':''));
+  pdf.note((globalThis.window?.PhevI18n?.t('pdf.totalCosts')||'Erfasste Gesamtkosten: ')+money(combined)+' '+settings.base+(globalThis.window?.PhevI18n?.t('pdf.summaryElectric')||'; Strom: ')+money(sum(charges,conv))+(globalThis.window?.PhevI18n?.t('pdf.summaryFuel')||'; Benzin: ')+money(sum(fuel,conv))+(globalThis.window?.PhevI18n?.t('pdf.summaryExtras')||'; Zusatzkosten: ')+money(extras)+'.');
+  pdf.note((globalThis.window?.PhevI18n?.t('pdf.activeMonths')||'Aktive Kostenmonate: ')+activeMonths.length+(globalThis.window?.PhevI18n?.t('pdf.ofTwelve')||' von 12.')+(highest?(globalThis.window?.PhevI18n?.t('pdf.highestMonth')||' Kostenintensivster Monat: ')+highest.name+' ('+money(highest.total)+' '+settings.base+').':''));
   pdf.note((globalThis.window?.PhevI18n?.t('pdf.reportDisclaimer')||'Der Bericht beruecksichtigt nur erfasste Vorgänge und Ausgaben. Wechselkurse entsprechen den aktuellen App-Einstellungen.'));
  }
  pdf.heading((globalThis.window?.PhevI18n?.t('pdf.individualEntries')||'Einzelne Einträge'));
