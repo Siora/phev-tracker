@@ -5,8 +5,8 @@
  * Die Diagramme arbeiten ausschließlich mit den gefilterten Einträgen.
  */
 const AnalyticsCharts = (() => {
-  const money = (value, currency) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: 2}).format(value) + ' ' + currency;
-  const num = (value, digits = 1) => new Intl.NumberFormat('de-CH', {maximumFractionDigits: digits}).format(value);
+  const money = (value, currency) => new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'), {maximumFractionDigits: 2}).format(value) + ' ' + currency;
+  const num = (value, digits = 1) => new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'), {maximumFractionDigits: digits}).format(value);
   const clean = (node) => node.replaceChildren();
   const quantity = (value) => { const n = Number(String(value ?? 0).replace(',', '.')); return Number.isFinite(n) ? n : 0; };
   const empty = (node, message = 'Für diese Auswahl sind keine Daten vorhanden.') => {

@@ -36,3 +36,12 @@ test('fresh translated status continues switching normally',()=>{
  i18n.setLanguage('de');
  assert.equal(status.textContent,'Wartet');
 });
+
+test('regional date and number formatting follows account language',()=>{
+ const {i18n}=setup();
+ assert.equal(i18n.locale(),'de-CH');
+ i18n.setLanguage('en');
+ assert.equal(i18n.locale(),'en-CH');
+ i18n.setLanguage('de');
+ assert.equal(i18n.locale(),'de-CH');
+});

@@ -237,7 +237,7 @@ function renderIntelligence(){
  const result=window.PhevIntelligence.analyze(analysisRecords,isFamily?[]:vehicleExpenses,vehicleSelect.value,Number(yearSelect.value),conv,e=>expenseCurrency(Number(e.amount),e.currency));
  const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
  summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
- const money=v=>new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
+ const money=v=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
  for(const [label,value] of [['Gesamtkosten',money(result.total)],['Stromkosten',money(result.energyCost)],['Benzinkosten',money(result.fuelCost)],['Weitere Ausgaben',money(result.otherCost)],['Geladene Energie',result.kwh.toFixed(1)+' kWh'],['Benzinmenge',result.liters.toFixed(1)+' l']]){
   const card=document.createElement('article');card.className='quick-card';
   const title=document.createElement('strong');title.textContent=label;
@@ -391,7 +391,7 @@ function renderEconomicsScenario(){
  output.replaceChildren();
  const paragraph=document.createElement('p');
  if(!result.available){paragraph.textContent=result.reason;output.append(paragraph);return;}
- const money=value=>new Intl.NumberFormat('de-CH',{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
+ const money=value=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
  paragraph.textContent='Geschätzte Jahreskosten: '+money(result.annual)+' · Kosten pro 100 km: '+money(result.costPer100);
  const detail=document.createElement('p');
  detail.textContent='Strom: '+money(result.electricity)+' · Benzin: '+money(result.fuel)+' · Fixkosten: '+money(result.fixed);
@@ -451,7 +451,7 @@ function renderConsumptionInsights(items,charges,fuel,distance){
  if(!items.length){add('Noch keine Daten','–','Erfasse Ladungen oder Tankungen für eine Auswertung.');return;}
  const total=items.reduce((sum,r)=>sum+conv(r),0);
  add('Gesamtkosten',fmt(total,settings.base),items.length+' Einträge im gewählten Zeitraum');
- if(distance>0)add('Kosten je 100 km',fmt(total/distance*100,settings.base),'Näherung aus '+distance.toLocaleString('de-CH')+' km Kilometerstandsspanne');
+ if(distance>0)add('Kosten je 100 km',fmt(total/distance*100,settings.base),'Näherung aus '+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne');
  else add('Kosten je 100 km','–','Mindestens zwei unterschiedliche Kilometerstände erforderlich');
  const valid=charges.filter(r=>Number(r.amount)>0&&Number.isFinite(conv(r))&&conv(r)>=0);
  const sumKwh=valid.reduce((a,r)=>a+Number(r.amount),0);
@@ -645,7 +645,7 @@ function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cos
   if(v){
   const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
   const mileage=(selectedVehicle.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords:records).filter(r=>String(r.vehicle_id)===String(v.id)&&Number(r.km)>0).map(r=>Number(r.km));
-  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString('de-CH')+' km':'–')+'.';
+  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km':'–')+'.';
   summary.append(details,latest);
   }
   }
@@ -683,7 +683,7 @@ function renderDashboardTimeline(filtered){
     head.append(title,date);
     const details=document.createElement('div');details.className='timeline-details';
     const amount=Number(r.amount)||0;
-    details.textContent=amount.toLocaleString('de-CH',{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
+    details.textContent=amount.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
     const notes=document.createElement('small');notes.className='timeline-notes';
     const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
     notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');
@@ -834,7 +834,7 @@ function render(){
       tile.append(small,bold);consumption.append(tile);
     }
     $('consumption-note').textContent=distance>0
-      ? 'Näherungswerte: '+distance.toLocaleString('de-CH')+' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.'
+      ? 'Näherungswerte: '+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.'
       : 'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.';
   }
   renderConsumptionInsights(filtered,charges,fuel,distance);
@@ -864,7 +864,7 @@ function escapeHTML(s){
   }
   [c]))
 }
-for(let i=0;i<12;i++)$('chosenMonth').add(new Option(new Date(2026,i,1).toLocaleString('de-CH',{
+for(let i=0;i<12;i++)$('chosenMonth').add(new Option(new Date(2026,i,1).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{
   month:'long'
 }),i));
 $('chosenMonth').value=new Date().getMonth();
@@ -1174,7 +1174,7 @@ function renderVehicleExpenses(){
   const row=document.createElement('tr');
   const fields=[
    x.date||'–',x.category||'–',fmt(Number(x.amount),x.currency),
-   x.mileage_km===null||x.mileage_km===undefined||x.mileage_km===''?'–':Number(x.mileage_km).toLocaleString('de-CH')+' km',
+   x.mileage_km===null||x.mileage_km===undefined||x.mileage_km===''?'–':Number(x.mileage_km).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km',
    x.next_service_date||'–',x.note||'–'
   ];
   for(const value of fields){
@@ -1414,7 +1414,7 @@ function renderEnergyBalance(items){
  const bar=document.createElement('div');bar.style.cssText='display:flex;height:16px;border-radius:8px;overflow:hidden;background:#e5e7eb';
  const e=document.createElement('div');e.style.cssText='background:#1795be;width:'+(b.total?b.electric/b.total*100:0)+'%';
  const g=document.createElement('div');g.style.cssText='background:#e9a145;flex:1';bar.append(e,g);target.append(bar);
- $('energy-balance-note').textContent='Benzin: '+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString('de-CH')+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
+ $('energy-balance-note').textContent='Benzin: '+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
 }
 try{$('fuel-energy-factor').value=fuelEnergyFactor();}catch(error){console.warn(error);}
 

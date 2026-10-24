@@ -35,6 +35,6 @@
   }
   return true;
  }
- window.PhevI18n=Object.freeze({t:translate,setLanguage,getLanguage:()=>active,languages});
+ window.PhevI18n=Object.freeze({t:translate,setLanguage,getLanguage:()=>active,locale:()=>active==='en'?'en-CH':'de-CH',languages});
  document.addEventListener('DOMContentLoaded',()=>setLanguage(active));
 })();
