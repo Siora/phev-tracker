@@ -482,3 +482,12 @@ test('Jahreskosten-Grafik und Fahrzeugbild sind barrierefrei übersetzt',()=>{
   assert.ok(app.includes("PhevI18n?.t('"+key+"')"));assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Sprachwechsel aktualisiert Fahrzeugauswahl, Zuordnungszähler und mobiles Menü',()=>{
+ const source=read('app.js');
+ const listener=source.slice(source.lastIndexOf("document.addEventListener('phev:language-changed',()=>{"));
+ for(const call of ['refreshVehicles();','render();','renderChargingManagement();',"PhevI18n?.t('dynamic.menuOpen')","PhevI18n?.t('dynamic.menuClose')"]){
+  assert.ok(listener.includes(call),call);
+ }
+ assert.ok(source.includes("replaceVehicleOptions(filter,(globalThis.window?.PhevI18n?.t('dashboard.allVehicles')"));
+});
