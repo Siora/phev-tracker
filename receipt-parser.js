@@ -59,7 +59,7 @@
   proposal={};
   preview.hidden=true;
   fields.replaceChildren();
-  status.textContent='Belegtext geändert. Bitte Werte erneut prüfen.';
+  status.textContent=(globalThis.window?.PhevI18n?.t('receipt.textChanged')||'Belegtext geändert. Bitte Werte erneut prüfen.');
  });
  extract.addEventListener('click',()=>{
   proposal=parse(source.value);
@@ -71,7 +71,7 @@
    fields.append(p);
   }
   preview.hidden=Object.keys(proposal).length===0;
-  status.textContent=preview.hidden?'Keine eindeutigen Werte erkannt. Bitte manuell eintragen.':'Vorschläge erkannt. Bitte vor Übernahme mit dem Beleg abgleichen.';
+  status.textContent=preview.hidden?'Keine eindeutigen Werte erkannt. Bitte manuell eintragen.':(globalThis.window?.PhevI18n?.t('receipt.suggestions')||'Vorschläge erkannt. Bitte vor Übernahme mit dem Beleg abgleichen.');
  });
  apply.addEventListener('click',()=>{
   for(const [key,value] of Object.entries(proposal)){
@@ -80,6 +80,6 @@
    control.value=String(value);
    control.dispatchEvent(new Event('change',{bubbles:true}));
   }
-  status.textContent='Vorschläge ins Formular übertragen. Bitte prüfen und erst dann speichern.';
+  status.textContent=(globalThis.window?.PhevI18n?.t('receipt.applied')||'Vorschläge ins Formular übertragen. Bitte prüfen und erst dann speichern.');
  });
 })(typeof window!=='undefined'?window:globalThis);

@@ -16,7 +16,7 @@
   preview.hidden=true;
   clear.hidden=true;
   input.value='';
-  status.textContent='Noch kein Beleg ausgewählt.';
+  status.textContent=(globalThis.window?.PhevI18n?.t('receipt.noneSelected')||'Noch kein Beleg ausgewählt.');
  }
  input.addEventListener('change',()=>{
   resetPreview();
@@ -24,12 +24,12 @@
   if(!file)return;
   const allowed=['image/jpeg','image/png','image/webp','image/heic','image/heif'];
   if(!allowed.includes(file.type)){
-   status.textContent='Bitte ein JPEG-, PNG-, WebP- oder HEIC-Bild auswählen.';
+   status.textContent=(globalThis.window?.PhevI18n?.t('receipt.imageTypes')||'Bitte ein JPEG-, PNG-, WebP- oder HEIC-Bild auswählen.');
    input.value='';
    return;
   }
   if(file.size>15*1024*1024){
-   status.textContent='Das Belegfoto darf höchstens 15 MB groß sein.';
+   status.textContent=(globalThis.window?.PhevI18n?.t('receipt.maxSize')||'Das Belegfoto darf höchstens 15 MB groß sein.');
    input.value='';
    return;
   }

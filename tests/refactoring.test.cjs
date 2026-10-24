@@ -288,3 +288,8 @@ test('Fahrzeug-, Import-, Analyse- und Berichts-Texte sind zweisprachig',()=>{
   for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
  }
 });
+
+test('Nebenmodule und Belegverarbeitung sind zweisprachig',()=>{
+ const modules={"charts.js":["charts.noData","charts.tapBars","charts.noCharging","charts.noChargingEvents"],"pagination.js":["pagination.noEntries"],"pdf-report.js":["pdf.libraryFailed"],"auto-backup.js":["backup.autoFailed"],"intelligent-analytics.js":["analytics.invalidAssumptions","analytics.addRecords","analytics.significantChange","analytics.previousMonth"],"receipt-ocr.js":["receipt.selectFirst","receipt.ocrPreparing","receipt.ocrCheck","receipt.ocrRecognized","receipt.ocrUnreadable"],"receipt-parser.js":["receipt.textChanged","receipt.suggestions","receipt.applied"],"receipt-preview.js":["receipt.noneSelected","receipt.imageTypes","receipt.maxSize"]};
+ for(const [file,keys] of Object.entries(modules))for(const key of keys){assert.ok(read(file).includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
+});

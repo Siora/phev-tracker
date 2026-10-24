@@ -63,7 +63,7 @@ window.PhevIntelligence=Object.freeze({
  economicsScenario(input){
   const n=key=>Number(input[key]);
   const fields=['annualKm','electricShare','kwhPer100','litersPer100','priceKwh','priceLiter','fixedAnnual'];
-  if(!input||fields.some(key=>!Number.isFinite(n(key))))return {available:false,reason:'Bitte alle Annahmen als gültige Zahlen eingeben.'};
+  if(!input||fields.some(key=>!Number.isFinite(n(key))))return {available:false,reason:(globalThis.window?.PhevI18n?.t('analytics.invalidAssumptions')||'Bitte alle Annahmen als gültige Zahlen eingeben.')};
   if(n('annualKm')<=0||n('annualKm')>150000||n('electricShare')<0||n('electricShare')>100||
    n('kwhPer100')<0||n('kwhPer100')>100||n('litersPer100')<0||n('litersPer100')>100||
    n('priceKwh')<0||n('priceLiter')<0||n('fixedAnnual')<0)return {available:false,reason:'Die Annahmen liegen außerhalb des zulässigen Bereichs.'};
@@ -116,10 +116,10 @@ window.PhevIntelligence=Object.freeze({
   const last=current.length?current[current.length-1]:null;
   const change=previous&&previous.total>0&&last?(last.total-previous.total)/previous.total*100:null;
   const messages=[];
-  if(!valid.length&&!extra.length)messages.push({type:'info',title:'Noch keine Daten',detail:'Erfasse Ladungen, Tankungen oder Fahrzeugausgaben für dieses Jahr.'});
+  if(!valid.length&&!extra.length)messages.push({type:'info',title:'Noch keine Daten',detail:(globalThis.window?.PhevI18n?.t('analytics.addRecords')||'Erfasse Ladungen, Tankungen oder Fahrzeugausgaben für dieses Jahr.')});
   else{
    if(expensive)messages.push({type:'info',title:'Kostenintensivster Monat',detail:expensive.month+'/'+year+' mit '+expensive.total.toFixed(2)+' in der Basiswährung.'});
-   if(change!==null&&Math.abs(change)>=20)messages.push({type:'warning',title:'Deutliche Kostenänderung',detail:'Letzter abgeschlossener Monat gegenüber dem Vormonat: '+(change>0?'+':'')+change.toFixed(1)+' %. Die Anzahl der Vorgänge kann variieren.'});
+   if(change!==null&&Math.abs(change)>=20)messages.push({type:'warning',title:(globalThis.window?.PhevI18n?.t('analytics.significantChange')||'Deutliche Kostenänderung'),detail:(globalThis.window?.PhevI18n?.t('analytics.previousMonth')||'Letzter abgeschlossener Monat gegenüber dem Vormonat: ')+(change>0?'+':'')+change.toFixed(1)+' %. Die Anzahl der Vorgänge kann variieren.'});
    if(sum('kwh')>0&&sum('liters')>0)messages.push({type:'info',title:'Gemischter Energieeinsatz',detail:'Strom und Benzin wurden beide erfasst. Ohne Fahrstrecken pro Antriebsart ist kein elektrischer Fahranteil bestimmbar.'});
   }
   const forecast=window.PhevIntelligence.forecast(months,year,today);
