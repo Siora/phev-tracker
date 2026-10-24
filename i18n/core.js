@@ -31,7 +31,7 @@
  function translateNode(node){
   if(node.matches?.('[data-i18n]'))translateElement(node);
   node.querySelectorAll?.('[data-i18n]').forEach(translateElement);
-  for(const attribute of ['placeholder','aria-label','alt']){
+  for(const attribute of ['placeholder','aria-label','alt','title']){
    const selector='[data-i18n-'+attribute+']';
    if(node.matches?.(selector))translateAttribute(node,attribute);
    node.querySelectorAll?.(selector).forEach(element=>translateAttribute(element,attribute));
@@ -43,7 +43,7 @@
   active=code;document.documentElement.lang=code;
   document.querySelectorAll('[data-i18n]').forEach(translateElement);
   // Translate attributes without replacing form controls or their current values.
-  for(const attribute of ['placeholder','aria-label','alt']){
+  for(const attribute of ['placeholder','aria-label','alt','title']){
    document.querySelectorAll('[data-i18n-'+attribute+']').forEach(element=>translateAttribute(element,attribute));
   }
   if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')document.dispatchEvent(new CustomEvent('phev:language-changed',{detail:{language:code}}));

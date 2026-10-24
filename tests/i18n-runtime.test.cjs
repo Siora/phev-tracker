@@ -46,9 +46,9 @@ test('regional date and number formatting follows account language',()=>{
  assert.equal(i18n.locale(),'de-CH');
 });
 
-test('placeholder, aria-label and alt attributes switch without overwriting user edits',()=>{
+test('placeholder, aria-label, alt and title attributes switch without overwriting user edits',()=>{
  const elements={};
- for(const attribute of ['placeholder','aria-label','alt']){
+ for(const attribute of ['placeholder','aria-label','alt','title']){
   const key='data-i18n-'+attribute;
   const values={[key]:'label',[attribute]:'Deutsch'};
   elements[attribute]={
@@ -60,7 +60,7 @@ test('placeholder, aria-label and alt attributes switch without overwriting user
  const document={
   documentElement:{lang:'de'},
   querySelectorAll:selector=>{
-   const match=/^\[data-i18n-(placeholder|aria-label|alt)\]$/.exec(selector);
+   const match=/^\[data-i18n-(placeholder|aria-label|alt|title)\]$/.exec(selector);
    return match?[elements[match[1]]]:[];
   },
   addEventListener:()=>{}
@@ -75,6 +75,7 @@ test('placeholder, aria-label and alt attributes switch without overwriting user
  assert.equal(elements.placeholder.values.placeholder,'Custom placeholder');
  assert.equal(elements['aria-label'].values['aria-label'],'Deutsch');
  assert.equal(elements.alt.values.alt,'Deutsch');
+ assert.equal(elements.title.values.title,'Deutsch');
 });
 
 test('translation interpolates named variables and falls back to German',()=>{
