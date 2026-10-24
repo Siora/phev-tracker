@@ -9,7 +9,7 @@ const AnalyticsCharts = (() => {
   const num = (value, digits = 1) => new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'), {maximumFractionDigits: digits}).format(value);
   const clean = (node) => node.replaceChildren();
   const quantity = (value) => { const n = Number(String(value ?? 0).replace(',', '.')); return Number.isFinite(n) ? n : 0; };
-  const empty = (node, message = 'Für diese Auswahl sind keine Daten vorhanden.') => {
+  const empty = (node, message = (globalThis.window?.PhevI18n?.t('charts.noData')||'Für diese Auswahl sind keine Daten vorhanden.')) => {
     const p = document.createElement('p');
     p.className = 'chart-empty';
     p.textContent = message;
@@ -55,7 +55,7 @@ const AnalyticsCharts = (() => {
       item.append(amount, track, element('span', 'trend-label', month.slice(2)));
       bars.append(item);
     });
-    node.append(bars, element('p', 'chart-hint', 'Balken berühren, um Monatswerte anzuzeigen.'));
+    node.append(bars, element('p', 'chart-hint', (globalThis.window?.PhevI18n?.t('charts.tapBars')||'Balken berühren, um Monatswerte anzuzeigen.')));
   }
   // Vergleicht Strom- und Kraftstoffkosten in der gewählten Währung.
   function donut(node, entries, currency, convert) {
@@ -95,7 +95,7 @@ const AnalyticsCharts = (() => {
       v.cost += convert(e);
     });
     const months = [...groups.keys()].sort();
-    if (!months.length) return empty(node, 'Noch keine Ladungen für diese Auswahl.');
+    if (!months.length) return empty(node, (globalThis.window?.PhevI18n?.t('charts.noCharging')||'Noch keine Ladungen für diese Auswahl.'));
     const values = months.map(m => groups.get(m).cost / groups.get(m).energy);
     const width = 600, height = 180, pad = 24;
     const low = Math.min(...values), high = Math.max(...values);
@@ -145,7 +145,7 @@ const AnalyticsCharts = (() => {
       groups.set(provider, (groups.get(provider) || 0) + quantity(e.amount));
     });
     const rows = [...groups].sort((a, b) => b[1] - a[1]);
-    if (!rows.length) return empty(node, 'Keine Ladevorgänge für diese Auswahl.');
+    if (!rows.length) return empty(node, (globalThis.window?.PhevI18n?.t('charts.noChargingEvents')||'Keine Ladevorgänge für diese Auswahl.'));
     const max = Math.max(1, ...rows.map(row => row[1]));
     rows.forEach(([name, value]) => {
       const row = element('div', 'provider-row');
