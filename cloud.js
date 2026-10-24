@@ -230,20 +230,20 @@ window.loadSharedAnalytics=async function(){
 };
 async function loadSharedVehicleOverview(){
  const status=ce('shared-vehicle-overview-status'),list=ce('shared-vehicle-overview-list');
- if(!cloudToken){status.textContent='Bitte anmelden, um Familienfahrzeuge zu sehen.';list.replaceChildren();return;}
+ if(!cloudToken){status.textContent=(window.PhevI18n?.t('familyVehicles.login')||'Bitte anmelden, um Familienfahrzeuge zu sehen.');list.replaceChildren();return;}
  try{
   const result=await cloudCall('family-shared-vehicles');
   const shared=result.vehicles||[];
-  status.textContent=shared.length?shared.length+' Familienfahrzeug(e) für dich freigegeben.':'Noch keine Familienfahrzeuge für dich freigegeben.';
+  status.textContent=shared.length?shared.length+(window.PhevI18n?.t('familyVehicles.countSuffix')||' Familienfahrzeug(e) für dich freigegeben.'):(window.PhevI18n?.t('familyVehicles.empty')||'Noch keine Familienfahrzeuge für dich freigegeben.');
   // Nur bereits autorisierte Fahrzeugstammdaten; keine Kosten oder Einträge.
   const rows=shared.map(v=>{
    const details=document.createElement('details');
    details.className='shared-vehicle-details';
    const summary=document.createElement('summary');
-   summary.textContent='Details ansehen';
+   summary.textContent=(window.PhevI18n?.t('familyVehicles.viewDetails')||'Details ansehen');
    details.append(summary);
    const dl=document.createElement('dl');
-   const fields=[['Fahrzeug',v.brand+' '+v.model],['Baujahr',v.model_year],['Kennzeichen',v.plate],['Antrieb',v.drivetrain],['Batterie',v.battery_kwh==null?null:v.battery_kwh+' kWh'],['Tank',v.tank_liters==null?null:v.tank_liters+' l'],['Berechtigung',v.access_level==='edit'?'Bearbeiten (noch nicht aktiv)':'Nur lesen']];
+   const fields=[['Fahrzeug',v.brand+' '+v.model],['Baujahr',v.model_year],['Kennzeichen',v.plate],['Antrieb',v.drivetrain],['Batterie',v.battery_kwh==null?null:v.battery_kwh+' kWh'],['Tank',v.tank_liters==null?null:v.tank_liters+' l'],['Berechtigung',v.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)'):(window.PhevI18n?.t('familyVehicles.readOnly')||'Nur lesen')]];
    for(const [label,value] of fields){
     const dt=document.createElement('dt');dt.textContent=label;
     const dd=document.createElement('dd');dd.textContent=value==null||value===''?'–':String(value);
@@ -253,7 +253,7 @@ async function loadSharedVehicleOverview(){
    return [v.brand+' '+v.model,v.model_year||'–',v.drivetrain||'–',details];
   });
   familyTable(list,['Fahrzeug','Baujahr','Antrieb','Details'],rows);
- }catch(error){status.textContent='Familienfahrzeuge konnten nicht geladen werden: '+error.message;list.replaceChildren();}
+ }catch(error){status.textContent=(window.PhevI18n?.t('familyVehicles.loadFailed')||'Familienfahrzeuge konnten nicht geladen werden: ')+error.message;list.replaceChildren();}
 }
 /** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
 /** Tabellen verwenden ausschließlich textContent; API-Daten werden nie als HTML interpretiert. */
