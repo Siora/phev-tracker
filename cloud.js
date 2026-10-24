@@ -386,19 +386,19 @@ async function loadFamilies(){
 ce('family-create-form').onsubmit=async event=>{
  event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
  try{await cloudCall('family-create',{name:form.elements.name.value.trim()});form.reset();await loadFamilies();}
- catch(error){ce('family-status').textContent='Familie konnte nicht erstellt werden: '+error.message;}
+ catch(error){ce('family-status').textContent=(window.PhevI18n?.t('familyForms.createFailed')||'Familie konnte nicht erstellt werden: ')+error.message;}
  finally{button.disabled=false;}
 };
 ce('family-invite-form').onsubmit=async event=>{
  event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
- try{await cloudCall('family-invite',{family_id:Number(form.elements.family_id.value),email:form.elements.email.value.trim()});form.elements.email.value='';ce('family-status').textContent='Einladung wurde versendet.';}
- catch(error){ce('family-status').textContent='Einladung fehlgeschlagen: '+error.message;}
+ try{await cloudCall('family-invite',{family_id:Number(form.elements.family_id.value),email:form.elements.email.value.trim()});form.elements.email.value='';ce('family-status').textContent=(window.PhevI18n?.t('familyForms.inviteSent')||'Einladung wurde versendet.');}
+ catch(error){ce('family-status').textContent=(window.PhevI18n?.t('familyForms.inviteFailed')||'Einladung fehlgeschlagen: ')+error.message;}
  finally{button.disabled=false;}
 };
 ce('family-accept-form').onsubmit=async event=>{
  event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
- try{await cloudCall('family-invite-accept',{token:form.elements.token.value.trim()});form.reset();ce('family-status').textContent='Einladung angenommen.';await loadFamilies();}
- catch(error){ce('family-status').textContent='Einladung konnte nicht angenommen werden: '+error.message;}
+ try{await cloudCall('family-invite-accept',{token:form.elements.token.value.trim()});form.reset();ce('family-status').textContent=(window.PhevI18n?.t('familyForms.inviteAccepted')||'Einladung angenommen.');await loadFamilies();}
+ catch(error){ce('family-status').textContent=(window.PhevI18n?.t('familyForms.acceptFailed')||'Einladung konnte nicht angenommen werden: ')+error.message;}
  finally{button.disabled=false;}
 };
 // Die Sprache kommt ausschließlich aus dem angemeldeten MySQL-Konto.
