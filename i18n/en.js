@@ -638,4 +638,9 @@ window.PhevTranslations.en=Object.freeze({
  'consumption.per100.energyCost':"💰 Energy cost / 100 km",
  'consumption.approxStart':"Estimates: ",
  'consumption.approxEnd':" km between the lowest and highest recorded odometer readings in the selected period. Recorded charging and refueling may not fully correspond to this distance. The separate costs are not measured propulsion consumption.",
+ 'dashboard.vehicle.unassigned':"Unassigned vehicle",
+ 'dashboard.vehicle.all':"All vehicles",
+ 'dashboard.vehicle.generic':"Vehicle",
+ 'dashboard.vehicle.energySuffix':" · Energy & costs",
+ 'dashboard.vehicle.energy':"Energy & costs",
 });
