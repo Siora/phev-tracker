@@ -262,31 +262,31 @@
 <button id="import" class="hide" data-i18n="importPage.importButton">Einträge importieren</button>
 </section>
 <!-- Währungseinstellungen und lokale Datensicherung -->
-<section id="options" class="hide"><div class="account-heading"><h2>Optionen & Backup</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
-<h2>Optionen & Backup</h2>
-<h3>Automatische lokale Sicherungen</h3>
-<p>Bei Änderungen und nach dem Laden deiner Cloud-Daten werden automatisch lokale Sicherungen angelegt. Die letzten fünf Sicherungen bleiben auf diesem iPhone gespeichert.</p>
-<p id="auto-backup-status" role="status">Noch keine automatische Sicherung erstellt.</p>
-<button type="button" onclick="downloadLatestAutoBackup()">Letzte automatische Sicherung herunterladen</button>
-<small>Wichtig: Lokale Sicherungen ersetzen kein extern gespeichertes Backup. Bitte die heruntergeladene Datei regelmäßig in der Dateien-App oder iCloud Drive sichern.</small>
-<h3>Energiebilanz</h3><label>Benzin-Energiegehalt (kWh pro Liter)<input id="fuel-energy-factor" type="number" min="1" max="20" step="0.1" value="8.8"></label><button type="button" onclick="saveFuelEnergyFactor()">Umrechnungsfaktor speichern</button><h3>Kostenvergleich pro 100 km</h3>
-<label>Angenommener Stromverbrauch (kWh/100 km)<input id="comparison-electric" type="number" min="0.1" step="0.1" value="20"></label>
-<label>Angenommener Benzinverbrauch (l/100 km)<input id="comparison-fuel" type="number" min="0.1" step="0.1" value="7"></label>
-<button type="button" onclick="saveCostComparison()">Vergleichswerte speichern</button>
-<label>Auswertungswährung</label>
+<section id="options" class="hide"><div class="account-heading"><h2 data-i18n="optionsPage.title">Optionen & Backup</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
+<h2 data-i18n="optionsPage.title">Optionen & Backup</h2>
+<h3 data-i18n="optionsPage.autoBackup">Automatische lokale Sicherungen</h3>
+<p data-i18n="optionsPage.autoDescription">Bei Änderungen und nach dem Laden deiner Cloud-Daten werden automatisch lokale Sicherungen angelegt. Die letzten fünf Sicherungen bleiben auf diesem iPhone gespeichert.</p>
+<p id="auto-backup-status" role="status" data-i18n="optionsPage.noBackup">Noch keine automatische Sicherung erstellt.</p>
+<button type="button" onclick="downloadLatestAutoBackup()" data-i18n="optionsPage.downloadAuto">Letzte automatische Sicherung herunterladen</button>
+<small data-i18n="optionsPage.backupWarning">Wichtig: Lokale Sicherungen ersetzen kein extern gespeichertes Backup. Bitte die heruntergeladene Datei regelmäßig in der Dateien-App oder iCloud Drive sichern.</small>
+<h3 data-i18n="optionsPage.energy">Energiebilanz</h3><label><span data-i18n="optionsPage.fuelEnergy">Benzin-Energiegehalt (kWh pro Liter)</span><input id="fuel-energy-factor" type="number" min="1" max="20" step="0.1" value="8.8"></label><button type="button" onclick="saveFuelEnergyFactor()" data-i18n="optionsPage.saveFactor">Umrechnungsfaktor speichern</button><h3 data-i18n="optionsPage.costComparison">Kostenvergleich pro 100 km</h3>
+<label><span data-i18n="optionsPage.electricUse">Angenommener Stromverbrauch (kWh/100 km)</span><input id="comparison-electric" type="number" min="0.1" step="0.1" value="20"></label>
+<label><span data-i18n="optionsPage.fuelUse">Angenommener Benzinverbrauch (l/100 km)</span><input id="comparison-fuel" type="number" min="0.1" step="0.1" value="7"></label>
+<button type="button" onclick="saveCostComparison()" data-i18n="optionsPage.saveComparison">Vergleichswerte speichern</button>
+<label data-i18n="optionsPage.currency">Auswertungswährung</label>
 <select id="base">
 <option>CHF</option>
 <option>EUR</option>
 </select>
-<label>1 EUR = CHF (manuell)</label>
+<label data-i18n="optionsPage.rate">1 EUR = CHF (manuell)</label>
 <input id="rate" type="number" step="any" min=".01">
-<button onclick="settingsSave()">Speichern</button>
-<button onclick="backup()">JSON-Backup herunterladen</button>
+<button onclick="settingsSave()" data-i18n="optionsPage.save">Speichern</button>
+<button onclick="backup()" data-i18n="optionsPage.downloadJson">JSON-Backup herunterladen</button>
 
-<label>JSON-Backup wiederherstellen</label>
+<label data-i18n="optionsPage.restoreJson">JSON-Backup wiederherstellen</label>
 <input type="file" id="restore" accept=".json">
 <p>
-<small>Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
+<small data-i18n="optionsPage.localNotice">Daten werden nur lokal auf diesem Gerät gespeichert. Bitte regelmäßig sichern.</small>
 </p>
 </section>
 <!-- Cloud-Konto, Synchronisierung und Administration -->
