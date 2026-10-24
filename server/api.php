@@ -281,8 +281,9 @@ if (in_array($action,['family-invite','family-invite-accept'],true)) {
   $stmt=$db->prepare('INSERT INTO family_invitations(family_id,invited_email,invited_by,token_hash,expires_at) VALUES (?,?,?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 7 DAY))');
   $stmt->execute([$familyId,$mail,$uid,$hash]);
   $link='https://tracker.web-produktion.com/#family-invite='.$token;
-  $message="Du wurdest zu einer Familie im PHEV Tracker eingeladen.\nMelde dich mit dieser E-Mail-Adresse an und öffne den Link innerhalb von 7 Tagen:\n".$link."\nWenn du nicht teilnehmen möchtest, ignoriere diese Nachricht.\n";
-  if (!sendResetMail($config,$mail,'PHEV Tracker - Familieneinladung',$message)) {
+  [$subject,$message]=phevMailContent('family-invite',phevInvitationMailLanguage($db,$mail,$uid),$link);
+  if (!sendResetMail($config,$mail,$subject,$message)) {
+
    $stmt=$db->prepare('DELETE FROM family_invitations WHERE token_hash=?');$stmt->execute([$hash]);
    fail(503,'Einladung konnte nicht zugestellt werden');
   }
