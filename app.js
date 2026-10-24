@@ -834,7 +834,7 @@ function render(){
       tile.append(small,bold);consumption.append(tile);
     }
     $('consumption-note').textContent=distance>0
-      ? '(window.PhevI18n?.t('consumption.approxStart')||'Näherungswerte: ')+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+(window.PhevI18n?.t('consumption.approxEnd')||' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.')'
+      ? (window.PhevI18n?.t('consumption.approxStart')||'Näherungswerte: ')+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+(window.PhevI18n?.t('consumption.approxEnd')||' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.')
       : (globalThis.window?.PhevI18n?.t('consumption.distanceRequired')||'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.');
   }
   renderConsumptionInsights(filtered,charges,fuel,distance);
