@@ -1325,7 +1325,7 @@ $('file').onchange=async e=>{
       id:crypto.randomUUID(),type:'charge',date:date(r[d]),amount:n(r[a]),cost:n(r[c]),currency:w>=0&&/EUR/i.test(r[w])?'EUR':'CHF',place:p>=0?r[p]:'ChargeLog',km:k>=0?n(r[k]):null
     };if(!x.date||x.amount<=0||x.cost<0||seen.has(id(x)))return;seen.add(id(x));pending.push(x)
   });
-  $('preview').textContent=pending.length+' CSV-Ladevorgänge erkannt (bereits vorhandene werden anhand von Datum, Ort und Kosten aktualisiert; CSV-Zeilen: '+rows.length+', Datum-Spalte: '+d+', Energie-Spalte: '+a+', Kosten-Spalte: '+c+'). Vorschau: '+pending.slice(0,8).map(x=>x.date+' / '+x.amount+' kWh / '+fmt(x.cost,x.currency)).join(' | ')+'. Prüfe insbesondere Kosten und Währung.';
+  $('preview').textContent=pending.length+(globalThis.window?.PhevI18n?.t('import.previewIntro')||' CSV-Ladevorgänge erkannt (bereits vorhandene werden anhand von Datum, Ort und Kosten aktualisiert; CSV-Zeilen: ')+rows.length+(globalThis.window?.PhevI18n?.t('import.dateColumn')||', Datum-Spalte: ')+d+(globalThis.window?.PhevI18n?.t('import.energyColumn')||', Energie-Spalte: ')+a+(globalThis.window?.PhevI18n?.t('import.costColumn')||', Kosten-Spalte: ')+c+(globalThis.window?.PhevI18n?.t('import.previewLabel')||'). Vorschau: ')+pending.slice(0,8).map(x=>x.date+' / '+x.amount+' kWh / '+fmt(x.cost,x.currency)).join(' | ')+(globalThis.window?.PhevI18n?.t('import.previewWarning')||'. Prüfe insbesondere Kosten und Währung.');
   $('import').classList.toggle('hide',!pending.length)
 };
 $('import').onclick=()=>{
@@ -1358,8 +1358,8 @@ tab(restoredPage());
 function fuelEnergyFactor(){const v=Number(localStorage.getItem(fuelEnergyKey));return v>=1&&v<=20?v:8.8;}
 function saveFuelEnergyFactor(){
  const v=Number($('fuel-energy-factor').value);
- if(!Number.isFinite(v)||v<1||v>20){alert('Bitte einen Faktor zwischen 1 und 20 eingeben.');return;}
- localStorage.setItem(fuelEnergyKey,String(v));window.scheduleCloudPreferences?.();render();alert('Umrechnungsfaktor gespeichert.');
+ if(!Number.isFinite(v)||v<1||v>20){alert((globalThis.window?.PhevI18n?.t('energy.invalidFactor')||'Bitte einen Faktor zwischen 1 und 20 eingeben.'));return;}
+ localStorage.setItem(fuelEnergyKey,String(v));window.scheduleCloudPreferences?.();render();alert((globalThis.window?.PhevI18n?.t('energy.factorSaved')||'Umrechnungsfaktor gespeichert.'));
 }
 function energyBalance(items){
  const km=items.map(r=>Number(r.km)).filter(v=>v>0);

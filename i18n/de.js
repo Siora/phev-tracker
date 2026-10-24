@@ -715,4 +715,12 @@ window.PhevTranslations.de=Object.freeze({
  'intelligence.priceDisclaimer':" %). Vergleich mit mindestens vier früheren Einträgen; Tarifwechsel, Ladeort oder Buchungsfehler können die Abweichung erklären.",
  'import.newCount':" neu importiert, ",
  'import.updatedCount':" bestehende Einträge aktualisiert.",
+ 'import.previewIntro':" CSV-Ladevorgänge erkannt (bereits vorhandene werden anhand von Datum, Ort und Kosten aktualisiert; CSV-Zeilen: ",
+ 'import.dateColumn':", Datum-Spalte: ",
+ 'import.energyColumn':", Energie-Spalte: ",
+ 'import.costColumn':", Kosten-Spalte: ",
+ 'import.previewLabel':"). Vorschau: ",
+ 'import.previewWarning':". Prüfe insbesondere Kosten und Währung.",
+ 'energy.invalidFactor':"Bitte einen Faktor zwischen 1 und 20 eingeben.",
+ 'energy.factorSaved':"Umrechnungsfaktor gespeichert.",
 });

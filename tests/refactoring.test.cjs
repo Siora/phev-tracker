@@ -445,3 +445,11 @@ test('Intelligente Auswertung und Importergebnis sind zweisprachig',()=>{
   assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('CSV-Vorschau und Energieeinstellungen sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['import.previewIntro','import.dateColumn','import.energyColumn','import.costColumn','import.previewLabel','import.previewWarning','energy.invalidFactor','energy.factorSaved']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});
