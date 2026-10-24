@@ -243,7 +243,7 @@ async function loadSharedVehicleOverview(){
    summary.textContent=(window.PhevI18n?.t('familyVehicles.viewDetails')||'Details ansehen');
    details.append(summary);
    const dl=document.createElement('dl');
-   const fields=[['Fahrzeug',v.brand+' '+v.model],['Baujahr',v.model_year],['Kennzeichen',v.plate],['Antrieb',v.drivetrain],['Batterie',v.battery_kwh==null?null:v.battery_kwh+' kWh'],['Tank',v.tank_liters==null?null:v.tank_liters+' l'],['Berechtigung',v.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)'):(window.PhevI18n?.t('familyVehicles.readOnly')||'Nur lesen')]];
+   const fields=[[(window.PhevI18n?.t('familyVehicles.column.vehicle')||'Fahrzeug'),v.brand+' '+v.model],[(window.PhevI18n?.t('familyVehicles.column.year')||'Baujahr'),v.model_year],[(window.PhevI18n?.t('familyVehicles.column.plate')||'Kennzeichen'),v.plate],[(window.PhevI18n?.t('familyVehicles.column.drivetrain')||'Antrieb'),v.drivetrain],[(window.PhevI18n?.t('familyVehicles.column.battery')||'Batterie'),v.battery_kwh==null?null:v.battery_kwh+' kWh'],[(window.PhevI18n?.t('familyVehicles.column.tank')||'Tank'),v.tank_liters==null?null:v.tank_liters+' l'],[(window.PhevI18n?.t('familyVehicles.column.access')||'Berechtigung'),v.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)'):(window.PhevI18n?.t('familyVehicles.readOnly')||'Nur lesen')]];
    for(const [label,value] of fields){
     const dt=document.createElement('dt');dt.textContent=label;
     const dd=document.createElement('dd');dd.textContent=value==null||value===''?'–':String(value);
@@ -252,7 +252,7 @@ async function loadSharedVehicleOverview(){
    details.append(dl);
    return [v.brand+' '+v.model,v.model_year||'–',v.drivetrain||'–',details];
   });
-  familyTable(list,['Fahrzeug','Baujahr','Antrieb','Details'],rows);
+  familyTable(list,[(window.PhevI18n?.t('familyVehicles.column.vehicle')||'Fahrzeug'),(window.PhevI18n?.t('familyVehicles.column.year')||'Baujahr'),(window.PhevI18n?.t('familyVehicles.column.drivetrain')||'Antrieb'),(window.PhevI18n?.t('familyVehicles.column.details')||'Details')],rows);
  }catch(error){status.textContent=(window.PhevI18n?.t('familyVehicles.loadFailed')||'Familienfahrzeuge konnten nicht geladen werden: ')+error.message;list.replaceChildren();}
 }
 /** Geteilte Fahrzeuge werden nur angezeigt, nie in eigene Fahrzeuge übernommen. */
