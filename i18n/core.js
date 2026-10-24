@@ -2,6 +2,8 @@
 (function(){
  const languages=['de','en'];
  let active='de';
+ // Remember only text written by i18n; never overwrite live status updates.
+ const translatedText=new WeakMap();
  function translate(key,variables){
   const dictionaries=window.PhevTranslations||{};
   const value=dictionaries[active]?.[key]??dictionaries.de?.[key]??key;
@@ -11,7 +13,11 @@
   if(!languages.includes(code))return false;
   active=code;document.documentElement.lang=code;
   document.querySelectorAll('[data-i18n]').forEach(element=>{
-   element.textContent=translate(element.dataset.i18n);
+   const previous=translatedText.get(element);
+   if(previous!==undefined && element.textContent!==previous) return;
+   const next=translate(element.dataset.i18n);
+   element.textContent=next;
+   translatedText.set(element,next);
   });
   return true;
  }
