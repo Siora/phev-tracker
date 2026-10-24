@@ -347,3 +347,12 @@ test('Sprachwechsel aktualisiert Ladeorte und Anbieter',()=>{
  assert.ok(listener.includes('render();'));
  assert.ok(listener.includes('renderChargingManagement();'));
 });
+
+test('Verbrauchskennzahlen und Näherungshinweis sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ["consumption.per100.charged","consumption.per100.fueled","consumption.per100.electricCost","consumption.per100.fuelCost","consumption.per100.energyCost","consumption.approxStart","consumption.approxEnd"]){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});

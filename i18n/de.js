@@ -631,4 +631,11 @@ window.PhevTranslations.de=Object.freeze({
  'insight.label.trendNote':"Vergleich der früheren und neueren Hälfte der Einträge; kein Verbrauchstrend pro km",
  'insight.label.petrolVolume':"Erfasste Benzinmenge",
  'insight.label.liters':" Liter",
+ 'consumption.per100.charged':"⚡ Geladen / 100 km",
+ 'consumption.per100.fueled':"⛽ Getankt / 100 km",
+ 'consumption.per100.electricCost':"⚡ Stromkosten / 100 km",
+ 'consumption.per100.fuelCost':"⛽ Benzinkosten / 100 km",
+ 'consumption.per100.energyCost':"💰 Energiekosten / 100 km",
+ 'consumption.approxStart':"Näherungswerte: ",
+ 'consumption.approxEnd':" km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.",
 });
