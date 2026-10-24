@@ -746,4 +746,10 @@ window.PhevTranslations.de=Object.freeze({
  'intelligence.otherExpenses':"Weitere Ausgaben",
  'intelligence.chargedEnergy':"Geladene Energie",
  'intelligence.petrolVolume':"Benzinmenge",
+ 'vehiclePhoto.customAlt':"Eigenes Fahrzeugfoto: ",
+ 'yearChart.electricity':": Strom ",
+ 'yearChart.petrol':", Benzin ",
+ 'yearChart.other':", Weitere ",
+ 'yearChart.total':", Gesamt ",
+ 'yearChart.incomplete':". Laufendes, unvollständiges Jahr.",
 });
