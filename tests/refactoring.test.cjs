@@ -308,3 +308,11 @@ test('Analyse-Kennzahlen werden in Deutsch und Englisch übersetzt',()=>{
  const keys=["noData","totalCosts","costPer100","entriesPeriod","estimatedFrom","mileageSpan","needMileage","weightedPrice","chargesIncluded","aboveAverage","costTrend","trendNote","petrolVolume","liters"];
  for(const suffix of keys){const key='insight.label.'+suffix;assert.ok(app.includes("PhevI18n?.t('"+key+"')"));for(const lang of ['de','en'])assert.ok(read('i18n/'+lang+'.js').includes("'"+key+"'"));}
 });
+
+test('Dynamisch eingefügte Übersetzungsattribute werden berücksichtigt',()=>{
+ const core=read('i18n/core.js');
+ assert.ok(core.includes('function translateNode(node)'));
+ assert.ok(core.includes('translateNode(node);'));
+ for(const attr of ['placeholder','aria-label','alt'])assert.ok(core.includes("'"+attr+"'"));
+ assert.ok(core.includes('translateAttribute(node,attribute)'));
+});
