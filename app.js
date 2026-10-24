@@ -1511,7 +1511,7 @@ function exportPdfReport(mode){
  const period=String(year)+(mode==='month'?'-'+month:'');
  const data=records.filter(r=>String(r.date||'').startsWith(period)&&(!vehicleId||String(r.vehicle_id)===vehicleId));
  const chosen=vehicles.find(v=>String(v.id)===vehicleId);
- const title=mode==='month'?'Monatsbericht '+month+'.'+year:'Jahresbericht '+year;
+ const title=mode==='month'?(globalThis.window?.PhevI18n?.t('pdf.monthlyTitle')||'Monatsbericht ')+month+'.'+year:(globalThis.window?.PhevI18n?.t('pdf.annualTitle')||'Jahresbericht ')+year;
  if(!window.jspdf?.jsPDF){alert((globalThis.window?.PhevI18n?.t('report.pdfUnavailable')||'Die PDF-Bibliothek ist noch nicht geladen. Bitte Internetverbindung prüfen und die Seite neu öffnen.'));return;}
  const pdf=new PhevPdfReport(title,chosen?vehicleName(chosen):'Alle Fahrzeuge',settings.base);
  const charges=data.filter(r=>r.type==='charge'),fuel=data.filter(r=>r.type==='fuel');
@@ -1538,7 +1538,7 @@ function exportPdfReport(mode){
  const best=charges.filter(x=>Number(x.amount)>0).slice().sort((a,b)=>conv(a)/Number(a.amount)-conv(b)/Number(b.amount))[0];
  pdf.coverOverview({period:mode==='month'?month+'.'+year:String(year),total:combined,energy,liters,chargeCost:sum(charges,conv),fuelCost:sum(fuel,conv),extras,kmSpan,charges,providers:ranked,best});
  pdf.heading((globalThis.window?.PhevI18n?.t('pdf.vehicleCosts')||'Fahrzeugkosten im Berichtszeitraum'));
- pdf.metrics([['Strom und Benzin',total.toFixed(2)+' '+settings.base],['Weitere Ausgaben',extras.toFixed(2)+' '+settings.base],['Kosten gesamt',combined.toFixed(2)+' '+settings.base],['Kosten / km',kmSpan>0?(combined/kmSpan).toFixed(2)+' '+settings.base:'–']]);
+ pdf.metrics([[(globalThis.window?.PhevI18n?.t('pdf.energyAndFuel')||'Strom und Benzin'),total.toFixed(2)+' '+settings.base],[(globalThis.window?.PhevI18n?.t('pdf.otherExpenses')||'Weitere Ausgaben'),extras.toFixed(2)+' '+settings.base],[(globalThis.window?.PhevI18n?.t('pdf.totalCosts')||'Kosten gesamt'),combined.toFixed(2)+' '+settings.base],[(globalThis.window?.PhevI18n?.t('pdf.costPerKm')||'Kosten / km'),kmSpan>0?(combined/kmSpan).toFixed(2)+' '+settings.base:'–']]);
  pdf.note((globalThis.window?.PhevI18n?.t('pdf.costPerKmNote')||'Kosten/km: Näherung aus Kilometerstandsspanne. Keine Abschreibung oder nicht erfassten Kosten enthalten.'));
  if(extraExpenses.length){
   pdf.heading((globalThis.window?.PhevI18n?.t('pdf.additionalVehicleExpenses')||'Weitere Fahrzeugausgaben'));
@@ -1546,13 +1546,13 @@ function exportPdfReport(mode){
  }
  const balance=energyBalance(data);
  pdf.heading((globalThis.window?.PhevI18n?.t('pdf.combinedEnergy')||'Kombinierte Energiebilanz'));
- if(balance.distance){pdf.metrics([['Strom / 100 km',(balance.electric*100/balance.distance).toFixed(1)+' kWh'],['Benzin / 100 km',(balance.fuelKwh*100/balance.distance).toFixed(1)+' kWh'],['Gesamt / 100 km',(balance.total*100/balance.distance).toFixed(1)+' kWh'],['Benzinfaktor',fuelEnergyFactor().toFixed(1)+' kWh/l']]);}else{pdf.note((globalThis.window?.PhevI18n?.t('pdf.mileageNeeded')||'kWh/100 km: mindestens zwei unterschiedliche Kilometerstände nötig.'));}
+ if(balance.distance){pdf.metrics([[(globalThis.window?.PhevI18n?.t('pdf.electricPer100')||'Strom / 100 km'),(balance.electric*100/balance.distance).toFixed(1)+' kWh'],[(globalThis.window?.PhevI18n?.t('pdf.petrolPer100')||'Benzin / 100 km'),(balance.fuelKwh*100/balance.distance).toFixed(1)+' kWh'],[(globalThis.window?.PhevI18n?.t('pdf.totalPer100')||'Gesamt / 100 km'),(balance.total*100/balance.distance).toFixed(1)+' kWh'],[(globalThis.window?.PhevI18n?.t('pdf.petrolFactor')||'Benzinfaktor'),fuelEnergyFactor().toFixed(1)+' kWh/l']]);}else{pdf.note((globalThis.window?.PhevI18n?.t('pdf.mileageNeeded')||'kWh/100 km: mindestens zwei unterschiedliche Kilometerstände nötig.'));}
  pdf.note((globalThis.window?.PhevI18n?.t('pdf.petrolEnergyNote')||'Chemischer Benzin-Energiegehalt; Verbrauch aus erfassten Mengen geschätzt.'));
  pdf.heading((globalThis.window?.PhevI18n?.t('pdf.energyShares')||'Energieanteile'));
  pdf.donut([balance.electric,balance.fuelKwh],[(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin')],'kWh');
  pdf.heading((globalThis.window?.PhevI18n?.t('pdf.costBreakdown')||'Kostenverteilung'));
- pdf.donut([sum(charges,conv),sum(fuel,conv),extras],[(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin'),'Weitere Ausgaben']);
- pdf.heading(mode==='year'?'Kosten nach Monat':'Kosten nach Tag');
+ pdf.donut([sum(charges,conv),sum(fuel,conv),extras],[(globalThis.window?.PhevI18n?.t('pdf.col.electricity')||'Strom'),(globalThis.window?.PhevI18n?.t('pdf.col.petrol')||'Benzin'),(globalThis.window?.PhevI18n?.t('pdf.otherExpenses')||'Weitere Ausgaben')]);
+ pdf.heading(mode==='year'?(globalThis.window?.PhevI18n?.t('pdf.costByMonth')||'Kosten nach Monat'):(globalThis.window?.PhevI18n?.t('pdf.costByDay')||'Kosten nach Tag'));
  const buckets=mode==='year'?Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')):[...new Set([...data.map(r=>r.date.slice(8,10)),...extraExpenses.map(x=>x.date.slice(8,10))])].sort();
  const points=buckets.map(k=>sum(data.filter(r=>(mode==='year'?r.date.slice(5,7):r.date.slice(8,10))===k),conv)+extraExpenses.filter(x=>(mode==='year'?x.date.slice(5,7):x.date.slice(8,10))===k).reduce((n,x)=>n+expenseCurrency(Number(x.amount),x.currency),0));
  pdf.bars(buckets,points);

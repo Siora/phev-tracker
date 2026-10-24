@@ -410,3 +410,12 @@ test('Kostenvergleich und Ladeartenbericht sind zweisprachig',()=>{
  }
  assert.ok(app.includes("PhevI18n?.t('charging.type.'+type)"));
 });
+
+test('PDF-Titel, Kennzahlen und Diagramme sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const name of ['monthlyTitle','annualTitle','energyAndFuel','otherExpenses','totalCosts','costPerKm','electricPer100','petrolPer100','totalPer100','petrolFactor','costByMonth','costByDay']){
+  const key='pdf.'+name;
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});
