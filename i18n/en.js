@@ -676,4 +676,12 @@ window.PhevTranslations.en=Object.freeze({
  'energy.balance.calculatedFrom':" kWh. Calculated from ",
  'energy.balance.disclaimer':" km odometer range; not a measurement of actual driving consumption.",
  'comparison.saved':"Comparison values saved.",
+ 'comparison.electricLabel':"Electricity: ",
+ 'comparison.petrolLabel':"/100 km · Petrol: ",
+ 'charging.report.unspecified':"Not specified",
+ 'charging.report.charges':" charging sessions · ",
+ 'charging.type.Zuhause':"Home",
+ 'charging.type.Öffentlich':"Public",
+ 'charging.type.Arbeitsplatz':"Workplace",
+ 'charging.type.Kostenlos':"Free",
 });
