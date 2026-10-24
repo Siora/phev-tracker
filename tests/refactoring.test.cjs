@@ -233,3 +233,11 @@ test('Hetzner-Deployment enthält Mail-Abhängigkeit und Workflow-Änderungen',(
  assert.match(deploy,/rollback_api/);
  assert.match(deploy,/if \[ "\$code" != "401" \]/);
 });
+
+test('Dynamisch eingefügte Übersetzungselemente werden nach Sprachwechsel erkannt',()=>{
+ const core=read('i18n/core.js');
+ assert.match(core,/MutationObserver/);
+ assert.match(core,/record\.addedNodes/);
+ assert.match(core,/translateElement\(node\)/);
+ assert.match(core,/element\.textContent!==previous/);
+});
