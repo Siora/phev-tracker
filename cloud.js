@@ -348,7 +348,7 @@ async function loadFamilies(){
   for(const family of result.families||[]){
    const shareOption=document.createElement('option');shareOption.value=String(family.id);shareOption.textContent=family.name;shareSelect.append(shareOption);
    const memberOption=document.createElement('option');memberOption.value=String(family.id);memberOption.textContent=family.name;membersSelect.append(memberOption);
-   const item=document.createElement('div');item.className='family-summary-item';const name=document.createElement('strong');name.textContent=family.name;const role=document.createElement('span');role.textContent=family.role==='owner'?'Besitzer':'Mitglied';item.append(name,role);
+   const item=document.createElement('div');item.className='family-summary-item';const name=document.createElement('strong');name.textContent=family.name;const role=document.createElement('span');role.textContent=family.role==='owner'?(window.PhevI18n?.t('familyList.owner')||'Besitzer'):(window.PhevI18n?.t('familyList.member')||'Mitglied');item.append(name,role);
    if(family.role==='owner'){
     const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Familie auflösen';
     remove.onclick=async()=>{
@@ -376,12 +376,12 @@ async function loadFamilies(){
    }
   }
   ce('family-invite-form').classList.toggle('hide',!select.options.length);
-  status.textContent=(result.families||[]).length+' Familie(n) vorhanden.';
+  status.textContent=(result.families||[]).length+(window.PhevI18n?.t('familyList.countSuffix')||' Familie(n) vorhanden.');
   const vehicles=await cloudCall('vehicles');const vehicleSelect=ce('family-share-vehicle');vehicleSelect.replaceChildren();
   for(const vehicle of vehicles.vehicles||[]){const option=document.createElement('option');option.value=String(vehicle.id);option.textContent=vehicle.brand+' '+vehicle.model;vehicleSelect.append(option);}
   ce('family-share-form').classList.toggle('hide',!vehicleSelect.options.length||!shareSelect.options.length);
   await loadFamilyShares();
- }catch(error){status.textContent='Familienverwaltung derzeit nicht verfügbar: '+error.message;}
+ }catch(error){status.textContent=(window.PhevI18n?.t('familyList.unavailable')||'Familienverwaltung derzeit nicht verfügbar: ')+error.message;}
 }
 ce('family-create-form').onsubmit=async event=>{
  event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
