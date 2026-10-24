@@ -701,4 +701,8 @@ window.PhevTranslations.en=Object.freeze({
  'pdf.summaryExtras':"; Additional expenses: ",
  'pdf.ofTwelve':" of 12.",
  'pdf.highestMonth':" Highest-cost month: ",
+ 'pdf.miscellaneous':"Miscellaneous",
+ 'dashboard.allVehicles':"All vehicles",
+ 'dashboard.layout.moveUp':" move up",
+ 'dashboard.layout.moveDown':" move down",
 });

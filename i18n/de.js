@@ -701,4 +701,8 @@ window.PhevTranslations.de=Object.freeze({
  'pdf.summaryExtras':"; Zusatzkosten: ",
  'pdf.ofTwelve':" von 12.",
  'pdf.highestMonth':" Kostenintensivster Monat: ",
+ 'pdf.miscellaneous':"Sonstiges",
+ 'dashboard.allVehicles':"Alle Fahrzeuge",
+ 'dashboard.layout.moveUp':" nach oben",
+ 'dashboard.layout.moveDown':" nach unten",
 });

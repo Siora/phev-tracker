@@ -428,3 +428,12 @@ test('Jahres-PDF lokalisiert Monatsnamen und Jahresfazit',()=>{
   assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('PDF-Fallbacks und Dashboard-Anordnung sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['pdf.miscellaneous','dashboard.allVehicles','dashboard.layout.moveUp','dashboard.layout.moveDown']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+ assert.ok(app.includes("document.addEventListener('phev:language-changed',controls)"));
+});

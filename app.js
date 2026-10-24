@@ -1513,7 +1513,7 @@ function exportPdfReport(mode){
  const chosen=vehicles.find(v=>String(v.id)===vehicleId);
  const title=mode==='month'?(globalThis.window?.PhevI18n?.t('pdf.monthlyTitle')||'Monatsbericht ')+month+'.'+year:(globalThis.window?.PhevI18n?.t('pdf.annualTitle')||'Jahresbericht ')+year;
  if(!window.jspdf?.jsPDF){alert((globalThis.window?.PhevI18n?.t('report.pdfUnavailable')||'Die PDF-Bibliothek ist noch nicht geladen. Bitte Internetverbindung prüfen und die Seite neu öffnen.'));return;}
- const pdf=new PhevPdfReport(title,chosen?vehicleName(chosen):'Alle Fahrzeuge',settings.base);
+ const pdf=new PhevPdfReport(title,chosen?vehicleName(chosen):(globalThis.window?.PhevI18n?.t('dashboard.allVehicles')||'Alle Fahrzeuge'),settings.base);
  const charges=data.filter(r=>r.type==='charge'),fuel=data.filter(r=>r.type==='fuel');
  const sum=(arr,fn)=>arr.reduce((n,r)=>n+fn(r),0);
  const total=sum(data,conv),energy=sum(charges,r=>Number(r.amount||0)),liters=sum(fuel,r=>Number(r.amount||0));
@@ -1533,7 +1533,7 @@ function exportPdfReport(mode){
  const spans=[...vehicleGroups.values()].map(values=>values.length>=2?Math.max(...values)-Math.min(...values):0);
  const kmSpan=spans.reduce((a,b)=>a+b,0);
  const providers=new Map();
- for(const row of charges){const name=String(row.place||'Unbekannt');const p=providers.get(name)||{name,energy:0,cost:0,count:0};p.energy+=Number(row.amount||0);p.cost+=conv(row);p.count++;providers.set(name,p);}
+ for(const row of charges){const name=String(row.place||(globalThis.window?.PhevI18n?.t('dashboard.unknown')||'Unbekannt'));const p=providers.get(name)||{name,energy:0,cost:0,count:0};p.energy+=Number(row.amount||0);p.cost+=conv(row);p.count++;providers.set(name,p);}
  const ranked=[...providers.values()].sort((a,b)=>b.energy-a.energy);
  const best=charges.filter(x=>Number(x.amount)>0).slice().sort((a,b)=>conv(a)/Number(a.amount)-conv(b)/Number(b.amount))[0];
  pdf.coverOverview({period:mode==='month'?month+'.'+year:String(year),total:combined,energy,liters,chargeCost:sum(charges,conv),fuelCost:sum(fuel,conv),extras,kmSpan,charges,providers:ranked,best});
@@ -1597,7 +1597,7 @@ function exportPdfReport(mode){
    [80,130,130,155]);
   const categories=new Map();
   for(const expense of extraExpenses){
-   const name=String(expense.category||'Sonstiges');
+   const name=String(expense.category||(globalThis.window?.PhevI18n?.t('pdf.miscellaneous')||'Sonstiges'));
    categories.set(name,(categories.get(name)||0)+expenseValue(expense));
   }
   pdf.heading((globalThis.window?.PhevI18n?.t('pdf.expensesByCategory')||'Weitere Ausgaben nach Kategorie'));
@@ -1684,8 +1684,8 @@ function initializeDashboardLayout(){
    const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=!state.hidden.includes(id);
    toggle.onchange=()=>{state.hidden=toggle.checked?state.hidden.filter(x=>x!==id):[...state.hidden,id];persist();apply();};
    label.append(toggle,document.createTextNode(' '+id));
-   const up=document.createElement('button');up.type='button';up.textContent='↑';up.setAttribute('aria-label',id+' nach oben');up.disabled=index===0;
-   const down=document.createElement('button');down.type='button';down.textContent='↓';down.setAttribute('aria-label',id+' nach unten');down.disabled=index===state.order.length-1;
+   const up=document.createElement('button');up.type='button';up.textContent='↑';up.setAttribute('aria-label',id+(globalThis.window?.PhevI18n?.t('dashboard.layout.moveUp')||' nach oben'));up.disabled=index===0;
+   const down=document.createElement('button');down.type='button';down.textContent='↓';down.setAttribute('aria-label',id+(globalThis.window?.PhevI18n?.t('dashboard.layout.moveDown')||' nach unten'));down.disabled=index===state.order.length-1;
    const move=offset=>{const target=index+offset;[state.order[index],state.order[target]]=[state.order[target],state.order[index]];persist();apply();controls();};
    up.onclick=()=>move(-1);down.onclick=()=>move(1);
    row.append(label,up,down);root.append(row);
@@ -1699,6 +1699,7 @@ function initializeDashboardLayout(){
  };
  reset.onclick=()=>{state={order:[...defaults],hidden:[]};persist();apply();controls();};
  apply();controls();
+ document.addEventListener('phev:language-changed',controls);
 }
 initializeDashboardLayout();
 
