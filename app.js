@@ -26,7 +26,7 @@ function compareRecordDateTime(a,b){const av=String(a.date||'')+'T'+(recordTime(
 function localClock(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
 let cloudView=false;
-function toggleMobileMenu(){const nav=$('primary-nav'),button=$('mobile-menu-toggle');if(!nav||!button)return;const open=nav.classList.toggle('menu-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?'✕ Menü schliessen':'☰ Menü öffnen';}
+function toggleMobileMenu(){const nav=$('primary-nav'),button=$('mobile-menu-toggle');if(!nav||!button)return;const open=nav.classList.toggle('menu-open');button.setAttribute('aria-expanded',String(open));button.textContent=open?'✕ Menü schliessen':(globalThis.window?.PhevI18n?.t('dynamic.menuOpen')||'☰ Menü öffnen');}
 document.addEventListener('click',event=>{if(event.target.closest('#primary-nav button')){const nav=$('primary-nav'),button=$('mobile-menu-toggle');nav?.classList.remove('menu-open');if(button){button.setAttribute('aria-expanded','false');button.textContent='☰ Menü öffnen';}}});
 function updateLoginNotice(){const el=$('login-required-notice');if(el)el.hidden=!!localStorage.getItem('phev-session-v1');}
 window.updateLoginNotice=updateLoginNotice;
@@ -216,7 +216,7 @@ function renderYearlyCostChart(data,money,currentYear){
   row.append(heading,track,total);container.append(row);
  }
  const footnote=document.createElement('small');
- footnote.textContent='* Laufendes Jahr (unvollständig). Jahre ohne Einträge sind keine nachgewiesenen Nullkosten.';
+ footnote.textContent=(globalThis.window?.PhevI18n?.t('dynamic.yearFootnote')||'* Laufendes Jahr (unvollständig). Jahre ohne Einträge sind keine nachgewiesenen Nullkosten.');
  container.append(footnote);
 }
 function renderIntelligence(){
@@ -302,7 +302,7 @@ function renderIntelligence(){
    yoyPanel.append(headline);
   }else{
    const prefix=comparison.difference>0?'+':'';
-   headline.textContent='Kostenänderung: '+prefix+money(comparison.difference)+' ('+prefix+comparison.percent.toFixed(1)+' %)';
+   headline.textContent=(globalThis.window?.PhevI18n?.t('dynamic.costChange')||'Kostenänderung: ')+prefix+money(comparison.difference)+' ('+prefix+comparison.percent.toFixed(1)+' %)';
    const period=document.createElement('p');
    period.textContent=(comparison.partial?'Januar–'+String(comparison.months).padStart(2,'0'):'Gesamtes Jahr')+
     ': '+money(comparison.currentTotal)+' gegenüber '+money(comparison.previousTotal)+' im Vorjahr.';
@@ -359,7 +359,7 @@ function renderIntelligence(){
   const unit=item.type==='charge'?'kWh':'l';
   const sign=item.deviation>0?'+':'';
   const card=document.createElement('article');card.className='insight-item';
-  const heading=document.createElement('strong');heading.textContent='Auffälliger '+kind+' am '+item.date;
+  const heading=document.createElement('strong');heading.textContent=(globalThis.window?.PhevI18n?.t('dynamic.notable')||'Auffälliger ')+kind+' am '+item.date;
   const detail=document.createElement('p');
   detail.textContent=money(item.price)+'/'+unit+' statt üblicher '+money(item.baseline)+'/'+unit+
    ' ('+sign+item.deviation.toFixed(0)+' %). Vergleich mit mindestens vier früheren Einträgen; Tarifwechsel, Ladeort oder Buchungsfehler können die Abweichung erklären.';
@@ -392,11 +392,11 @@ function renderEconomicsScenario(){
  const paragraph=document.createElement('p');
  if(!result.available){paragraph.textContent=result.reason;output.append(paragraph);return;}
  const money=value=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
- paragraph.textContent='Geschätzte Jahreskosten: '+money(result.annual)+' · Kosten pro 100 km: '+money(result.costPer100);
+ paragraph.textContent=(globalThis.window?.PhevI18n?.t('dynamic.estimatedAnnual')||'Geschätzte Jahreskosten: ')+money(result.annual)+' · Kosten pro 100 km: '+money(result.costPer100);
  const detail=document.createElement('p');
  detail.textContent='Strom: '+money(result.electricity)+' · Benzin: '+money(result.fuel)+' · Fixkosten: '+money(result.fixed);
  const note=document.createElement('small');
- note.textContent='Szenario auf Basis deiner Eingaben, keine Prognose aus echten Fahrdaten. Werte werden nicht gespeichert.';
+ note.textContent=(globalThis.window?.PhevI18n?.t('dynamic.scenarioNote')||'Szenario auf Basis deiner Eingaben, keine Prognose aus echten Fahrdaten. Werte werden nicht gespeichert.');
  output.append(paragraph,detail,note);
 }
 document.getElementById('economics-form')?.addEventListener('submit',event=>{
@@ -645,7 +645,7 @@ function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cos
   if(v){
   const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
   const mileage=(selectedVehicle.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords:records).filter(r=>String(r.vehicle_id)===String(v.id)&&Number(r.km)>0).map(r=>Number(r.km));
-  const latest=document.createElement('p');latest.textContent='Ausgewählter Zeitraum: '+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km':'–')+'.';
+  const latest=document.createElement('p');latest.textContent=(globalThis.window?.PhevI18n?.t('dynamic.selectedPeriod')||'Ausgewählter Zeitraum: ')+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km':'–')+'.';
   summary.append(details,latest);
   }
   }
@@ -1315,7 +1315,7 @@ $('file').onchange=async e=>{
   let rows=csvRows(await e.target.files[0].text());
   let h=(rows.shift()||[]).map(x=>x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'')),find=(...terms)=>h.findIndex(x=>terms.some(t=>x.includes(t))),d=find('datum','date','start'),a=h.indexOf('energiekwh')>=0?h.indexOf('energiekwh'):h.indexOf('energykwh')>=0?h.indexOf('energykwh'):find('charged','energy'),c=find('gesamtbetragingewahlterwahrung','totalcost','totalprice','gesamtkosten','cost','kosten'),p=find('ort','location','station','place','ladeort','provider','anbieter'),w=h.indexOf('wahrung')>=0?h.indexOf('wahrung'):find('currency'),k=find('odometer','kilometerstand');
   if(d<0||a<0||c<0){
-    $('preview').textContent='Spalten nicht erkannt: '+h.join(', ');
+    $('preview').textContent=(globalThis.window?.PhevI18n?.t('dynamic.unknownColumns')||'Spalten nicht erkannt: ')+h.join(', ');
     return
   }
   let seen=new Set();
@@ -1390,7 +1390,7 @@ function renderConsumptionTrend(){
  target.replaceChildren();
  const valid=rows.filter(r=>r.valid);
  if(!valid.length){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.consumption')||'Noch keine Monate mit ausreichenden Kilometerständen für eine Verbrauchskurve vorhanden.');return;}
- const legend=document.createElement('p');legend.textContent='🔵 Strom · 🟠 Benzin (umgerechnet) · Gesamtenergie in kWh/100 km';target.append(legend);
+ const legend=document.createElement('p');legend.textContent=(globalThis.window?.PhevI18n?.t('dynamic.consumptionLegend')||'🔵 Strom · 🟠 Benzin (umgerechnet) · Gesamtenergie in kWh/100 km');target.append(legend);
  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
  svg.setAttribute('viewBox','0 0 600 240');svg.setAttribute('role','img');svg.setAttribute('aria-label','Kombinierte Energieverbrauchsentwicklung der letzten zwölf Monate');svg.style.cssText='width:100%;height:auto;max-height:290px';
  const max=Math.max(1,...valid.map(r=>r.total))*1.12;
@@ -1407,14 +1407,14 @@ function renderConsumptionTrend(){
 function renderEnergyBalance(items){
  const target=$('energy-balance');if(!target)return;
  const b=energyBalance(items);
- if(!b.distance){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.energyDistance')||'Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.');$('energy-balance-note').textContent='Erfasste Lade- und Tankmengen sind Näherungswerte.';return;}
+ if(!b.distance){target.textContent=(globalThis.window?.PhevI18n?.t('dashboardEmpty.energyDistance')||'Für kWh/100 km werden mindestens zwei unterschiedliche Kilometerstände im Zeitraum benötigt.');$('energy-balance-note').textContent=(globalThis.window?.PhevI18n?.t('dynamic.energyEstimate')||'Erfasste Lade- und Tankmengen sind Näherungswerte.');return;}
  const f=v=>(100*v/b.distance).toFixed(2);
  target.replaceChildren();
- const p=document.createElement('p');p.textContent='⚡ Strom: '+f(b.electric)+' kWh/100 km · ⛽ Benzin: '+f(b.fuelKwh)+' kWh/100 km · Gesamt: '+f(b.total)+' kWh/100 km';target.append(p);
+ const p=document.createElement('p');p.textContent=(globalThis.window?.PhevI18n?.t('dynamic.electricity')||'⚡ Strom: ')+f(b.electric)+' kWh/100 km · ⛽ Benzin: '+f(b.fuelKwh)+' kWh/100 km · Gesamt: '+f(b.total)+' kWh/100 km';target.append(p);
  const bar=document.createElement('div');bar.style.cssText='display:flex;height:16px;border-radius:8px;overflow:hidden;background:#e5e7eb';
  const e=document.createElement('div');e.style.cssText='background:#1795be;width:'+(b.total?b.electric/b.total*100:0)+'%';
  const g=document.createElement('div');g.style.cssText='background:#e9a145;flex:1';bar.append(e,g);target.append(bar);
- $('energy-balance-note').textContent='Benzin: '+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
+ $('energy-balance-note').textContent=(globalThis.window?.PhevI18n?.t('dynamic.petrol')||'Benzin: ')+b.liters.toFixed(2)+' l × '+fuelEnergyFactor().toFixed(1)+' kWh/l = '+b.fuelKwh.toFixed(2)+' kWh. Berechnet aus '+b.distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km Kilometerstandsspanne; keine Messung des tatsächlichen Fahrverbrauchs.';
 }
 try{$('fuel-energy-factor').value=fuelEnergyFactor();}catch(error){console.warn(error);}
 
@@ -1442,7 +1442,7 @@ function renderCostComparison(charges,fuel){
  const chargeKwh=charges.reduce((total,r)=>total+Number(r.amount||0),0);
  const fuelLiters=fuel.reduce((total,r)=>total+Number(r.amount||0),0);
  if(!chargeKwh||!fuelLiters){
-  target.textContent='Für den Vergleich werden mindestens eine Stromladung und eine Tankung im gewählten Zeitraum benötigt.';
+  target.textContent=(globalThis.window?.PhevI18n?.t('dynamic.comparisonMissing')||'Für den Vergleich werden mindestens eine Stromladung und eine Tankung im gewählten Zeitraum benötigt.');
   return;
  }
  const assumptions=getCostComparison();
@@ -1486,7 +1486,7 @@ function renderChargingTypes(charges){
   groups.set(type,value);
  }
  target.replaceChildren();
- if(!groups.size){target.textContent='Noch keine Ladungen im gewählten Zeitraum.';return;}
+ if(!groups.size){target.textContent=(globalThis.window?.PhevI18n?.t('dynamic.noCharges')||'Noch keine Ladungen im gewählten Zeitraum.');return;}
  for(const [type,data] of groups){
   const row=document.createElement('p');
   row.textContent=type+': '+data.count+' Ladungen · '+data.energy.toFixed(1)+' kWh · '+fmt(data.cost,settings.base);
