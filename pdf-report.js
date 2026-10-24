@@ -12,7 +12,7 @@
  */
 class PhevPdfReport{
  constructor(title,vehicle,currency){
-  if(!window.jspdf?.jsPDF)throw Error('PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.');
+  if(!window.jspdf?.jsPDF)throw Error((globalThis.window?.PhevI18n?.t('pdf.libraryFailed')||'PDF-Bibliothek konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.'));
   this.pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'pt',format:'a4',compress:true});
   this.title=title;this.vehicle=vehicle;this.currency=currency;this.page=1;this.y=96;
   this.pdf.setProperties({title:'PHEV Tracker – '+title,author:'PHEV Tracker'});
