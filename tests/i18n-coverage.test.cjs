@@ -40,7 +40,7 @@ test('all translated attribute keys exist in both dictionaries',()=>{
 
 test('all literal JavaScript translation keys exist in both languages',()=>{
  const sources=['app.js','cloud.js'].map(name=>fs.readFileSync(path.join(root,name),'utf8'));
- const keys=[...new Set(sources.flatMap(source=>[...source.matchAll(/PhevI18n\\?\\.t\\('([^']+)'/g)].map(m=>m[1]).filter(key=>!key.endsWith('.'))))];
+ const keys=[...new Set(sources.flatMap(source=>[...source.matchAll(/PhevI18n\?\.t\\('([^']+)'/g)].map(m=>m[1]).filter(key=>!key.endsWith('.'))))];
  for(const lang of ['de','en'])assert.deepEqual(keys.filter(key=>!dictionaries[lang].has(key)),[],lang+': missing dynamic translations');
 });
 
@@ -51,7 +51,7 @@ test('translation placeholders match across languages',()=>{
   require('node:vm').runInNewContext(source,{window});
   return [lang,window.PhevTranslations[lang]];
  }));
- const placeholders=value=>[...String(value).matchAll(/\\{(\\w+)\\}/g)].map(m=>m[1]).sort();
+ const placeholders=value=>[...String(value).matchAll(/\{(\w+)\}/g)].map(m=>m[1]).sort();
  for(const key of dictionaries.de){
   assert.deepEqual(placeholders(values.en[key]),placeholders(values.de[key]),key);
  }
