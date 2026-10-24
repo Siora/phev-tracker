@@ -101,6 +101,7 @@ window.PhevTranslations.de=Object.freeze({
  'familyVehicles.column.details':'Details',
  'accountLanguage.migrationMissing':'Datenbankmigration für die Sprachauswahl steht noch aus.',
  'accountLanguage.saved':'Gespeichert.',
+ 'vehicles.column.actions':'Aktionen',
  'nav.home':'Übersicht','nav.analysis':'🧠 Analyse-Dashboard','nav.entries':'⚡ Ladungen / ⛽ Tankungen',
  'nav.vehicles':'🚘 Fahrzeuge','nav.charging':'⚡ Ladeorte & Anbieter','nav.account':'Konto',
  'nav.administration':'Administration',
