@@ -321,7 +321,7 @@ test('Sprachwechsel aktualisiert dynamisch erzeugte UI-Bereiche',()=>{
  const core=read('i18n/core.js');
  assert.ok(core.includes("new CustomEvent('phev:language-changed'"));
  assert.ok(core.includes("if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')"));
- assert.ok(read('app.js').includes("addEventListener('phev:language-changed',()=>render())"));
+ assert.ok(read('app.js').includes("addEventListener('phev:language-changed',()=>{"));
  assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>{"));
 });
 
@@ -339,4 +339,11 @@ test('Sprachwechsel aktualisiert auch Fahrzeugfreigaben und Administration',()=>
  assert.ok(section.includes('void loadSharedVehicleOverview();'));
  assert.ok(section.includes('void loadSharedVehicles();'));
  assert.ok(section.includes('void cloudUsers();'));
+});
+
+test('Sprachwechsel aktualisiert Ladeorte und Anbieter',()=>{
+ const source=read('app.js');
+ const listener=source.slice(source.lastIndexOf("document.addEventListener('phev:language-changed'"));
+ assert.ok(listener.includes('render();'));
+ assert.ok(listener.includes('renderChargingManagement();'));
 });
