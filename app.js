@@ -819,11 +819,11 @@ function render(){
     const fuelLiters=fuel.reduce((total,r)=>total+Number(r.amount||0),0);
     const values=distance>0
       ? [
-          ['⚡ Geladen / 100 km',(energyKwh*100/distance).toFixed(2)+' kWh'],
-          ['⛽ Getankt / 100 km',(fuelLiters*100/distance).toFixed(2)+' l'],
-          ['⚡ Stromkosten / 100 km',fmt(electric*100/distance,settings.base)],
-          ['⛽ Benzinkosten / 100 km',fmt(petrol*100/distance,settings.base)],
-          ['💰 Energiekosten / 100 km',fmt(cost*100/distance,settings.base)]
+          [(window.PhevI18n?.t('consumption.per100.charged')||'⚡ Geladen / 100 km'),(energyKwh*100/distance).toFixed(2)+' kWh'],
+          [(window.PhevI18n?.t('consumption.per100.fueled')||'⛽ Getankt / 100 km'),(fuelLiters*100/distance).toFixed(2)+' l'],
+          [(window.PhevI18n?.t('consumption.per100.electricCost')||'⚡ Stromkosten / 100 km'),fmt(electric*100/distance,settings.base)],
+          [(window.PhevI18n?.t('consumption.per100.fuelCost')||'⛽ Benzinkosten / 100 km'),fmt(petrol*100/distance,settings.base)],
+          [(window.PhevI18n?.t('consumption.per100.energyCost')||'💰 Energiekosten / 100 km'),fmt(cost*100/distance,settings.base)]
         ]
       : [];
     consumption.replaceChildren();
@@ -834,7 +834,7 @@ function render(){
       tile.append(small,bold);consumption.append(tile);
     }
     $('consumption-note').textContent=distance>0
-      ? 'Näherungswerte: '+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.'
+      ? '(window.PhevI18n?.t('consumption.approxStart')||'Näherungswerte: ')+distance.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+(window.PhevI18n?.t('consumption.approxEnd')||' km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.')'
       : (globalThis.window?.PhevI18n?.t('consumption.distanceRequired')||'Für die Berechnung werden mindestens zwei unterschiedliche Kilometerstände im ausgewählten Zeitraum benötigt.');
   }
   renderConsumptionInsights(filtered,charges,fuel,distance);
