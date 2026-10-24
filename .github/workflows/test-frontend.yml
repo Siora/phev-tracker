@@ -6,6 +6,7 @@ on:
     paths:
       - 'index.html'
       - 'server/api.php'
+      - 'server/mail-i18n.php'
       - '*.js'
       - 'i18n/**'
       - 'release.json'
@@ -35,7 +36,7 @@ jobs:
         with:
           node-version: '22'
       - name: PHP-API-Syntax prüfen
-        run: php -l server/api.php
+        run: php -l server/api.php && php -l server/mail-i18n.php && php tests/mail-i18n.test.php
       - name: Release-Version und Offline-Cache abgleichen
         run: node scripts/release-version.cjs --check
 
