@@ -241,25 +241,25 @@
 <div id="shared-vehicle-overview" class="shared-vehicle-panel" aria-live="polite"><h3>Von der Familie geteilte Fahrzeuge</h3><p id="shared-vehicle-overview-status">Geteilte Fahrzeuge werden geladen.</p><div id="shared-vehicle-overview-list"></div></div>
 </section>
 <!-- Gemeinsamer CSV-Import und -Export -->
-<section id="csv" class="hide"><div class="account-heading"><h2>Import / Export</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
-<h2>Monatsberichte und erweiterte Jahresberichte (PDF)</h2>
-<p>Monatsberichte sowie mehrseitige Jahresberichte mit Monatsvergleich, Energiebilanz, Wartungs- und Fahrzeugkosten nach Kategorien, Fahrzeugvergleich und Kosten pro Kilometer. Alle Daten werden lokal als PDF auf deinem Gerät verarbeitet.</p>
-<label>Jahr<input id="report-year" type="number" min="2020" max="2100" value="2026"></label>
-<label>Monat<select id="report-month"><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></label>
+<section id="csv" class="hide"><div class="account-heading"><h2 data-i18n="importPage.title">Import / Export</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
+<h2 data-i18n="importPage.pdfTitle">Monatsberichte und erweiterte Jahresberichte (PDF)</h2>
+<p data-i18n="importPage.pdfDescription">Monatsberichte sowie mehrseitige Jahresberichte mit Monatsvergleich, Energiebilanz, Wartungs- und Fahrzeugkosten nach Kategorien, Fahrzeugvergleich und Kosten pro Kilometer. Alle Daten werden lokal als PDF auf deinem Gerät verarbeitet.</p>
+<label><span data-i18n="importPage.year">Jahr</span><input id="report-year" type="number" min="2020" max="2100" value="2026"></label>
+<label><span data-i18n="importPage.month">Monat</span><select id="report-month"><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></label>
 <label><span data-i18n="form.vehicle">Fahrzeug</span><select id="report-vehicle"><option value="">Alle Fahrzeuge</option></select></label>
-<button type="button" onclick="exportPdfReport('month')">Monatsbericht als PDF</button>
-<button type="button" onclick="exportPdfReport('year')">Jahresbericht als PDF</button>
+<button type="button" onclick="exportPdfReport('month')" data-i18n="importPage.monthPdf">Monatsbericht als PDF</button>
+<button type="button" onclick="exportPdfReport('year')" data-i18n="importPage.yearPdf">Jahresbericht als PDF</button>
 <hr>
-<h2>CSV Import & Export</h2>
-<p>Alle Einträge als CSV-Datei exportieren.</p>
-<button type="button" onclick="exportCSV()">CSV-Export herunterladen</button>
+<h2 data-i18n="importPage.csvTitle">CSV Import & Export</h2>
+<p data-i18n="importPage.csvDescription">Alle Einträge als CSV-Datei exportieren.</p>
+<button type="button" onclick="exportCSV()" data-i18n="importPage.downloadCsv">CSV-Export herunterladen</button>
 <hr>
-<h3>ChargeLog CSV importieren</h3>
-<p>CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
+<h3 data-i18n="importPage.importTitle">ChargeLog CSV importieren</h3>
+<p data-i18n="importPage.importDescription">CSV-Datei wählen und erkannte Werte vor dem Import prüfen. Keine Datei wird an einen Server gesendet.</p>
 <input id="file" type="file" accept=".csv,text/csv">
 <div id="preview">
 </div>
-<button id="import" class="hide">Einträge importieren</button>
+<button id="import" class="hide" data-i18n="importPage.importButton">Einträge importieren</button>
 </section>
 <!-- Währungseinstellungen und lokale Datensicherung -->
 <section id="options" class="hide"><div class="account-heading"><h2>Optionen & Backup</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
