@@ -137,9 +137,9 @@ async function loadVehicles(){
     picker.onchange=async()=>{
      const file=picker.files?.[0];picker.remove();
      if(!file)return;
-     if(!['image/jpeg','image/png','image/webp'].includes(file.type)){ce('vehicle-status').textContent='Bitte JPEG, PNG oder WebP auswählen.';return;}
-     if(file.size>5000000){ce('vehicle-status').textContent='Das Bild darf höchstens 5 MB gross sein.';return;}
-     photo.disabled=true;ce('vehicle-status').textContent='Bild wird hochgeladen …';
+     if(!['image/jpeg','image/png','image/webp'].includes(file.type)){ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.photoInvalidType')||'Bitte JPEG, PNG oder WebP auswählen.');return;}
+     if(file.size>5000000){ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.photoTooLarge')||'Das Bild darf höchstens 5 MB gross sein.');return;}
+     photo.disabled=true;ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.photoUploading')||'Bild wird hochgeladen …');
      try{
       const body=new FormData();body.append('vehicle_id',String(v.id));body.append('photo',file);
       const headers=/^[a-f0-9]{64}$/.test(cloudToken||'')?{'Authorization':'Bearer '+cloudToken}:{};
@@ -152,8 +152,8 @@ async function loadVehicles(){
       await cloudCall('preferences',{preferences:merged});
       cloudPreferences=merged;cloudPreferencesReady=true;
       window.setVehiclePhoto(v.id,url);
-      ce('vehicle-status').textContent='Fahrzeugbild auf dem Server gespeichert.';
-     }catch(error){ce('vehicle-status').textContent='Bild konnte nicht vollständig gespeichert werden: '+error.message;}
+      ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.photoSaved')||'Fahrzeugbild auf dem Server gespeichert.');
+     }catch(error){ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.photoSaveFailed')||'Bild konnte nicht vollständig gespeichert werden: ')+error.message;}
      finally{photo.disabled=false;}
     };
     picker.oncancel=()=>picker.remove();
@@ -163,7 +163,7 @@ async function loadVehicles(){
    actions.append(edit,photo,del);row.append(actions);return row;
   };
   table.append(tbody);window.paginateTable(list,table,tbody,data.vehicles,5,'vehicles',makeVehicleRow);
- }catch(e){ce('vehicle-status').textContent='Fahrzeuge konnten nicht geladen werden: '+e.message;}
+ }catch(e){ce('vehicle-status').textContent=(window.PhevI18n?.t('vehicles.loadFailed')||'Fahrzeuge konnten nicht geladen werden: ')+e.message;}
 }
 function vehicleFormView(open){
  ce('vehicle-form-panel').classList.toggle('hide',!open);
