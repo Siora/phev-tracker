@@ -468,3 +468,10 @@ test('Jahresprognose und Kosten pro 100 km sind zweisprachig',()=>{
   assert.ok(app.includes("PhevI18n?.t('"+key+"')"));assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Intelligenz-Kennzahlen, Szenario und Fahrzeugfilter sind übersetzt',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['intelligence.electricityPrice','intelligence.petrolPrice','scenario.electricity','scenario.petrol','scenario.fixed','vehicleSelection.notFound','intelligence.totalCosts','intelligence.electricityCosts','intelligence.petrolCosts','intelligence.otherExpenses','intelligence.chargedEnergy','intelligence.petrolVolume']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});

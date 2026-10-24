@@ -110,11 +110,11 @@ function refreshVehicles(){
   const selected=filter.value;
   const entry=$('entryVehicle');
   const chosen=entry.value;
-  replaceVehicleOptions(filter,'Alle Fahrzeuge',selected,false);
+  replaceVehicleOptions(filter,(globalThis.window?.PhevI18n?.t('dashboard.allVehicles')||'Alle Fahrzeuge'),selected,false);
   if(typeof appendFamilyOptions==='function')appendFamilyOptions(filter);
   if(selected.startsWith('family:'))filter.value=[...filter.options].some(o=>o.value===selected)?selected:'';
   const reportVehicle=$('report-vehicle');
-  if(reportVehicle)replaceVehicleOptions(reportVehicle,'Alle Fahrzeuge',reportVehicle.value,false);
+  if(reportVehicle)replaceVehicleOptions(reportVehicle,(globalThis.window?.PhevI18n?.t('dashboard.allVehicles')||'Alle Fahrzeuge'),reportVehicle.value,false);
   replaceVehicleOptions(entry,(globalThis.window?.PhevI18n?.t('vehicleSelection.prompt')||'Bitte Fahrzeug auswählen'),chosen,true);
   document.querySelectorAll('.quick-form select[name=vehicle_id]').forEach(sel=>{
     replaceVehicleOptions(sel,(globalThis.window?.PhevI18n?.t('vehicleSelection.select')||'Fahrzeug auswählen'),sel.value,true);
@@ -139,7 +139,7 @@ function replaceVehicleOptions(select,placeholder,previous,autoSelectSingle){
 function updateBulkCount(){const el=$('bulk-count');if(el)el.textContent=records.filter(r=>!r.vehicle_id).length+(globalThis.window?.PhevI18n?.t('bulk.unassigned')||' Einträge ohne Fahrzeugzuordnung.');}
 // Ordnet ausschließlich bisher nicht zugewiesene Einträge einem Fahrzeug zu.
 window.assignUnassignedToVehicle=function(vehicleId){
- if(!vehicles.some(v=>String(v.id)===String(vehicleId)))throw Error('Fahrzeug nicht gefunden');
+ if(!vehicles.some(v=>String(v.id)===String(vehicleId)))throw Error((globalThis.window?.PhevI18n?.t('vehicleSelection.notFound')||'Fahrzeug nicht gefunden'));
  let count=0;records=records.map(r=>{if(r.vehicle_id)return r;count++;return {...r,vehicle_id:Number(vehicleId)};});
  if(count)save();updateBulkCount();return count;
 };
@@ -238,7 +238,7 @@ function renderIntelligence(){
  const summary=$('intelligence-summary'),chart=$('intelligence-chart'),insights=$('intelligence-insights'),body=$('intelligence-months');
  summary.replaceChildren();chart.replaceChildren();insights.replaceChildren();body.replaceChildren();
  const money=v=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v))+' '+settings.base;
- for(const [label,value] of [['Gesamtkosten',money(result.total)],['Stromkosten',money(result.energyCost)],['Benzinkosten',money(result.fuelCost)],['Weitere Ausgaben',money(result.otherCost)],['Geladene Energie',result.kwh.toFixed(1)+' kWh'],['Benzinmenge',result.liters.toFixed(1)+' l']]){
+ for(const [label,value] of [[(''+(globalThis.window?.PhevI18n?.t('intelligence.totalCosts')||'Gesamtkosten')),money(result.total)],[(globalThis.window?.PhevI18n?.t('intelligence.electricityCosts')||'Stromkosten'),money(result.energyCost)],[(globalThis.window?.PhevI18n?.t('intelligence.petrolCosts')||'Benzinkosten'),money(result.fuelCost)],[(globalThis.window?.PhevI18n?.t('intelligence.otherExpenses')||'Weitere Ausgaben'),money(result.otherCost)],[(globalThis.window?.PhevI18n?.t('intelligence.chargedEnergy')||'Geladene Energie'),result.kwh.toFixed(1)+' kWh'],[(globalThis.window?.PhevI18n?.t('intelligence.petrolVolume')||'Benzinmenge'),result.liters.toFixed(1)+' l']]){
   const card=document.createElement('article');card.className='quick-card';
   const title=document.createElement('strong');title.textContent=label;
   const number=document.createElement('p');number.textContent=value;
@@ -355,7 +355,7 @@ function renderIntelligence(){
  // Für Verbrauch pro 100 km fehlen ohne Fahrstrecke belastbare Daten.
  const anomalies=window.PhevIntelligence.priceAnomalies(analysisRecords,vehicleSelect.value,Number(yearSelect.value),conv);
  for(const item of anomalies){
-  const kind=item.type==='charge'?'Strompreis':'Benzinpreis';
+  const kind=item.type==='charge'?(globalThis.window?.PhevI18n?.t('intelligence.electricityPrice')||'Strompreis'):(globalThis.window?.PhevI18n?.t('intelligence.petrolPrice')||'Benzinpreis');
   const unit=item.type==='charge'?'kWh':'l';
   const sign=item.deviation>0?'+':'';
   const card=document.createElement('article');card.className='insight-item';
@@ -394,7 +394,7 @@ function renderEconomicsScenario(){
  const money=value=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
  paragraph.textContent=(globalThis.window?.PhevI18n?.t('dynamic.estimatedAnnual')||'Geschätzte Jahreskosten: ')+money(result.annual)+(globalThis.window?.PhevI18n?.t('intelligence.costPer100')||' · Kosten pro 100 km: ')+money(result.costPer100);
  const detail=document.createElement('p');
- detail.textContent='Strom: '+money(result.electricity)+' · Benzin: '+money(result.fuel)+' · Fixkosten: '+money(result.fixed);
+ detail.textContent=(globalThis.window?.PhevI18n?.t('scenario.electricity')||'Strom: ')+money(result.electricity)+(globalThis.window?.PhevI18n?.t('scenario.petrol')||' · Benzin: ')+money(result.fuel)+(globalThis.window?.PhevI18n?.t('scenario.fixed')||' · Fixkosten: ')+money(result.fixed);
  const note=document.createElement('small');
  note.textContent=(globalThis.window?.PhevI18n?.t('dynamic.scenarioNote')||'Szenario auf Basis deiner Eingaben, keine Prognose aus echten Fahrdaten. Werte werden nicht gespeichert.');
  output.append(paragraph,detail,note);
