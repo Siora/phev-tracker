@@ -638,4 +638,9 @@ window.PhevTranslations.de=Object.freeze({
  'consumption.per100.energyCost':"💰 Energiekosten / 100 km",
  'consumption.approxStart':"Näherungswerte: ",
  'consumption.approxEnd':" km zwischen dem kleinsten und größten erfassten Kilometerstand im gewählten Zeitraum. Erfasste Ladungen und Tankungen müssen nicht vollständig zu dieser Fahrstrecke gehören. Die getrennten Kosten sind keine gemessenen Antriebsverbräuche.",
+ 'dashboard.vehicle.unassigned':"Ohne Fahrzeugzuordnung",
+ 'dashboard.vehicle.all':"Alle Fahrzeuge",
+ 'dashboard.vehicle.generic':"Fahrzeug",
+ 'dashboard.vehicle.energySuffix':" · Energie & Kosten",
+ 'dashboard.vehicle.energy':"Energie & Kosten",
 });
