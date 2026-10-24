@@ -629,9 +629,9 @@ function renderDashboardProviderFilter(){
   const current=provider.value;
   const chosen=typeof familySelection==='function'&&typeof document!=='undefined'&&document.getElementById('vehicleFilter')?$('vehicleFilter').value:'';
   const source=chosen.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords.filter(r=>'family:'+r.vehicle_id===chosen):records;
-  const providers=[...new Set(source.map(x=>x.place||'Unbekannt'))].sort();
+  const providers=[...new Set(source.map(x=>x.place||(typeof window!=='undefined'&&window.PhevI18n?.t('dashboard.unknown')||'Unbekannt')))].sort();
   provider.replaceChildren(
-    new Option('Alle Orte / Tankstellen',''),
+    new Option((typeof window!=='undefined'&&window.PhevI18n?.t('dashboard.allPlaces')||'Alle Orte / Tankstellen'),''),
     ...providers.map(x=>new Option(x,x))
   );
   provider.value=providers.includes(current)?current:'';
@@ -1076,14 +1076,14 @@ $('base').value=settings.base;
 $('rate').value=settings.rate;
 function settingsSave(){
   let r=n($('rate').value);
-  if(r<=0)return alert('Ungültiger Kurs');
+  if(r<=0)return alert((typeof window!=='undefined'&&window.PhevI18n?.t('settings.invalidRate')||'Ungültiger Kurs'));
   settings={
     base:$('base').value,rate:r
   };
   localStorage.setItem('phev-settings-1',JSON.stringify(settings));
   window.scheduleCloudPreferences?.();
   render();
-  alert('Gespeichert')
+  alert((typeof window!=='undefined'&&window.PhevI18n?.t('settings.saved')||'Gespeichert'))
 }
 
 // Cloud preferences are applied only after a successful authenticated fetch.
