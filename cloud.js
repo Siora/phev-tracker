@@ -79,7 +79,7 @@ window.syncManagedCharging=async function(next){
   }
   catalogSynced=structuredClone(next);
   syncError='';
-  ce('managed-charging-status').textContent='Ladeorte und Anbieter in MySQL synchronisiert.';
+  ce('managed-charging-status').textContent=(window.PhevI18n?.t('adminSync.chargingSynced')||'Ladeorte und Anbieter in MySQL synchronisiert.');
  }catch(e){syncError=e.message;ce('managed-charging-status').textContent=(window.PhevI18n?.t('accountFeedback.saveFailed')||'Cloud-Speicherung fehlgeschlagen: ')+e.message;}
  finally{syncingPreferences=false;updateSyncIndicator();}
 };
@@ -452,7 +452,7 @@ ce('admin-edit-form').onsubmit=async event=>{
  save.disabled=true;
  try{
   await cloudCall('admin-update-user',{id:adminEditingId,email:form.elements.email.value,role:form.elements.role.value});
-  cs('Benutzer aktualisiert.');await cloudUsers();adminView('list');
+  cs((window.PhevI18n?.t('adminSync.userUpdated')||'Benutzer aktualisiert.'));await cloudUsers();adminView('list');
  }catch(error){cs(error.message);}
  finally{save.disabled=false;}
 };
@@ -476,11 +476,11 @@ async function cloudUsers(){
  for(const label of ['E-Mail-Adresse','Rolle','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=label;heading.append(th);}
  thead.append(heading);table.append(thead);
  const tbody=document.createElement('tbody');
- if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=3;cell.textContent='Noch keine Benutzer vorhanden.';row.append(cell);tbody.append(row);}
+ if(!result.users.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=3;cell.textContent=(window.PhevI18n?.t('adminSync.noUsers')||'Noch keine Benutzer vorhanden.');row.append(cell);tbody.append(row);}
  const makeUserRow=user=>{
   const row=document.createElement('tr');
   const emailCell=document.createElement('td');emailCell.textContent=user.email;
-  const roleCell=document.createElement('td');roleCell.textContent=user.role==='admin'?'Administrator':'Benutzer';
+  const roleCell=document.createElement('td');roleCell.textContent=user.role==='admin'?(window.PhevI18n?.t('adminSync.admin')||'Administrator'):(window.PhevI18n?.t('adminSync.user')||'Benutzer');
   const actions=document.createElement('td');actions.className='admin-user-actions';
   const edit=adminActionIcon('edit','Benutzer '+user.email+' bearbeiten');
   edit.onclick=()=>{
@@ -525,7 +525,7 @@ ce('cloud-reset-request').onsubmit=async event=>{
 };
 ce('cloud-reset-confirm').onsubmit=async event=>{
  event.preventDefault();const form=event.currentTarget,button=form.querySelector('button[type=submit]');
- if(form.elements.new_password.value!==form.elements.confirm_password.value){cs('Neue Passwörter stimmen nicht überein.');return;}
+ if(form.elements.new_password.value!==form.elements.confirm_password.value){cs((window.PhevI18n?.t('adminSync.passwordMismatch')||'Neue Passwörter stimmen nicht überein.'));return;}
  button.disabled=true;
  try{
   await cloudCall('password-reset-confirm',{token:pendingResetToken,new_password:form.elements.new_password.value});
@@ -537,7 +537,7 @@ ce('cloud-reset-confirm').onsubmit=async event=>{
 ce('cloud-login').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button');
- button.disabled=true;cs('Anmeldung läuft …');
+ button.disabled=true;cs((window.PhevI18n?.t('adminSync.signingIn')||'Anmeldung läuft …'));
  try{
   const result=await cloudCall('login',{email:form.elements.email.value,password:form.elements.password.value});
   cloudToken='cookie';updateSyncIndicator();
@@ -546,7 +546,7 @@ ce('cloud-login').onsubmit=async event=>{
   try{applyAccountLanguage(await cloudCall('session'));}catch(error){ce('account-language-status').textContent=error.message;}
   await loadCloudOverview();
   form.elements.password.value='';
-  cs('Angemeldet. Lokale Einträge bleiben unverändert.');
+  cs((window.PhevI18n?.t('adminSync.signedInLocal')||'Angemeldet. Lokale Einträge bleiben unverändert.'));
   if(result.role==='admin')await cloudUsers();
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
@@ -557,7 +557,7 @@ ce('cloud-change-password').onsubmit=async event=>{
  const form=event.currentTarget,button=form.querySelector('button[type=submit]');
  const current=form.elements.current_password.value;
  const next=form.elements.new_password.value;
- if(next!==form.elements.confirm_password.value){cs('Neue Passwörter stimmen nicht überein.');return;}
+ if(next!==form.elements.confirm_password.value){cs((window.PhevI18n?.t('adminSync.passwordMismatch')||'Neue Passwörter stimmen nicht überein.'));return;}
  if(next===current){cs((window.PhevI18n?.t('accountFeedback.passwordDifferent')||'Bitte ein anderes neues Passwort wählen.'));return;}
  button.disabled=true;
  try{
@@ -598,7 +598,7 @@ ce('cloud-create').onsubmit=async event=>{
  button.disabled=true;
  try{
   await cloudCall('admin-create-user',{email:form.elements.email.value,password:form.elements.password.value,role:form.elements.role.value});
-  form.reset();cs('Benutzer erstellt.');await cloudUsers();adminView('list');
+  form.reset();cs((window.PhevI18n?.t('adminSync.userCreated')||'Benutzer erstellt.'));await cloudUsers();adminView('list');
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
@@ -621,7 +621,7 @@ ce('cloud-logout').onclick=async()=>{
  ce('cloud-account').classList.add('hide');
  ce('cloud-login').classList.remove('hide');
  ce('cloud-count').textContent='';
- cs('Abgemeldet.');
+ cs((window.PhevI18n?.t('adminSync.signedOut')||'Abgemeldet.'));
 };
 
 ce('cloud-upload').onclick=async()=>{
@@ -631,16 +631,16 @@ ce('cloud-upload').onclick=async()=>{
  const remote=await cloudCall('data');
  const ids=new Set(remote.records.map(r=>r.id));
  const todo=local.filter(r=>!ids.has(r.id));
- if(!todo.length)return cs('Keine neuen lokalen Einträge.');
+ if(!todo.length)return cs((window.PhevI18n?.t('adminSync.noLocalEntries')||'Keine neuen lokalen Einträge.'));
  if(!confirm(todo.length+(window.PhevI18n?.t('authSync.uploadConfirm')||' Einträge hochladen?')))return;
  btn.disabled=true;
  try{
   for(const record of todo)await cloudCall('save',{record});
   const check=await cloudCall('data');
   ce('cloud-upload-info').textContent=(window.PhevI18n?.t('cloudStatus.cloudEntries')||'Cloud-Einträge: ')+check.records.length;
-  cs('Import abgeschlossen. Lokale Daten unverändert.');
+  cs((window.PhevI18n?.t('adminSync.importDone')||'Import abgeschlossen. Lokale Daten unverändert.'));
   await loadCloudOverview();
- }catch(e){cs('Import unterbrochen: '+e.message);}
+ }catch(e){cs((window.PhevI18n?.t('adminSync.importInterrupted')||'Import unterbrochen: ')+e.message);}
  finally{btn.disabled=false;}
 };
 
@@ -672,7 +672,7 @@ ce('cloud-upload').onclick=async()=>{
    if(Array.isArray(cachedRecords))window.showCloudRecords(cachedRecords);
   }catch(cacheError){console.warn('Cloud cache could not be restored',cacheError);}
   await loadCloudOverview();
-  cs('Sitzung wiederhergestellt.');
+  cs((window.PhevI18n?.t('adminSync.sessionRestored')||'Sitzung wiederhergestellt.'));
   if(role==='admin')await cloudUsers();
  }catch(e){
   const message=String(e?.message||'');
@@ -762,7 +762,7 @@ window.queueCloudChanges=function(items){const email=JSON.parse(localStorage.get
  * Eine Operation wird erst nach erfolgreichem API-Request entfernt.
  * Bei Fehlern bleiben alle noch nicht bestätigten Operationen erhalten.
  */
-async function syncCloudQueue(){if(cloudSyncing||!cloudToken||!navigator.onLine)return;const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const key='phev-queue-'+email;cloudSyncing=true;updateSyncIndicator();try{let queue=JSON.parse(localStorage.getItem(key)||'[]');while(queue.length){const op=queue[0];await cloudCall(op.action,op.action==='save'?{record:op.record}:{id:op.id});const latest=JSON.parse(localStorage.getItem(key)||'[]');latest.shift();localStorage.setItem(key,JSON.stringify(latest));queue=latest;}syncError='';cs('Alle Änderungen synchronisiert.');}catch(e){syncError=e.message;cs('Änderungen lokal vorgemerkt: '+e.message);}finally{cloudSyncing=false;updateSyncIndicator();}}
+async function syncCloudQueue(){if(cloudSyncing||!cloudToken||!navigator.onLine)return;const email=JSON.parse(localStorage.getItem(sessionKey)||'null')?.email;if(!email)return;const key='phev-queue-'+email;cloudSyncing=true;updateSyncIndicator();try{let queue=JSON.parse(localStorage.getItem(key)||'[]');while(queue.length){const op=queue[0];await cloudCall(op.action,op.action==='save'?{record:op.record}:{id:op.id});const latest=JSON.parse(localStorage.getItem(key)||'[]');latest.shift();localStorage.setItem(key,JSON.stringify(latest));queue=latest;}syncError='';cs((window.PhevI18n?.t('adminSync.syncDone')||'Alle Änderungen synchronisiert.'));}catch(e){syncError=e.message;cs((window.PhevI18n?.t('adminSync.syncQueued')||'Änderungen lokal vorgemerkt: ')+e.message);}finally{cloudSyncing=false;updateSyncIndicator();}}
 window.addEventListener('online',()=>{syncError='';updateSyncIndicator();syncCloudQueue();});
 window.addEventListener('offline',updateSyncIndicator);
 window.addEventListener('storage',updateSyncIndicator);
