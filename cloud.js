@@ -27,13 +27,13 @@ function updateSyncIndicator(){
  if(familyButton)familyButton.hidden=!cloudToken;
  const el=ce('cloud-sync-indicator');if(!el)return;
  const pending=pendingCount();
- let message='Nicht angemeldet',state='idle';
+ let message=(globalThis.window?.PhevI18n?.t('syncIndicator.signedOut')||'Nicht angemeldet'),state='idle';
  if(cloudToken){
-  if(!navigator.onLine){message='Offline – Änderungen warten auf Verbindung';state='waiting';}
-  else if(cloudSyncing||syncingPreferences){message='Synchronisierung läuft …';state='syncing';}
-  else if(syncError){message='Synchronisierungsfehler – '+syncError;state='error';}
-  else if(pending){message=pending+' Änderung(en) warten auf Synchronisierung';state='waiting';}
-  else{message='Synchronisiert';state='ok';}
+  if(!navigator.onLine){message=(globalThis.window?.PhevI18n?.t('syncIndicator.offline')||'Offline – Änderungen warten auf Verbindung');state='waiting';}
+  else if(cloudSyncing||syncingPreferences){message=(globalThis.window?.PhevI18n?.t('syncIndicator.syncing')||'Synchronisierung läuft …');state='syncing';}
+  else if(syncError){message=(globalThis.window?.PhevI18n?.t('syncIndicator.errorPrefix')||'Synchronisierungsfehler – ')+syncError;state='error';}
+  else if(pending){message=pending+(globalThis.window?.PhevI18n?.t('syncIndicator.pendingSuffix')||' Änderung(en) warten auf Synchronisierung');state='waiting';}
+  else{message=(globalThis.window?.PhevI18n?.t('syncIndicator.synced')||'Synchronisiert');state='ok';}
  }
  el.textContent=message;el.dataset.state=state;
 }
@@ -492,7 +492,7 @@ async function cloudUsers(){
   const remove=adminActionIcon('delete',(globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserStart')||'Benutzer ')+user.email+' löschen');
   remove.onclick=async()=>{
    if(!confirm((globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserStart')||'Benutzer ')+user.email+(globalThis.window?.PhevI18n?.t('adminConfirm.deleteUserEnd')||' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.')))return;
-   if(prompt('Zur Bestätigung LÖSCHEN eingeben:')!=='LÖSCHEN')return;
+   if(prompt((globalThis.window?.PhevI18n?.t('syncIndicator.deleteTokenPrompt')||'Zur Bestätigung LÖSCHEN eingeben:'))!=='LÖSCHEN')return;
    remove.disabled=true;
    try{await cloudCall('admin-delete-user',{id:user.id});cs((window.PhevI18n?.t('accountFeedback.userDeleted')||'Benutzer gelöscht.'));await cloudUsers();}
    catch(error){cs(error.message);remove.disabled=false;}
@@ -575,7 +575,7 @@ ce('cloud-change-password').onsubmit=async event=>{
 ce('cloud-delete-account').onsubmit=async event=>{
  event.preventDefault();
  const form=event.currentTarget,button=form.querySelector('button[type=submit]');
- if(form.elements.confirmation.value!=='KONTO LÖSCHEN'){cs('Bitte KONTO LÖSCHEN eingeben.');return;}
+ if(form.elements.confirmation.value!=='KONTO LÖSCHEN'){cs((globalThis.window?.PhevI18n?.t('syncIndicator.deleteAccountTokenPrompt')||'Bitte KONTO LÖSCHEN eingeben.'));return;}
  if(!window.confirm((globalThis.window?.PhevI18n?.t('adminConfirm.accountDeleteConfirm')||'Konto und zugehörige Cloud-Daten unwiderruflich löschen?')))return;
  button.disabled=true;
  try{
