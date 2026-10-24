@@ -417,6 +417,9 @@ ce('account-language')?.addEventListener('change',async event=>{
  try{
   const result=await cloudCall('account-language',{language:select.value});
   window.PhevI18n?.setLanguage(result.language);
+  updateSyncIndicator();
+  const cloudStatus=ce('cloud-status');
+  if(cloudStatus&&['Sitzung wiederhergestellt.','Session restored.'].includes(cloudStatus.textContent))cloudStatus.textContent=window.PhevI18n?.t('adminSync.sessionRestored')||cloudStatus.textContent;
   ce('account-language-status').textContent=(window.PhevI18n?.t('accountLanguage.saved')||'Gespeichert.');
  }catch(error){select.value=previous;ce('account-language-status').textContent=error.message;}
  finally{select.disabled=false;}
