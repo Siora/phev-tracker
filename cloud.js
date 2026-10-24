@@ -107,7 +107,7 @@ async function loadVehicles(){
   const list=ce('vehicle-list');list.replaceChildren();
   const table=document.createElement('table');table.className='management-table vehicle-management-table';
   const thead=document.createElement('thead'),heading=document.createElement('tr');
-  for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank','Aktionen']){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
+  for(const title of ['Fahrzeug','Baujahr','Kennzeichen','Antrieb','Batterie','Tank','Aktionen'].map((fallback,i)=>window.PhevI18n?.t(['familyVehicles.column.vehicle','familyVehicles.column.year','familyVehicles.column.plate','familyVehicles.column.drivetrain','familyVehicles.column.battery','familyVehicles.column.tank','vehicles.column.actions'][i])||fallback)){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
   if(!data.vehicles.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent=(window.PhevI18n?.t('vehicles.empty')||'Noch keine Fahrzeuge angelegt.');tr.append(td);tbody.append(tr);}
