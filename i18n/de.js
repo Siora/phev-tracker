@@ -725,4 +725,13 @@ window.PhevTranslations.de=Object.freeze({
  'energy.factorSaved':"Umrechnungsfaktor gespeichert.",
  'dynamic.menuClose':"✕ Menü schliessen",
  'family.vehiclePrefix':"Familie · ",
+ 'forecast.recorded':"Erfasste Jahreskosten: ",
+ 'forecast.projected':"Voraussichtliche Jahreskosten: ",
+ 'forecast.completedYear':"Abgeschlossenes Jahr; keine Hochrechnung.",
+ 'forecast.average':"Durchschnitt pro abgeschlossenem Monat: ",
+ 'forecast.basedOn':" · Hochrechnung aus ",
+ 'forecast.monthsWith':" Monaten mit ",
+ 'forecast.activeMonths':" aktiven Kostenmonaten.",
+ 'forecast.partialWarning':" Achtung: Monate ohne Einträge können unvollständig sein.",
+ 'intelligence.costPer100':" · Kosten pro 100 km: ",
 });
