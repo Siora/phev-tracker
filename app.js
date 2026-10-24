@@ -643,9 +643,9 @@ function renderDashboardVehicleSummary(selectedVehicle,filtered,charges,fuel,cos
   if(selectedVehicle&&selectedVehicle!=='none'){
   const v=(typeof familyVehicle==='function'?familyVehicle(selectedVehicle):null)||vehicles.find(v=>String(v.id)===selectedVehicle);
   if(v){
-  const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||'Antrieb nicht angegeben')+(v.model_year?' · Baujahr '+v.model_year:'')+(v.battery_kwh?' · Batterie '+v.battery_kwh+' kWh':'')+(v.tank_liters?' · Tank '+v.tank_liters+' l':'');
+  const details=document.createElement('p');details.textContent='🚗 '+vehicleName(v)+' · '+(v.drivetrain||(globalThis.window?.PhevI18n?.t('dashboard.vehicle.noDrivetrain')||'Antrieb nicht angegeben'))+(v.model_year?(globalThis.window?.PhevI18n?.t('dashboard.vehicle.modelYear')||' · Baujahr ')+v.model_year:'')+(v.battery_kwh?(globalThis.window?.PhevI18n?.t('dashboard.vehicle.battery')||' · Batterie ')+v.battery_kwh+' kWh':'')+(v.tank_liters?(globalThis.window?.PhevI18n?.t('dashboard.vehicle.tank')||' · Tank ')+v.tank_liters+' l':'');
   const mileage=(selectedVehicle.startsWith('family:')&&typeof familyRecords!=='undefined'?familyRecords:records).filter(r=>String(r.vehicle_id)===String(v.id)&&Number(r.km)>0).map(r=>Number(r.km));
-  const latest=document.createElement('p');latest.textContent=(globalThis.window?.PhevI18n?.t('dynamic.selectedPeriod')||'Ausgewählter Zeitraum: ')+filtered.length+' Einträge · '+fmt(cost,settings.base)+' Kosten · '+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' Liter. Höchster erfasster Kilometerstand: '+(mileage.length?Math.max(...mileage).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km':'–')+'.';
+  const latest=document.createElement('p');latest.textContent=(globalThis.window?.PhevI18n?.t('dynamic.selectedPeriod')||'Ausgewählter Zeitraum: ')+filtered.length+(globalThis.window?.PhevI18n?.t('dashboard.vehicle.entries')||' Einträge · ')+fmt(cost,settings.base)+(globalThis.window?.PhevI18n?.t('dashboard.vehicle.costs')||' Kosten · ')+charges.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+' kWh · '+fuel.reduce((v,r)=>v+Number(r.amount||0),0).toFixed(2)+(globalThis.window?.PhevI18n?.t('dashboard.vehicle.mileage')||' Liter. Höchster erfasster Kilometerstand: ')+(mileage.length?Math.max(...mileage).toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'))+' km':'–')+'.';
   summary.append(details,latest);
   }
   }
@@ -659,7 +659,7 @@ function renderDashboardFleetOverview(){
     btn.type='button';
     btn.className='fleet-row';
     const count=records.filter(r=>String(r.vehicle_id)===String(v.id)).length;
-    btn.textContent='🚘 '+vehicleName(v)+' · '+count+' Einträge';
+    btn.textContent='🚘 '+vehicleName(v)+' · '+count+(globalThis.window?.PhevI18n?.t('dashboard.vehicle.entriesShort')||' Einträge');
     btn.onclick=()=>{
       $('vehicleFilter').value=String(v.id);
       render();
@@ -678,12 +678,12 @@ function renderDashboardTimeline(filtered){
     const marker=document.createElement('span');marker.className='timeline-marker';marker.textContent=isCharge?'⚡':'⛽';marker.setAttribute('aria-hidden','true');
     const content=document.createElement('div');content.className='timeline-content';
     const head=document.createElement('div');head.className='timeline-head';
-    const title=document.createElement('strong');title.textContent=isCharge?'Ladung':'Tankung';
+    const title=document.createElement('strong');title.textContent=isCharge?(globalThis.window?.PhevI18n?.t('dashboard.timeline.charge')||'Ladung'):(globalThis.window?.PhevI18n?.t('dashboard.timeline.fuel')||'Tankung');
     const date=document.createElement('time');date.textContent=recordDateTime(r).replace(' ',' · ');
     head.append(title,date);
     const details=document.createElement('div');details.className='timeline-details';
     const amount=Number(r.amount)||0;
-    details.textContent=amount.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{maximumFractionDigits:2})+(isCharge?' kWh':' Liter')+' · '+fmt(conv(r),settings.base);
+    details.textContent=amount.toLocaleString((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{maximumFractionDigits:2})+(isCharge?' kWh':(globalThis.window?.PhevI18n?.t('dashboard.timeline.liters')||' Liter'))+' · '+fmt(conv(r),settings.base);
     const notes=document.createElement('small');notes.className='timeline-notes';
     const v=vehicles.find(v=>String(v.id)===String(r.vehicle_id));
     notes.textContent=[v?vehicleName(v):'',isCharge?getChargeMode(r.id):'',r.place||''].filter(Boolean).join(' · ');

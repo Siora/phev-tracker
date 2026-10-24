@@ -374,3 +374,12 @@ test('Familienfreigabe-Diagnose im Dashboard ist zweisprachig',()=>{
   assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Fahrzeugübersicht und Timeline im Dashboard sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['dashboard.vehicle.noDrivetrain','dashboard.vehicle.modelYear','dashboard.vehicle.battery','dashboard.vehicle.tank','dashboard.vehicle.entries','dashboard.vehicle.costs','dashboard.vehicle.mileage','dashboard.vehicle.entriesShort','dashboard.timeline.charge','dashboard.timeline.fuel','dashboard.timeline.liters']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));
+  assert.ok(en.includes("'"+key+"'"));
+ }
+});
