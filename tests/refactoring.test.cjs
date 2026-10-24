@@ -419,3 +419,12 @@ test('PDF-Titel, Kennzahlen und Diagramme sind zweisprachig',()=>{
   assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Jahres-PDF lokalisiert Monatsnamen und Jahresfazit',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ assert.ok(app.includes("new Intl.DateTimeFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{month:'short'})"));
+ for(const name of ['monthlyValuesNote','summaryElectric','summaryFuel','summaryExtras','ofTwelve','highestMonth']){
+  const key='pdf.'+name;assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});

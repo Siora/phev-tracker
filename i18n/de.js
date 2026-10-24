@@ -695,4 +695,10 @@ window.PhevTranslations.de=Object.freeze({
  'pdf.petrolFactor':"Benzinfaktor",
  'pdf.costByMonth':"Kosten nach Monat",
  'pdf.costByDay':"Kosten nach Tag",
+ 'pdf.monthlyValuesNote':". Monatswerte entsprechen den erfassten Daten.",
+ 'pdf.summaryElectric':"; Strom: ",
+ 'pdf.summaryFuel':"; Benzin: ",
+ 'pdf.summaryExtras':"; Zusatzkosten: ",
+ 'pdf.ofTwelve':" von 12.",
+ 'pdf.highestMonth':" Kostenintensivster Monat: ",
 });
