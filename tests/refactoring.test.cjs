@@ -320,7 +320,7 @@ test('Dynamisch eingefügte Übersetzungsattribute werden berücksichtigt',()=>{
 test('Sprachwechsel aktualisiert dynamisch erzeugte UI-Bereiche',()=>{
  const core=read('i18n/core.js');
  assert.ok(core.includes("new CustomEvent('phev:language-changed'"));
- assert.ok(core.includes('if(changed)document.dispatchEvent'));
+ assert.ok(core.includes("if(changed && typeof CustomEvent==='function' && typeof document.dispatchEvent==='function')"));
  assert.ok(read('app.js').includes("addEventListener('phev:language-changed',()=>render())"));
  assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>updateSyncIndicator())"));
 });
