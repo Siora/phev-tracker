@@ -222,3 +222,14 @@ test('Entfernte Altmodule bleiben aus dem produktiven Lade- und Cachepfad',()=>{
  assert.doesNotMatch(worker,/['"]\.\/consumption-analysis\.js/);
  assert.match(read('app.js'),/function render\(/);
 });
+
+// Prevent future PHP dependencies or deployment edits from silently skipping production.
+test('Hetzner-Deployment enthält Mail-Abhängigkeit und Workflow-Änderungen',()=>{
+ const deploy=read('.github/workflows/deploy-pwa-hetzner.yml');
+ assert.match(deploy,/      - 'server\/mail-i18n\.php'/);
+ assert.match(deploy,/      - '\.github\/workflows\/deploy-pwa-hetzner\.yml'/);
+ assert.match(deploy,/php -l server\/mail-i18n\.php/);
+ assert.match(deploy,/put "server\/mail-i18n\.php" "mail-i18n\.php"/);
+ assert.match(deploy,/rollback_api/);
+ assert.match(deploy,/if \[ "\$code" != "401" \]/);
+});
