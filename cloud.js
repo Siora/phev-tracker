@@ -274,8 +274,8 @@ async function loadSharedVehicles(){
  const list=ce('family-shared-vehicles');if(!cloudToken)return;
  try{
   const result=await cloudCall('family-shared-vehicles');
-  familyTable(list,['Fahrzeug','Berechtigung'],(result.vehicles||[]).map(v=>[v.brand+' '+v.model,v.access_level==='edit'?'Bearbeiten (noch nicht aktiv)':'Lesen']));
- }catch(error){list.textContent='Geteilte Fahrzeuge derzeit nicht verfügbar: '+error.message;}
+  familyTable(list,[(window.PhevI18n?.t('familyVehicles.column.vehicle')||'Fahrzeug'),(window.PhevI18n?.t('familyVehicles.column.access')||'Berechtigung')],(result.vehicles||[]).map(v=>[v.brand+' '+v.model,v.access_level==='edit'?(window.PhevI18n?.t('familyVehicles.editPending')||'Bearbeiten (noch nicht aktiv)'):(window.PhevI18n?.t('familyShares.read')||'Lesen')]));
+ }catch(error){list.textContent=(window.PhevI18n?.t('familyComplete.sharedUnavailable')||'Geteilte Fahrzeuge derzeit nicht verfügbar: ')+error.message;}
 }
 async function loadFamilyShares(){
  const familyId=Number(ce('family-shares-group').value),list=ce('family-shares-list');
@@ -316,24 +316,24 @@ async function loadFamilyMembers(){
  list.replaceChildren();if(!cloudToken||!familyId)return;
  try{
   const result=await cloudCall('family-members',undefined,{family_id:String(familyId)});
-  if(!(result.members||[]).length){list.textContent='Keine Mitglieder vorhanden.';return;}
+  if(!(result.members||[]).length){list.textContent=(window.PhevI18n?.t('familyComplete.noMembers')||'Keine Mitglieder vorhanden.');return;}
   const isOwner=[...ce('family-invite-group').options].some(option=>Number(option.value)===familyId);
   const rows=result.members.map(member=>{
    let action='–';
    if(isOwner&&member.role==='member'){
-    const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Entfernen';
+    const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=(window.PhevI18n?.t('familyComplete.remove')||'Entfernen');
     button.onclick=async()=>{
-     if(!confirm('Mitglied „'+member.email+'“ aus der Familie entfernen? Der Zugriff auf freigegebene Fahrzeuge endet sofort.'))return;
+     if(!confirm((window.PhevI18n?.t('familyComplete.removeConfirmStart')||'Mitglied „')+member.email+(window.PhevI18n?.t('familyComplete.removeConfirmEnd')||'“ aus der Familie entfernen? Der Zugriff auf freigegebene Fahrzeuge endet sofort.')))return;
      button.disabled=true;
      try{await cloudCall('family-member-remove',{family_id:familyId,user_id:Number(member.id)});await loadFamilyMembers();}
-     catch(error){list.textContent='Mitglied konnte nicht entfernt werden: '+error.message;}
+     catch(error){list.textContent=(window.PhevI18n?.t('familyComplete.removeFailed')||'Mitglied konnte nicht entfernt werden: ')+error.message;}
     };
     action=button;
    }
-   return [member.email,member.role==='owner'?'Besitzer':'Mitglied',action];
+   return [member.email,member.role==='owner'?(window.PhevI18n?.t('familyList.owner')||'Besitzer'):(window.PhevI18n?.t('familyList.member')||'Mitglied'),action];
   });
-  familyTable(list,['E-Mail','Rolle','Aktion'],rows);
- }catch(error){list.textContent='Mitglieder konnten nicht geladen werden: '+error.message;}
+  familyTable(list,[(window.PhevI18n?.t('familyComplete.email')||'E-Mail'),(window.PhevI18n?.t('familyComplete.role')||'Rolle'),(window.PhevI18n?.t('familyShares.action')||'Aktion')],rows);
+ }catch(error){list.textContent=(window.PhevI18n?.t('familyComplete.loadFailed')||'Mitglieder konnten nicht geladen werden: ')+error.message;}
 }
 ce('family-members-refresh').onclick=loadFamilyMembers;
 ce('family-members-group').onchange=loadFamilyMembers;
@@ -352,7 +352,7 @@ async function loadFamilies(){
    if(family.role==='owner'){
     const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent=(window.PhevI18n?.t('familyActions.dissolve')||'Familie auflösen');
     remove.onclick=async()=>{
-     const confirmation=prompt('Familie „'+family.name+'“ endgültig auflösen? Alle Mitgliedschaften, Einladungen und Freigaben werden entfernt. Persönliche Fahrzeuge bleiben erhalten. Zur Bestätigung FAMILIE LÖSCHEN eingeben:');
+     const confirmation=prompt((window.PhevI18n?.t('familyComplete.dissolveConfirmStart')||'Familie „')+family.name+(window.PhevI18n?.t('familyComplete.dissolveConfirmEnd')||'“ endgültig auflösen? Alle Mitgliedschaften, Einladungen und Freigaben werden entfernt. Persönliche Fahrzeuge bleiben erhalten. Zur Bestätigung FAMILIE LÖSCHEN eingeben:'));
      if(confirmation!=='FAMILIE LÖSCHEN')return;
      remove.disabled=true;
      try{await cloudCall('family-delete',{family_id:Number(family.id),confirmation});await loadFamilies();await loadSharedVehicles();await loadSharedVehicleOverview();}
@@ -363,7 +363,7 @@ async function loadFamilies(){
    if(family.role!=='owner'){
     const leave=document.createElement('button');leave.type='button';leave.className='secondary';leave.textContent=(window.PhevI18n?.t('familyActions.leave')||'Familie verlassen');
     leave.onclick=async()=>{
-     if(!confirm('Familie „'+family.name+'“ wirklich verlassen? Du verlierst den Zugriff auf alle dort freigegebenen Fahrzeuge.'))return;
+     if(!confirm((window.PhevI18n?.t('familyComplete.leaveConfirmStart')||'Familie „')+family.name+(window.PhevI18n?.t('familyComplete.leaveConfirmEnd')||'“ wirklich verlassen? Du verlierst den Zugriff auf alle dort freigegebenen Fahrzeuge.')))return;
      leave.disabled=true;
      try{await cloudCall('family-leave',{family_id:Number(family.id)});await loadFamilies();await loadSharedVehicles();await loadSharedVehicleOverview();}
      catch(error){status.textContent=(window.PhevI18n?.t('familyActions.leaveFailed')||'Familie konnte nicht verlassen werden: ')+error.message;leave.disabled=false;}
