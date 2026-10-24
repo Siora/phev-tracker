@@ -350,23 +350,23 @@ async function loadFamilies(){
    const memberOption=document.createElement('option');memberOption.value=String(family.id);memberOption.textContent=family.name;membersSelect.append(memberOption);
    const item=document.createElement('div');item.className='family-summary-item';const name=document.createElement('strong');name.textContent=family.name;const role=document.createElement('span');role.textContent=family.role==='owner'?(window.PhevI18n?.t('familyList.owner')||'Besitzer'):(window.PhevI18n?.t('familyList.member')||'Mitglied');item.append(name,role);
    if(family.role==='owner'){
-    const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Familie auflösen';
+    const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent=(window.PhevI18n?.t('familyActions.dissolve')||'Familie auflösen');
     remove.onclick=async()=>{
      const confirmation=prompt('Familie „'+family.name+'“ endgültig auflösen? Alle Mitgliedschaften, Einladungen und Freigaben werden entfernt. Persönliche Fahrzeuge bleiben erhalten. Zur Bestätigung FAMILIE LÖSCHEN eingeben:');
      if(confirmation!=='FAMILIE LÖSCHEN')return;
      remove.disabled=true;
      try{await cloudCall('family-delete',{family_id:Number(family.id),confirmation});await loadFamilies();await loadSharedVehicles();await loadSharedVehicleOverview();}
-     catch(error){status.textContent='Familie konnte nicht aufgelöst werden: '+error.message;remove.disabled=false;}
+     catch(error){status.textContent=(window.PhevI18n?.t('familyActions.dissolveFailed')||'Familie konnte nicht aufgelöst werden: ')+error.message;remove.disabled=false;}
     };
     item.append(remove);
    }
    if(family.role!=='owner'){
-    const leave=document.createElement('button');leave.type='button';leave.className='secondary';leave.textContent='Familie verlassen';
+    const leave=document.createElement('button');leave.type='button';leave.className='secondary';leave.textContent=(window.PhevI18n?.t('familyActions.leave')||'Familie verlassen');
     leave.onclick=async()=>{
      if(!confirm('Familie „'+family.name+'“ wirklich verlassen? Du verlierst den Zugriff auf alle dort freigegebenen Fahrzeuge.'))return;
      leave.disabled=true;
      try{await cloudCall('family-leave',{family_id:Number(family.id)});await loadFamilies();await loadSharedVehicles();await loadSharedVehicleOverview();}
-     catch(error){status.textContent='Familie konnte nicht verlassen werden: '+error.message;leave.disabled=false;}
+     catch(error){status.textContent=(window.PhevI18n?.t('familyActions.leaveFailed')||'Familie konnte nicht verlassen werden: ')+error.message;leave.disabled=false;}
     };
     item.append(leave);
    }
