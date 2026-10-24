@@ -279,3 +279,12 @@ test('Dynamische Analyse-, Dashboard- und Importtexte sind zweisprachig',()=>{
   for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
  }
 });
+
+test('Fahrzeug-, Import-, Analyse- und Berichts-Texte sind zweisprachig',()=>{
+ const app=read('app.js');
+ const keys=["formValidation.photoUrl","vehicleSelection.prompt","vehicleSelection.select","insights.addEntries","insights.highChargingPrice","insights.unknownLocation","insights.priceCheck","insights.noAnomaly","insights.minimumCharges","insights.noHighPrice","insights.fuelDisclaimer","consumption.distanceRequired","backup.confirmReplace","backup.invalid","import.selectVehicle","chart.energyAria","comparison.invalidValues","comparison.electricCheaper","comparison.petrolCheaper","report.invalidYear","report.pdfUnavailable","report.noEntries"];
+ for(const key of keys){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  for(const language of ['de','en'])assert.ok(read('i18n/'+language+'.js').includes("'"+key+"'"));
+ }
+});
