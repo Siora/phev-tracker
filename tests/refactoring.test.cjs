@@ -324,3 +324,10 @@ test('Sprachwechsel aktualisiert dynamisch erzeugte UI-Bereiche',()=>{
  assert.ok(read('app.js').includes("addEventListener('phev:language-changed',()=>render())"));
  assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>updateSyncIndicator())"));
 });
+
+test('Sprachwechsel aktualisiert Familienlisten und dynamische Aktionen',()=>{
+ const cloud=read('cloud.js');
+ const listener=cloud.slice(cloud.lastIndexOf("document.addEventListener('phev:language-changed'"));
+ assert.ok(listener.includes('if(!cloudToken)return'));
+ for(const method of ['loadFamilies','loadFamilyShares','loadFamilyMembers'])assert.ok(listener.includes('void '+method+'();'));
+});
