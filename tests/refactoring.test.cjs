@@ -325,6 +325,7 @@ test('Sprachwechsel aktualisiert dynamisch erzeugte UI-Bereiche',()=>{
  assert.ok(read('cloud.js').includes("addEventListener('phev:language-changed',()=>updateSyncIndicator())"));
 });
 
+// Regression: Familienverwaltung aktualisiert sich nach Sprachwechsel.
 test('Sprachwechsel aktualisiert Familienlisten und dynamische Aktionen',()=>{
  const cloud=read('cloud.js');
  const listener=cloud.slice(cloud.lastIndexOf("document.addEventListener('phev:language-changed'"));
