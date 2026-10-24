@@ -437,3 +437,11 @@ test('PDF-Fallbacks und Dashboard-Anordnung sind zweisprachig',()=>{
  }
  assert.ok(app.includes("document.addEventListener('phev:language-changed',controls)"));
 });
+
+test('Intelligente Auswertung und Importergebnis sind zweisprachig',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['bulk.unassigned','intelligence.januaryThrough','intelligence.fullYear','intelligence.versus','intelligence.previousYear','intelligence.comparisonDisclaimer','intelligence.insteadOf','intelligence.priceDisclaimer','import.newCount','import.updatedCount']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+  assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+});
