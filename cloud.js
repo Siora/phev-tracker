@@ -80,7 +80,7 @@ window.syncManagedCharging=async function(next){
   catalogSynced=structuredClone(next);
   syncError='';
   ce('managed-charging-status').textContent='Ladeorte und Anbieter in MySQL synchronisiert.';
- }catch(e){syncError=e.message;ce('managed-charging-status').textContent='Cloud-Speicherung fehlgeschlagen: '+e.message;}
+ }catch(e){syncError=e.message;ce('managed-charging-status').textContent=(window.PhevI18n?.t('accountFeedback.saveFailed')||'Cloud-Speicherung fehlgeschlagen: ')+e.message;}
  finally{syncingPreferences=false;updateSyncIndicator();}
 };
 
@@ -494,7 +494,7 @@ async function cloudUsers(){
    if(!confirm('Benutzer '+user.email+' dauerhaft löschen? Zugehörige Cloud-Daten können unwiderruflich verloren gehen.'))return;
    if(prompt('Zur Bestätigung LÖSCHEN eingeben:')!=='LÖSCHEN')return;
    remove.disabled=true;
-   try{await cloudCall('admin-delete-user',{id:user.id});cs('Benutzer gelöscht.');await cloudUsers();}
+   try{await cloudCall('admin-delete-user',{id:user.id});cs((window.PhevI18n?.t('accountFeedback.userDeleted')||'Benutzer gelöscht.'));await cloudUsers();}
    catch(error){cs(error.message);remove.disabled=false;}
   };
   actions.append(edit,remove);row.append(emailCell,roleCell,actions);return row;
@@ -530,7 +530,7 @@ ce('cloud-reset-confirm').onsubmit=async event=>{
  try{
   await cloudCall('password-reset-confirm',{token:pendingResetToken,new_password:form.elements.new_password.value});
   pendingResetToken=null;form.reset();ce('cloud-reset-confirm').classList.add('hide');
-  ce('cloud-login').classList.remove('hide');cs('Passwort zurückgesetzt. Bitte erneut anmelden.');
+  ce('cloud-login').classList.remove('hide');cs((window.PhevI18n?.t('accountFeedback.passwordReset')||'Passwort zurückgesetzt. Bitte erneut anmelden.'));
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
@@ -558,7 +558,7 @@ ce('cloud-change-password').onsubmit=async event=>{
  const current=form.elements.current_password.value;
  const next=form.elements.new_password.value;
  if(next!==form.elements.confirm_password.value){cs('Neue Passwörter stimmen nicht überein.');return;}
- if(next===current){cs('Bitte ein anderes neues Passwort wählen.');return;}
+ if(next===current){cs((window.PhevI18n?.t('accountFeedback.passwordDifferent')||'Bitte ein anderes neues Passwort wählen.'));return;}
  button.disabled=true;
  try{
   await cloudCall('account-change-password',{current_password:current,new_password:next});
@@ -567,7 +567,7 @@ ce('cloud-change-password').onsubmit=async event=>{
   document.body.classList.add('login-locked');
   ce('cloud-account').classList.add('hide');ce('cloud-login').classList.remove('hide');
   ce('cloud-count').textContent='';window.showLocalRecords();
-  cs('Passwort geändert. Alle Sitzungen wurden beendet. Bitte erneut anmelden.');
+  cs((window.PhevI18n?.t('accountFeedback.passwordChanged')||'Passwort geändert. Alle Sitzungen wurden beendet. Bitte erneut anmelden.'));
  }catch(error){cs(error.message);}
  finally{button.disabled=false;}
 };
@@ -617,7 +617,7 @@ ce('cloud-logout').onclick=async()=>{
  document.body.classList.add('login-locked');
  localStorage.removeItem(sessionKey);
  window.showLocalRecords();
- ce('vehicle-status').textContent='Bitte anmelden, um Fahrzeuge zu verwalten.';
+ ce('vehicle-status').textContent=(window.PhevI18n?.t('accountFeedback.loginRequired')||'Bitte anmelden, um Fahrzeuge zu verwalten.');
  ce('cloud-account').classList.add('hide');
  ce('cloud-login').classList.remove('hide');
  ce('cloud-count').textContent='';
@@ -736,8 +736,8 @@ window.scheduleCloudPreferences=function(){
    const merged={...cloudPreferences,...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
    await cloudCall('preferences',{preferences:merged});
    cloudPreferences=merged;syncError='';
-   cs('Einstellungen in der Cloud gespeichert.');
-  }catch(e){syncError=e.message;cs('Einstellungen lokal gespeichert; Cloud-Sync fehlgeschlagen: '+e.message);}
+   cs((window.PhevI18n?.t('accountFeedback.settingsSaved')||'Einstellungen in der Cloud gespeichert.'));
+  }catch(e){syncError=e.message;cs((window.PhevI18n?.t('accountFeedback.settingsSyncFailed')||'Einstellungen lokal gespeichert; Cloud-Sync fehlgeschlagen: ')+e.message);}
   finally{syncingPreferences=false;updateSyncIndicator();}
  },700);
 };
@@ -750,8 +750,8 @@ ce('cloud-preferences-upload').onclick=async()=>{
   const merged={...(cloudPreferences||{}),...current,photos:{...(cloudPreferences?.photos||{}),...(current.photos||{})}};
   await cloudCall('preferences',{preferences:merged});
   cloudPreferences=merged;cloudPreferencesReady=true;syncError='';updateSyncIndicator();
-  cs('Lokale Einstellungen erfolgreich in die Cloud übernommen.');
- }catch(e){cs('Übernahme fehlgeschlagen: '+e.message);}
+  cs((window.PhevI18n?.t('accountFeedback.settingsImported')||'Lokale Einstellungen erfolgreich in die Cloud übernommen.'));
+ }catch(e){cs((window.PhevI18n?.t('accountFeedback.settingsImportFailed')||'Übernahme fehlgeschlagen: ')+e.message);}
  finally{button.disabled=false;}
 };
 
