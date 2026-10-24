@@ -958,7 +958,7 @@ function renderChargingManagement(){
   const list=$(listId);if(!list)continue;list.replaceChildren();
   const table=document.createElement('table');table.className='management-table managed-charging-table';
   const thead=document.createElement('thead'),heading=document.createElement('tr');
-  for(const title of (type==='locations'?['Ladeort','Typ','Preis / kWh','Aktionen']:['Anbieter','Preis / kWh','Aktionen'])){const th=document.createElement('th');th.scope='col';th.textContent=title;heading.append(th);}
+  for(const [key,fallback] of (type==='locations'?[['charging.column.location','Ladeort'],['charging.column.type','Typ'],['charging.column.price','Preis / kWh'],['vehicles.column.actions','Aktionen']]:[['charging.column.provider','Anbieter'],['charging.column.price','Preis / kWh'],['vehicles.column.actions','Aktionen']])){const th=document.createElement('th');th.scope='col';th.textContent=(typeof window!=='undefined'&&window.PhevI18n?.t(key))||fallback;heading.append(th);}
   thead.append(heading);table.append(thead);
   const tbody=document.createElement('tbody');
   if(!data[type].length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=type==='locations'?4:3;td.textContent=type==='locations'?(typeof window!=='undefined'&&window.PhevI18n?.t('charging.emptyLocations')||'Noch keine Ladeorte angelegt.'):(typeof window!=='undefined'&&window.PhevI18n?.t('charging.emptyProviders')||'Noch keine Anbieter angelegt.');tr.append(td);tbody.append(tr);}
