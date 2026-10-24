@@ -453,3 +453,11 @@ test('CSV-Vorschau und Energieeinstellungen sind zweisprachig',()=>{
   assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
  }
 });
+
+test('Verbrauchstabelle, Familienfahrzeuge und mobiles Menü übersetzt',()=>{
+ const app=read('app.js'),de=read('i18n/de.js'),en=read('i18n/en.js');
+ for(const key of ['dynamic.menuClose','family.vehiclePrefix']){
+  assert.ok(app.includes("PhevI18n?.t('"+key+"')"));assert.ok(de.includes("'"+key+"'"));assert.ok(en.includes("'"+key+"'"));
+ }
+ for(const key of ['pdf.col.month','pdf.col.electricity','pdf.col.petrol','pdf.col.total','pdf.col.cost','entries.save'])assert.ok(app.includes("PhevI18n?.t('"+key+"')"));
+});
