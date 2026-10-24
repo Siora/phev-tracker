@@ -631,4 +631,11 @@ window.PhevTranslations.en=Object.freeze({
  'insight.label.trendNote':"Comparison of earlier and later entries; not a per-km consumption trend",
  'insight.label.petrolVolume':"Recorded petrol volume",
  'insight.label.liters':" liters",
+ 'consumption.per100.charged':"⚡ Charged / 100 km",
+ 'consumption.per100.fueled':"⛽ Refueled / 100 km",
+ 'consumption.per100.electricCost':"⚡ Electricity cost / 100 km",
+ 'consumption.per100.fuelCost':"⛽ Petrol cost / 100 km",
+ 'consumption.per100.energyCost':"💰 Energy cost / 100 km",
+ 'consumption.approxStart':"Estimates: ",
+ 'consumption.approxEnd':" km between the lowest and highest recorded odometer readings in the selected period. Recorded charging and refueling may not fully correspond to this distance. The separate costs are not measured propulsion consumption.",
 });
