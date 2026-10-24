@@ -321,14 +321,14 @@ function renderIntelligence(){
   const forecast=result.forecast;
   const line=document.createElement('p');
   line.textContent=forecast.available
-   ?(forecast.final?'Erfasste Jahreskosten: ':'Voraussichtliche Jahreskosten: ')+money(forecast.projected)
+   ?(forecast.final?(globalThis.window?.PhevI18n?.t('forecast.recorded')||'Erfasste Jahreskosten: '):(globalThis.window?.PhevI18n?.t('forecast.projected')||'Voraussichtliche Jahreskosten: '))+money(forecast.projected)
    :forecast.reason;
   forecastPanel.append(line);
   if(forecast.available){
    const detail=document.createElement('small');
    detail.textContent=forecast.final
-    ?'Abgeschlossenes Jahr; keine Hochrechnung.'
-    :'Durchschnitt pro abgeschlossenem Monat: '+money(forecast.average)+' · Hochrechnung aus '+forecast.completed+' Monaten mit '+forecast.active+' aktiven Kostenmonaten.'+(forecast.partial?' Achtung: Monate ohne Einträge können unvollständig sein.':'');
+    ?(globalThis.window?.PhevI18n?.t('forecast.completedYear')||'Abgeschlossenes Jahr; keine Hochrechnung.')
+    :(globalThis.window?.PhevI18n?.t('forecast.average')||'Durchschnitt pro abgeschlossenem Monat: ')+money(forecast.average)+(globalThis.window?.PhevI18n?.t('forecast.basedOn')||' · Hochrechnung aus ')+forecast.completed+(globalThis.window?.PhevI18n?.t('forecast.monthsWith')||' Monaten mit ')+forecast.active+(globalThis.window?.PhevI18n?.t('forecast.activeMonths')||' aktiven Kostenmonaten.')+(forecast.partial?(globalThis.window?.PhevI18n?.t('forecast.partialWarning')||' Achtung: Monate ohne Einträge können unvollständig sein.'):'');
    forecastPanel.append(detail);
   }
  }
@@ -392,7 +392,7 @@ function renderEconomicsScenario(){
  const paragraph=document.createElement('p');
  if(!result.available){paragraph.textContent=result.reason;output.append(paragraph);return;}
  const money=value=>new Intl.NumberFormat((globalThis.window?.PhevI18n?.locale?.()||'de-CH'),{style:'currency',currency:settings.base==='EUR'?'EUR':'CHF'}).format(value);
- paragraph.textContent=(globalThis.window?.PhevI18n?.t('dynamic.estimatedAnnual')||'Geschätzte Jahreskosten: ')+money(result.annual)+' · Kosten pro 100 km: '+money(result.costPer100);
+ paragraph.textContent=(globalThis.window?.PhevI18n?.t('dynamic.estimatedAnnual')||'Geschätzte Jahreskosten: ')+money(result.annual)+(globalThis.window?.PhevI18n?.t('intelligence.costPer100')||' · Kosten pro 100 km: ')+money(result.costPer100);
  const detail=document.createElement('p');
  detail.textContent='Strom: '+money(result.electricity)+' · Benzin: '+money(result.fuel)+' · Fixkosten: '+money(result.fixed);
  const note=document.createElement('small');
