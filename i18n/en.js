@@ -746,4 +746,10 @@ window.PhevTranslations.en=Object.freeze({
  'intelligence.otherExpenses':"Other expenses",
  'intelligence.chargedEnergy':"Energy charged",
  'intelligence.petrolVolume':"Petrol volume",
+ 'vehiclePhoto.customAlt':"Custom vehicle photo: ",
+ 'yearChart.electricity':": Electricity ",
+ 'yearChart.petrol':", petrol ",
+ 'yearChart.other':", other ",
+ 'yearChart.total':", total ",
+ 'yearChart.incomplete':". Current, incomplete year.",
 });
