@@ -369,17 +369,17 @@
 </section>
 <!-- Familienverwaltung ist eine eigene, über das Konto erreichbare Ansicht. -->
 <section id="family" class="hide" aria-labelledby="family-page-title">
-<div class="account-heading"><h2 id="family-page-title">Familie</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
+<div class="account-heading"><h2 id="family-page-title" data-i18n="familyPage.title">Familie</h2><button type="button" onclick="tab('cloud')" data-i18n="cloudPage.back">← Zurück zum Konto</button></div>
 <section id="family-management" aria-labelledby="family-title">
-<h3 id="family-title">Familienverwaltung</h3>
-<p id="family-status" role="status" aria-live="polite">Familien werden nach der Anmeldung geladen.</p>
-<form id="family-create-form"><label>Neue Familie <input name="name" maxlength="120" required></label><button type="submit">Familie erstellen</button></form>
-<div id="family-list" class="family-summary"></div><h4>Familienmitglieder</h4><label>Familie <select id="family-members-group"></select></label><button type="button" id="family-members-refresh">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
-<div id="family-shares"><h4>Fahrzeugfreigaben</h4><label>Familie <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh">Freigaben laden</button><div id="family-shares-list"></div><h4>Mit mir geteilte Fahrzeuge</h4><div id="family-shared-vehicles" role="status" aria-live="polite"></div><form id="family-share-form"><label>Eigenes Fahrzeug <select name="vehicle_id" id="family-share-vehicle" required></select></label><label>Berechtigung <select name="access_level"><option value="view">Lesen</option><option value="edit">Bearbeiten (zukünftig)</option></select></label><button type="submit">Fahrzeug freigeben</button></form></div>
-<details class="family-invitations"><summary>Einladungen verwalten</summary>
-<form id="family-invite-form"><label>Familie <select name="family_id" id="family-invite-group" required></select></label><label>E-Mail-Adresse <input name="email" type="email" required></label><button type="submit">Einladung per E-Mail senden</button></form>
-<form id="family-accept-form"><label>Einladungstoken <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit">Einladung annehmen</button></form>
-<p><small>Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
+<h3 id="family-title" data-i18n="familyPage.management">Familienverwaltung</h3>
+<p id="family-status" role="status" aria-live="polite" data-i18n="familyPage.loading">Familien werden nach der Anmeldung geladen.</p>
+<form id="family-create-form"><label><span data-i18n="familyPage.newFamily">Neue Familie</span> <input name="name" maxlength="120" required></label><button type="submit" data-i18n="familyPage.create">Familie erstellen</button></form>
+<div id="family-list" class="family-summary"></div><h4 data-i18n="familyPage.members">Familienmitglieder</h4><label><span data-i18n="familyPage.family">Familie</span> <select id="family-members-group"></select></label><button type="button" id="family-members-refresh" data-i18n="familyPage.loadMembers">Mitglieder laden</button><div id="family-members-list" role="status" aria-live="polite"></div>
+<div id="family-shares"><h4 data-i18n="familyPage.shares">Fahrzeugfreigaben</h4><label><span data-i18n="familyPage.family">Familie</span> <select id="family-shares-group"></select></label><button type="button" id="family-shares-refresh" data-i18n="familyPage.loadShares">Freigaben laden</button><div id="family-shares-list"></div><h4 data-i18n="familyPage.sharedWithMe">Mit mir geteilte Fahrzeuge</h4><div id="family-shared-vehicles" role="status" aria-live="polite"></div><form id="family-share-form"><label><span data-i18n="familyPage.ownVehicle">Eigenes Fahrzeug</span> <select name="vehicle_id" id="family-share-vehicle" required></select></label><label><span data-i18n="familyPage.access">Berechtigung</span> <select name="access_level"><option value="view" data-i18n="familyPage.view">Lesen</option><option value="edit" data-i18n="familyPage.editFuture">Bearbeiten (zukünftig)</option></select></label><button type="submit" data-i18n="familyPage.shareVehicle">Fahrzeug freigeben</button></form></div>
+<details class="family-invitations"><summary data-i18n="familyPage.invitations">Einladungen verwalten</summary>
+<form id="family-invite-form"><label><span data-i18n="familyPage.family">Familie</span> <select name="family_id" id="family-invite-group" required></select></label><label><span data-i18n="familyPage.email">E-Mail-Adresse</span> <input name="email" type="email" required></label><button type="submit" data-i18n="familyPage.sendInvite">Einladung per E-Mail senden</button></form>
+<form id="family-accept-form"><label><span data-i18n="familyPage.inviteToken">Einladungstoken</span> <input name="token" pattern="[a-f0-9]{64}" minlength="64" maxlength="64" autocomplete="off" required></label><button type="submit" data-i18n="familyPage.accept">Einladung annehmen</button></form>
+<p><small data-i18n="familyPage.inviteNote">Einladungslink erhalten? Einladungslinks übernehmen den Code automatisch. Prüfe die Einladung und bestätige die Annahme selbst. Eine Einladung gilt sieben Tage.</small></p>
 </details>
 </section>
 </section>
