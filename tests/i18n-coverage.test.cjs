@@ -11,7 +11,7 @@ const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const dictionaries=Object.fromEntries(['de','en'].map(lang=>{
  const source=fs.readFileSync(path.join(root,'i18n',lang+'.js'),'utf8');
- const keys=[...source.matchAll(/^\s*'([^']+)'\s*:/gm)].map(m=>m[1]);
+ const keys=[...source.matchAll(/'([^']+)'\s*:/g)].map(m=>m[1]);
  assert.equal(keys.length,new Set(keys).size,lang+': duplicate translation keys');
  return [lang,new Set(keys)];
 }));
