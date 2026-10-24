@@ -56,7 +56,7 @@ window.paginateTable=function(container,table,tbody,items,pageSize,key,makeRow){
    const row=document.createElement('tr');
    const cell=document.createElement('td');
    cell.colSpan=table.querySelectorAll('thead th').length;
-   cell.textContent='Keine Einträge vorhanden.';
+   cell.textContent=(globalThis.window?.PhevI18n?.t('pagination.noEntries')||'Keine Einträge vorhanden.');
    row.append(cell);
    tbody.append(row);
   }else{
