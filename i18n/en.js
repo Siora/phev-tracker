@@ -715,4 +715,12 @@ window.PhevTranslations.en=Object.freeze({
  'intelligence.priceDisclaimer':" %). Compared with at least four earlier entries; tariff changes, charging location or booking errors may explain the deviation.",
  'import.newCount':" newly imported, ",
  'import.updatedCount':" existing entries updated.",
+ 'import.previewIntro':" CSV charging sessions detected (existing entries will be updated by date, location and cost; CSV rows: ",
+ 'import.dateColumn':", date column: ",
+ 'import.energyColumn':", energy column: ",
+ 'import.costColumn':", cost column: ",
+ 'import.previewLabel':"). Preview: ",
+ 'import.previewWarning':". Check costs and currency in particular.",
+ 'energy.invalidFactor':"Please enter a factor between 1 and 20.",
+ 'energy.factorSaved':"Conversion factor saved.",
 });
